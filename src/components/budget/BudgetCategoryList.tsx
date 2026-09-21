@@ -1,0 +1,41 @@
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Iconify } from 'react-native-iconify';
+import { BudgetCategory } from '@/data/budgetData';
+import BudgetCategoryRow from './BudgetCategoryRow';
+
+interface Props {
+  categories: BudgetCategory[];
+  onAdd: () => void;
+  onEdit: (category: BudgetCategory) => void;
+}
+
+export default function BudgetCategoryList({ categories, onAdd, onEdit }: Props) {
+  return (
+    <View className="mb-6">
+      <View className="flex-row items-center justify-between px-5 mb-3">
+        <Text className="text-lg font-bold text-[#0F172A]">Kategori Budget</Text>
+        <TouchableOpacity
+          className="rounded-full bg-orange px-3.5 py-1.5 flex-row items-center gap-1"
+          activeOpacity={0.85}
+          onPress={onAdd}
+        >
+          <Iconify icon="ph:plus-bold" size={13} color="#FFFFFF" />
+          <Text className="text-white text-lg font-bold">Tambah</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View className="px-5">
+        {categories.length === 0 ? (
+          <Text className="text-lg text-[#64748B] px-1">
+            Belum ada budget. Ketuk Tambah untuk mengatur limit kategori.
+          </Text>
+        ) : (
+          categories.map((c) => (
+            <BudgetCategoryRow key={c.categoryId} category={c} onEdit={onEdit} />
+          ))
+        )}
+      </View>
+    </View>
+  );
+}

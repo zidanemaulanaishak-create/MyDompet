@@ -1,18 +1,96 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+// @@iconify-code-gen
+import React from 'react';
+import { Image } from 'expo-image';
+import { View, StatusBar } from 'react-native';
+import { Redirect, Slot, usePathname } from 'expo-router';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import BottomNav from '@/components/ui/BottomNav';
+import { AuthProvider, useAuth } from '@/context/auth-context';
+import { ThemeProvider } from '@/context/theme-context';
+import { TransactionProvider } from '@/context/transaction-context';
+import { BudgetProvider } from '@/context/budget-context';
+import '../global.css';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+const PUBLIC_ROUTES: string[] = ['/welcome', '/login', '/register', '/verify', '/auth-callback'];
 
-SplashScreen.preventAutoHideAsync();
+const HIDE_NAV_ROUTES: string[] = ['/add-transaction', '/upload', '/scan', '/reports', '/welcome', '/login', '/register', '/verify', '/ai-assistant', '/weekly', '/goals', '/onboarding/step-1', '/onboarding/step-2', '/auth-callback'];
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const BLUE_HEADER_ROUTES: string[] = ['/welcome', '/login', '/register', '/ai-assistant', '/upload', '/scan', '/weekly', '/goals'];
+
+function BootSplash() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <View className="flex-1 bg-primary items-center justify-center">
+      <Image
+        source={require('@/assets/images/logo.png')}
+        style={{ width: 132, height: 132 }}
+        contentFit="contain"
+      />
+    </View>
   );
 }
+
+function RootNavigator() {
+  const pathname = usePathname();
+  const { user, isReady, onboarding, onboardingReady } = useAuth();
+
+  if (!isReady || !onboardingReady) {
+    return <BootSplash />;
+  }
+
+  const isPublic = PUBLIC_ROUTES.includes(pathname);
+  const isOnboarding = pathname.startsWith('/onboarding');
+  const hasBlueHeader = BLUE_HEADER_ROUTES.includes(pathname);
+  const hideNav = HIDE_NAV_ROUTES.includes(pathname);
+  const plainChrome = isPublic || isOnboarding;
+
+  // Belum login -> tahan di area publik
+  if (!user) {
+    if (!isPublic) return <Redirect href="/welcome" />;
+  }
+
+  // Login tapi belum onboarding -> paksa ke alur onboarding
+  if (user && !onboarding.completed) {
+    if (!isOnboarding) return <Redirect href="/onboarding/step-1" />;
+  }
+
+  // Login + onboarding selesai -> keluar dari onboarding/public
+  if (user && onboarding.completed) {
+    if (isPublic || isOnboarding || pathname === '/') {
+      return <Redirect href="/home" />;
+    }
+  }
+
+  return (
+    <SafeAreaView
+      className={`flex-1 ${plainChrome ? 'bg-white' : 'bg-primary'}`}
+      edges={plainChrome ? [] : ['top']}
+    >
+      <StatusBar
+        barStyle={hasBlueHeader || (!plainChrome) ? 'light-content' : 'dark-content'}
+        backgroundColor={hasBlueHeader || (!plainChrome) ? '#1A42BA' : '#FFFFFF'}
+        translucent={hasBlueHeader}
+      />
+      <View className="flex-1">
+        <Slot />
+        {!hideNav && <BottomNav />}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TransactionProvider>
+            <BudgetProvider>
+              <RootNavigator />
+            </BudgetProvider>
+          </TransactionProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+

@@ -1,0 +1,139 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { Iconify } from 'react-native-iconify';
+import { COLORS } from '@/constants/colors';
+import UploadOptionCard from '@/components/upload/UploadOptionCard';
+import ScanPreview from '@/components/upload/ScanPreview';
+import { mockOcrFromUri, MockOcrResult } from '@/utils/mockOcr';
+
+export default function UploadScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ scanUri?: string }>();
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const [ocr, setOcr] = useState<MockOcrResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const handledUri = useRef<string | null>(null);
+
+  const applyPreview = useCallback((uri: string) => {
+    setPreviewUri(uri);
+    setAnalyzing(true);
+    setTimeout(() => {
+      setOcr(mockOcrFromUri());
+      setAnalyzing(false);
+    }, 800);
+  }, []);
+
+  useEffect(() => {
+    if (params.scanUri && typeof params.scanUri === 'string' && handledUri.current !== params.scanUri) {
+      handledUri.current = params.scanUri;
+      queueMicrotask(() => {
+        applyPreview(params.scanUri as string);
+        router.setParams({ scanUri: undefined });
+      });
+    }
+  }, [params.scanUri, applyPreview, router]);
+
+  const handleBack = useCallback(() => {
+    if (previewUri) {
+      setPreviewUri(null);
+      setOcr(null);
+      return;
+    }
+    if (router.canGoBack()) router.back();
+    else router.replace('/home');
+  }, [router, previewUri]);
+
+  const pickDocument = useCallback(async () => {
+    try {
+      setBusy(true);
+      const result = await DocumentPicker.getDocumentAsync({ type: ['application/pdf', 'image/*'], copyToCacheDirectory: true });
+      if (result.canceled || !result.assets?.length) return;
+      applyPreview(result.assets[0].uri);
+    } catch {
+      Alert.alert('Gagal', 'Tidak bisa membuka dokumen.');
+    } finally {
+      setBusy(false);
+    }
+  }, [applyPreview]);
+
+  const scanReceipt = useCallback(() => {
+    router.push('/scan');
+  }, [router]);
+
+  const pickGallery = useCallback(async () => {
+    try {
+      setBusy(true);
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Izin galeri', 'Aktifkan izin galeri untuk memilih foto.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.8 });
+      if (result.canceled || !result.assets?.length) return;
+      applyPreview(result.assets[0].uri);
+    } catch {
+      Alert.alert('Gagal', 'Tidak bisa membuka galeri.');
+    } finally {
+      setBusy(false);
+    }
+  }, [applyPreview]);
+
+  return (
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7} accessibilityLabel="Kembali">
+          <Iconify icon="ph:arrow-left-bold" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.title}>{previewUri ? 'Hasil Scan' : 'Upload Transaksi'}</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <View style={styles.sheet}>
+        {previewUri ? (
+          analyzing || !ocr ? (
+            <View style={styles.analyzing}>
+              <ActivityIndicator color={COLORS.primary} size="large" />
+              <Text style={styles.analyzingText}>AI menganalisis struk...</Text>
+            </View>
+          ) : (
+            <ScanPreview
+              imageUri={previewUri}
+              onRetake={() => { setPreviewUri(null); setOcr(null); }}
+              initialAmount={String(ocr.amount)}
+              initialMerchant={ocr.merchant}
+              initialDateLabel={ocr.dateLabel}
+            />
+          )
+        ) : (
+          <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+            <UploadOptionCard icon="ph:file-text-bold" title="Upload Dokumen" subtitle="Upload file struk anda disini" onPress={pickDocument} />
+            <UploadOptionCard icon="ph:scan-bold" title="Scan Struk" subtitle="Arahkan kamera ke struk anda." onPress={scanReceipt} />
+            <UploadOptionCard icon="ph:image-bold" title="Pilih dari Galeri" subtitle="Pilih foto struk atau transaksi anda di sini." onPress={pickGallery} />
+            {busy ? (
+              <View style={styles.loading}>
+                <ActivityIndicator color={COLORS.primary} />
+              </View>
+            ) : null}
+          </ScrollView>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: COLORS.primary },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 28 },
+  backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  title: { flex: 1, textAlign: 'center', color: '#FFFFFF', fontSize: 17, fontWeight: '800', marginRight: 40 },
+  headerSpacer: { width: 0 },
+  sheet: { flex: 1, backgroundColor: '#F8F9FA', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 20, paddingHorizontal: 20 },
+  list: { gap: 14, paddingBottom: 32 },
+  loading: { alignItems: 'center', paddingTop: 12 },
+  analyzing: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingBottom: 80 },
+  analyzingText: { fontSize: 18, fontWeight: '600', color: COLORS.textMuted },
+});

@@ -11,7 +11,10 @@ import {
   Easing,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors, ColorPalette } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { translate, useI18n } from '@/i18n';
+import { getAppPrefs } from '@/utils/appPrefs';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '@/constants/categories';
 import { getPastelBg } from '@/constants/categoryVisuals';
 
@@ -39,7 +42,7 @@ const IDFormat = new Intl.DateTimeFormat('id-ID', {
 const MONTH_FORMAT = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' });
 
 function formatDate(d: Date | null): string {
-  return d ? IDFormat.format(d) : 'Semua';
+  return d ? IDFormat.format(d) : translate(getAppPrefs().locale, 'common.all');
 }
 
 function startOfDay(d: Date): Date {
@@ -52,11 +55,11 @@ function endOfDay(d: Date): Date {
 
 type PresetKey = 'all' | 'today' | '7d' | 'month';
 
-const PRESETS: { key: PresetKey; label: string }[] = [
-  { key: 'all', label: 'Semua' },
-  { key: 'today', label: 'Hari Ini' },
-  { key: '7d', label: '7 Hari' },
-  { key: 'month', label: 'Bulan Ini' },
+const PRESETS: { key: PresetKey; labelKey: string }[] = [
+  { key: 'all', labelKey: 'common.all' },
+  { key: 'today', labelKey: 'history.presetToday' },
+  { key: '7d', labelKey: 'history.preset7d' },
+  { key: 'month', labelKey: 'history.presetMonth' },
 ];
 
 function getPresetRange(key: PresetKey): [Date | null, Date | null] {
@@ -96,6 +99,10 @@ export default function HistoryFilterSheet({
   dateTo,
   onApplyDates,
 }: Props) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
+  const styles = createStyles(palette);
   // eslint-disable-next-line react-hooks/refs
   const translateY = useRef(new Animated.Value(500)).current;
   const [internalMode, setInternalMode] = useState<FilterMode>(mode);
@@ -198,9 +205,9 @@ export default function HistoryFilterSheet({
           </View>
 
           <View style={styles.header}>
-            <Text style={styles.title}>Filter Transaksi</Text>
+            <Text style={styles.title}>{t('history.filterTitle')}</Text>
             <TouchableOpacity onPress={handleBackdropPress} hitSlop={8}>
-              <Iconify icon="ph:x-bold" size={22} color={COLORS.textMuted} />
+              <Iconify icon="ph:x-bold" size={22} color={palette.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -216,7 +223,7 @@ export default function HistoryFilterSheet({
                 activeOpacity={0.8}
               >
                 <Text style={[styles.tabText, internalMode === m && styles.tabTextActive]}>
-                  {m === 'date' ? 'Tanggal' : 'Kategori'}
+                  {m === 'date' ? t('common.date') : t('common.category')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -230,9 +237,9 @@ export default function HistoryFilterSheet({
             {internalMode === 'date' ? (
               <>
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionText}>Jangka Waktu</Text>
+                  <Text style={styles.sectionText}>{t('history.periodRange')}</Text>
                   <TouchableOpacity onPress={() => handleQuickPreset('all')}>
-                    <Text style={styles.resetText}>Reset</Text>
+                    <Text style={styles.resetText}>{t('common.reset')}</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.chipRow}>
@@ -246,7 +253,7 @@ export default function HistoryFilterSheet({
                         activeOpacity={0.8}
                       >
                         <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                          {preset.label}
+                          {t(preset.labelKey)}
                         </Text>
                       </TouchableOpacity>
                     );
@@ -254,13 +261,13 @@ export default function HistoryFilterSheet({
                 </View>
 
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionText}>Rentang Kustom</Text>
+                  <Text style={styles.sectionText}>{t('history.customRange')}</Text>
                 </View>
                 <View style={styles.rangeRow}>
                   {(
                     [
-                      { key: 'from', label: 'Dari' },
-                      { key: 'to', label: 'Sampai' },
+                      { key: 'from', labelKey: 'history.from' },
+                      { key: 'to', labelKey: 'history.to' },
                     ] as const
                   ).map((r) => (
                     <TouchableOpacity
@@ -271,8 +278,8 @@ export default function HistoryFilterSheet({
                       }
                       activeOpacity={0.8}
                     >
-                      <Iconify icon="ph:calendar-bold" size={15} color={COLORS.textMuted} />
-                      <Text style={styles.rangeLabel}>{r.label}</Text>
+                      <Iconify icon="ph:calendar-bold" size={15} color={palette.textMuted} />
+                      <Text style={styles.rangeLabel}>{t(r.labelKey)}</Text>
                       <Text style={styles.rangeValue}>
                         {r.key === 'from' ? formatDate(localFrom) : formatDate(localTo)}
                       </Text>
@@ -293,16 +300,16 @@ export default function HistoryFilterSheet({
                   </View>
                 ) : null}
 
-                <Text style={styles.hintText}>Bulan aktif: {MONTH_FORMAT.format(new Date())}</Text>
+                <Text style={styles.hintText}>{t('history.activeMonth', { month: MONTH_FORMAT.format(new Date()) })}</Text>
               </>
             ) : (
               <>
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionText}>Pengeluaran</Text>
+                  <Text style={styles.sectionText}>{t('transactions.expense')}</Text>
                 </View>
                 {EXPENSE_CATEGORIES.map((category) => renderCategoryItem(category))}
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionText}>Pemasukan</Text>
+                  <Text style={styles.sectionText}>{t('transactions.income')}</Text>
                 </View>
                 {INCOME_CATEGORIES.map((category) => renderCategoryItem(category))}
               </>
@@ -356,14 +363,15 @@ export default function HistoryFilterSheet({
   }
 }
 
-const styles = StyleSheet.create({
+function createStyles(palette: ColorPalette) {
+  return StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
   },
   bottomSheet: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -381,7 +389,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: palette.border,
   },
   header: {
     flexDirection: 'row',
@@ -393,11 +401,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textDark,
+    color: palette.textDark,
   },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: palette.divider,
     borderRadius: 12,
     padding: 3,
     marginHorizontal: 20,
@@ -410,7 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tabActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.card,
     shadowColor: '#0F172A',
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -420,10 +428,10 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 17,
     fontWeight: '600',
-    color: COLORS.textMuted,
+    color: palette.textMuted,
   },
   tabTextActive: {
-    color: COLORS.primary,
+    color: palette.primary,
   },
   listContent: {
     paddingHorizontal: 20,
@@ -439,14 +447,14 @@ const styles = StyleSheet.create({
   sectionText: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textMuted,
+    color: palette.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
   resetText: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.primary,
+    color: palette.primary,
   },
   chipRow: {
     flexDirection: 'row',
@@ -458,17 +466,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
+    borderColor: palette.border,
+    backgroundColor: palette.card,
   },
   chipActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: palette.primary,
+    borderColor: palette.primary,
   },
   chipText: {
     fontSize: 17,
     fontWeight: '600',
-    color: COLORS.textDark,
+    color: palette.textDark,
   },
   chipTextActive: {
     color: '#FFFFFF',
@@ -486,22 +494,22 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
+    borderColor: palette.border,
+    backgroundColor: palette.card,
   },
   rangeButtonActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: '#EBF2FF',
+    borderColor: palette.primary,
+    backgroundColor: palette.chipBlue,
   },
   rangeLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.textMuted,
+    color: palette.textMuted,
   },
   rangeValue: {
     fontSize: 17,
     fontWeight: '600',
-    color: COLORS.textDark,
+    color: palette.textDark,
   },
   pickerWrap: {
     marginTop: 8,
@@ -510,7 +518,7 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 18,
-    color: COLORS.textMuted,
+    color: palette.textMuted,
     marginTop: 12,
   },
   categoryItem: {
@@ -520,12 +528,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 14,
     marginBottom: 8,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: palette.inputBg,
   },
   categoryItemSelected: {
-    backgroundColor: '#EBF2FF',
+    backgroundColor: palette.chipBlue,
     borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderColor: palette.primary,
   },
   iconWrapper: {
     width: 40,
@@ -538,11 +546,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '500',
-    color: COLORS.textDark,
+    color: palette.textDark,
     marginLeft: 12,
   },
   categoryLabelSelected: {
-    color: COLORS.primary,
+    color: palette.primary,
     fontWeight: '600',
   },
   checkbox: {
@@ -554,18 +562,18 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   checkboxChecked: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: palette.primary,
+    borderColor: palette.primary,
   },
   footer: {
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: palette.divider,
   },
   applyButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: palette.primary,
     borderRadius: 14,
     alignItems: 'center',
     paddingVertical: 14,
@@ -575,4 +583,5 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
   },
-});
+  });
+}

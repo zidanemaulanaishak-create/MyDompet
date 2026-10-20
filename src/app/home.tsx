@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import HeaderSummary from '@/components/home/HeaderSummary';
@@ -8,28 +8,39 @@ import AIInsightCard from '@/components/home/AIInsightCard';
 import BudgetCard from '@/components/home/BudgetCard';
 import TransactionList from '@/components/home/TransactionList';
 import GoalList from '@/components/home/GoalList';
-import { quickActions, goals, weeklySpending } from '@/data/dummyData';
+import { quickActions } from '@/data/dummyData';
+import type { GoalItem } from '@/data/dummyData';
+import { useGoals } from '@/context/goal-context';
+import { daysLeftLabel, formatRupiah as formatGoalRupiah, goalProgress } from '@/utils/goals';
 import { getFirstName, useAuth } from '@/context/auth-context';
 import { useTransactions } from '@/context/transaction-context';
 import { useBudget } from '@/context/budget-context';
-import { filterByPeriod, summarize, formatRupiah } from '@/utils/reports';
+import { useTheme } from '@/context/theme-context';
+import { getThemeColors } from '@/constants/colors';
+import { filterByPeriod, summarize, formatRupiah, txAmount } from '@/utils/reports';
 import { buildBudget, totalLimit, totalSpent } from '@/utils/budget';
-import { monthKey, monthLabel } from '@/utils/dates';
+import { monthKey, monthLabel, parseItemDate } from '@/utils/dates';
+import { itemType } from '@/constants/categoryVisuals';
 import { buildRuleInsight } from '@/utils/insights';
 import { buildContextSnapshot } from '@/services/snapshot';
 import { requestInsight, type InsightResult } from '@/services/ai';
+import { useI18n, shortDayNames } from '@/i18n';
 
 export default function HomeScreen() {
   const { user, onboarding } = useAuth();
   const { transactions: liveTransactions, refresh: refreshTransactions } = useTransactions();
   const { getBudgetsForMonth } = useBudget();
+  const { goals: liveGoals, refresh: refreshGoals } = useGoals();
   const router = useRouter();
+  const { isDark } = useTheme();
+  const { t, locale } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const [refreshing, setRefreshing] = useState(false);
   const [aiInsight, setAiInsight] = useState<{ version: string; result: InsightResult } | null>(
     null
   );
 
-  const name = user ? getFirstName(user.name) : 'Teman';
+  const name = user ? getFirstName(user.name) : t('home.friend');
 
   const today = new Date();
   const currentMonthKey = monthKey(today);
@@ -52,6 +63,30 @@ export default function HomeScreen() {
 
   const monthBalance = mainIncome + monthSum.income - monthExpense;
   const totalBalance = mainIncome + allSum.income - allSum.expense;
+
+  const dayNames = shortDayNames[locale];
+
+  const weeklyData = useMemo(() => {
+    const now = new Date();
+    const buckets = new Map<string, number>();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      buckets.set(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, 0);
+    }
+    for (const tx of liveTransactions) {
+      if (itemType(tx) !== 'expense') continue;
+      const d = parseItemDate(tx);
+      if (!d) continue;
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (!buckets.has(key)) continue;
+      buckets.set(key, (buckets.get(key) ?? 0) + txAmount(tx));
+    }
+    return [...buckets.entries()].map(([key, amount]) => {
+      const parts = key.split('-').map(Number);
+      const day = new Date(parts[0], parts[1], parts[2]).getDay();
+      return { day: dayNames[day] ?? '', amount };
+    });
+  }, [liveTransactions, dayNames]);
 
   const snapshot = buildContextSnapshot({
     userName: user?.name ?? 'Teman',
@@ -116,11 +151,11 @@ export default function HomeScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refreshTransactions();
+      await Promise.all([refreshTransactions(), refreshGoals()]);
     } finally {
       setRefreshing(false);
     }
-  }, [refreshTransactions]);
+  }, [refreshTransactions, refreshGoals]);
 
   const onQuickAction = (label: string) => {
     switch (label) {
@@ -151,7 +186,8 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-bg"
+      className="flex-1"
+      style={{ backgroundColor: palette.bg }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 100 }}
       refreshControl={
@@ -160,7 +196,7 @@ export default function HomeScreen() {
     >
       <HeaderSummary
         name={name}
-        balanceLabel="SISA KEUANGAN"
+        balanceLabel={t('home.sisaKeuangan')}
         monthLabel={monthLabel(currentMonthKey)}
         monthDate={monthDate}
         monthBalance={formatRupiah(monthBalance)}
@@ -177,7 +213,7 @@ export default function HomeScreen() {
       />
 
       <View className="px-4 pt-4">
-        <SpendingChart data={weeklySpending} />
+        <SpendingChart data={weeklyData} />
 
         <BudgetCard allowance={totalLimit(monthBudget)} spent={totalSpent(monthBudget)} monthLabel={monthLabel(currentMonthKey)} />
 
@@ -190,14 +226,24 @@ export default function HomeScreen() {
         <TransactionList
           items={liveTransactions}
           onSeeAll={() => router.push('/transactions')}
-          onPressItem={(tx) => onAsk(`Lihat detail transaksi: ${tx.name}`)}
+          onPressItem={(tx) => onAsk(t('home.detailTransaction', { name: tx.name }))}
         />
 
         <GoalList
-          title="Financial Goals"
-          items={goals}
+          title={t('home.goals')}
+          items={liveGoals.slice(0, 3).map(
+            (g): GoalItem => ({
+              id: g.id,
+              name: g.name,
+              days: daysLeftLabel(g.deadlineTs, locale),
+              saved: formatGoalRupiah(g.saved),
+              target: `${Math.round(goalProgress(g) * 100)}% ${t('home.goalOf')} ${formatGoalRupiah(g.target)}`,
+              icon: g.icon || 'ph:target-bold',
+              progress: goalProgress(g),
+            })
+          )}
           onSeeAll={() => router.push('/goals' as never)}
-          onPressItem={(g) => onAsk(`Lihat target: ${g.name}`)}
+          onPressItem={() => router.push('/goals' as never)}
         />
       </View>
     </ScrollView>

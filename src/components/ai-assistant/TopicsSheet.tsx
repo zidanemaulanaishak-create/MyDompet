@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, Platform } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { POPULAR_TOPICS, PopularTopic } from './AiHero';
+import { useI18n } from '@/i18n';
 
 interface Props {
   visible: boolean;
@@ -10,15 +11,16 @@ interface Props {
 }
 
 export default function TopicsSheet({ visible, onClose, onTopicPress }: Props) {
+  const { t } = useI18n();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <TouchableOpacity style={styles.dismiss} activeOpacity={1} onPress={onClose} accessibilityLabel="Tutup" />
+        <TouchableOpacity style={styles.dismiss} activeOpacity={1} onPress={onClose} accessibilityLabel={t('common.close')} />
         <View style={styles.sheet}>
           <View style={styles.handle} />
           <View style={styles.head}>
-            <Text style={styles.title}>Semua Topik</Text>
-            <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.closeBtn} accessibilityLabel="Tutup daftar topik">
+            <Text style={styles.title}>{t('ai.allTopics')}</Text>
+            <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.closeBtn} accessibilityLabel={t('ai.closeTopics')}>
               <Iconify icon="ph:x-bold" size={16} color="#CBD5E1" />
             </TouchableOpacity>
           </View>
@@ -36,7 +38,7 @@ export default function TopicsSheet({ visible, onClose, onTopicPress }: Props) {
                 <View style={styles.itemIcon}>
                   <Iconify icon={topic.icon} size={17} color="#FFFFFF" />
                 </View>
-                <Text style={styles.itemLabel} numberOfLines={2}>{topic.label}</Text>
+                <Text style={styles.itemLabel} numberOfLines={2}>{t(topic.label)}</Text>
                 <Iconify icon="ph:arrow-up-right-bold" size={15} color="#64748B" />
               </TouchableOpacity>
             ))}

@@ -13,7 +13,8 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { useTransactions } from '@/context/transaction-context';
 import { TransactionItem } from '@/data/dummyData';
 import CurrencySelector from '@/components/CurrencySelector';
@@ -26,6 +27,7 @@ import NoteInput from '@/components/transaction/NoteInput';
 import SaveButton from '@/components/transaction/SaveButton';
 import { Category, getDefaultCategory } from '@/constants/categories';
 import { itemType, resolveCategory } from '@/constants/categoryVisuals';
+import { useI18n } from '@/i18n';
 
 type TxType = 'expense' | 'income';
 
@@ -37,6 +39,9 @@ export default function AddTransactionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const { transactions, addTransaction, updateTransaction } = useTransactions();
 
   const existing = useMemo<TransactionItem | undefined>(
@@ -68,12 +73,12 @@ export default function AddTransactionScreen() {
     const newErrors: Record<string, string> = {};
 
     if (numericAmount <= 0) {
-      newErrors.amount = 'Nominal harus lebih dari 0';
+      newErrors.amount = t('addTx.amountMoreThanZero');
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [numericAmount]);
+  }, [numericAmount, t]);
 
   const handleAmountChange = useCallback(
     (text: string, value: number) => {
@@ -146,11 +151,11 @@ export default function AddTransactionScreen() {
 
       router.back();
     } catch {
-      Alert.alert('Gagal menyimpan', 'Transaksi tidak tersimpan. Coba lagi.');
+      Alert.alert(t('addTx.saveFailed'), t('addTx.saveFailedDesc'));
     } finally {
       setIsSubmitting(false);
     }
-  }, [validateForm, note, category, type, selectedCurrency, numericAmount, existing, addTransaction, updateTransaction, router]);
+  }, [validateForm, note, category, type, selectedCurrency, numericAmount, existing, addTransaction, updateTransaction, router, t]);
 
   const handleBack = useCallback(() => {
     Keyboard.dismiss();
@@ -163,7 +168,7 @@ export default function AddTransactionScreen() {
   }, []);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: palette.bg }]}>
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -177,20 +182,20 @@ export default function AddTransactionScreen() {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
-              style={styles.backButton}
+              style={[styles.backButton, { backgroundColor: palette.card }]}
               onPress={handleBack}
               activeOpacity={0.7}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Iconify icon="ph:arrow-left" size={22} color={COLORS.textDark} />
+              <Iconify icon="ph:arrow-left" size={22} color={palette.textDark} />
             </TouchableOpacity>
-            <Text style={styles.title}>{isEditing ? 'Edit Transaksi' : 'Tambah Transaksi'}</Text>
+            <Text style={[styles.title, { color: palette.textDark }]}>{isEditing ? t('addTx.editTitle') : t('addTx.addTitle')}</Text>
             <View style={styles.headerSpacer} />
           </View>
 
           {/* Type Selector */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Tipe Transaksi</Text>
+            <Text style={[styles.sectionLabel, { color: palette.textDark }]}>{t('addTx.type')}</Text>
             <TypeSelector value={type} onChange={handleTypeChange} />
           </View>
 
@@ -203,7 +208,7 @@ export default function AddTransactionScreen() {
               value={amount}
               onChangeText={handleAmountChange}
               error={errors.amount || null}
-              label="Nominal"
+              label={t('common.amount')}
             />
             <View style={styles.quickSection}>
               <QuickAmountChips
@@ -216,7 +221,7 @@ export default function AddTransactionScreen() {
 
           {/* Currency Selector */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Mata Uang</Text>
+            <Text style={[styles.sectionLabel, { color: palette.textDark }]}>{t('addTx.currency')}</Text>
             <CurrencySelector
               selectedCurrency={selectedCurrency}
               onSelect={setSelectedCurrency}
@@ -227,22 +232,22 @@ export default function AddTransactionScreen() {
           {/* Category Picker */}
           <View style={styles.section}>
             <View style={styles.categoryRow}>
-              <Text style={styles.sectionLabel}>Kategori</Text>
+              <Text style={[styles.sectionLabel, { color: palette.textDark }]}>{t('common.category')}</Text>
               <TouchableOpacity
                 style={styles.categoryButton}
                 onPress={handleCategoryPress}
                 activeOpacity={0.8}
               >
-                <View style={styles.categoryButtonContent}>
-                  <View style={styles.categoryIcon}>
+                <View style={[styles.categoryButtonContent, { backgroundColor: palette.card, borderColor: palette.border }]}>
+                  <View style={[styles.categoryIcon, { backgroundColor: palette.inputBg }]}>
                     <Iconify
                       icon={category.icon}
                       size={20}
-                      color={type === 'expense' ? COLORS.red : COLORS.green}
+                      color={type === 'expense' ? palette.red : palette.green}
                     />
                   </View>
-                  <Text style={styles.categoryButtonLabel}>{category.label}</Text>
-                  <Iconify icon="ph:caret-right-bold" size={16} color={COLORS.textMuted} />
+                  <Text style={[styles.categoryButtonLabel, { color: palette.textDark }]}>{category.label}</Text>
+                  <Iconify icon="ph:caret-right-bold" size={16} color={palette.textMuted} />
                 </View>
               </TouchableOpacity>
             </View>
@@ -253,7 +258,9 @@ export default function AddTransactionScreen() {
               onSelect={handleCategorySelect}
               selectedCategoryId={category.id}
               type={type}
-              title={`Pilih Kategori ${type === 'expense' ? 'Pengeluaran' : 'Pemasukan'}`}
+              title={t('addTx.selectCategoryTitle', {
+                type: t(type === 'expense' ? 'addTx.tabExpense' : 'addTx.tabIncome'),
+              })}
             />
           </View>
 
@@ -262,9 +269,9 @@ export default function AddTransactionScreen() {
             <NoteInput
               value={note}
               onChangeText={setNote}
-              placeholder="Tambahkan catatan (opsional)"
+              placeholder={t('addTx.notePlaceholderOptional')}
               maxLength={200}
-              label="Catatan"
+              label={t('common.note')}
             />
           </View>
 
@@ -274,12 +281,17 @@ export default function AddTransactionScreen() {
       </KeyboardAvoidingView>
 
       {/* Save Button - Fixed at bottom */}
-      <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + 24 }]}>
+      <View
+        style={[
+          styles.buttonContainer,
+          { paddingBottom: insets.bottom + 24, backgroundColor: palette.bg, borderTopColor: palette.border },
+        ]}
+      >
         <SaveButton
           onPress={handleSave}
           disabled={!numericAmount || numericAmount <= 0}
           loading={isSubmitting}
-          title={isEditing ? 'Simpan Perubahan' : 'Simpan Transaksi'}
+          title={isEditing ? t('addTx.saveChanges') : t('addTx.save')}
           variant="primary"
           fullWidth={true}
         />
@@ -291,7 +303,6 @@ export default function AddTransactionScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.bg,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -312,7 +323,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
     shadowColor: '#1A2E5A',
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -322,7 +332,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textDark,
     flex: 1,
     textAlign: 'center',
     marginRight: 40,
@@ -336,7 +345,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.textDark,
     marginBottom: 10,
     marginLeft: 2,
   },
@@ -358,9 +366,7 @@ const styles = StyleSheet.create({
   categoryButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -371,12 +377,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F8F9FA',
   },
   categoryButtonLabel: {
     fontSize: 17,
     fontWeight: '500',
-    color: COLORS.textDark,
     marginLeft: 12,
     flex: 1,
   },
@@ -391,9 +395,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 24,
     paddingTop: 12,
-    backgroundColor: COLORS.bg,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 10,

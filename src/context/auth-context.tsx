@@ -14,6 +14,8 @@ import {
   signInWithProvider as signInWithProviderFlow,
   type SocialProvider,
 } from '@/services/socialAuth';
+import { getAppPrefs } from '@/utils/appPrefs';
+import { translate } from '@/i18n';
 
 export interface AuthUser {
   id: string;
@@ -31,6 +33,7 @@ interface AuthContextValue {
   resetOnboarding: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (name: string, email: string, password: string) => Promise<string | null>;
+  updateName: (name: string) => Promise<string | null>;
   signInWithProvider: (provider: SocialProvider) => Promise<string | null>;
   signOut: () => Promise<void>;
 }
@@ -250,6 +253,34 @@ async function applySession(user?: User) {
     []
   );
 
+  const updateName = useCallback(
+    async (nextName: string): Promise<string | null> => {
+      if (!user) {
+        return translate(getAppPrefs().locale, 'profile.errLoginRequired');
+      }
+      const clean = nextName.trim();
+      if (!clean) {
+        return translate(getAppPrefs().locale, 'profile.errNameRequired');
+      }
+      if (clean.length < 3) {
+        return translate(getAppPrefs().locale, 'profile.errNameMin');
+      }
+
+      const { error } = await supabase.auth.updateUser({ data: { name: clean } });
+      if (error) {
+        return translate(getAppPrefs().locale, 'profile.errUpdateFailed');
+      }
+
+      await supabase
+        .from('profiles')
+        .upsert({ id: user.id, name: clean, email: user.email }, { onConflict: 'id' });
+
+      setUser((prev) => (prev ? { ...prev, name: clean } : prev));
+      return null;
+    },
+    [user]
+  );
+
   const setOnboarding = useCallback(
     async (patch: Partial<OnboardingData>) => {
       if (!user) return;
@@ -304,6 +335,7 @@ async function applySession(user?: User) {
       resetOnboarding,
       signIn,
       signUp,
+      updateName,
       signInWithProvider,
       signOut,
     }),
@@ -317,6 +349,7 @@ async function applySession(user?: User) {
       resetOnboarding,
       signIn,
       signUp,
+      updateName,
       signInWithProvider,
       signOut,
     ]

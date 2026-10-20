@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'r
 import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface Props {
   value: string;
@@ -14,10 +15,10 @@ interface Props {
 }
 
 const SHORTCUTS: { id: string; label: string; icon: string }[] = [
-  { id: 's1', label: 'Catat transaksi', icon: 'ph:pencil-line-bold' },
-  { id: 's2', label: 'Cek riwayat', icon: 'ph:file-text-bold' },
-  { id: 's3', label: 'Bandingkan keuangan', icon: 'ph:trend-up-bold' },
-  { id: 's4', label: 'Tips hemat', icon: 'ph:sparkle-bold' },
+  { id: 's1', label: 'ai.shortcut.record', icon: 'ph:pencil-line-bold' },
+  { id: 's2', label: 'ai.shortcut.history', icon: 'ph:file-text-bold' },
+  { id: 's3', label: 'ai.shortcut.compare', icon: 'ph:trend-up-bold' },
+  { id: 's4', label: 'ai.shortcut.tips', icon: 'ph:sparkle-bold' },
 ];
 
 export default function MessageInput({
@@ -26,12 +27,14 @@ export default function MessageInput({
   onSend,
   onShortcutPress,
   disabled = false,
-  placeholder = 'Ketik pesan...',
+  placeholder,
 }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const [focused, setFocused] = useState(false);
   const hasText = value.trim().length > 0;
+  const placeholderText = placeholder ?? t('ai.inputPlaceholder');
 
   const handleFocus = useCallback(() => setFocused(true), []);
   const handleBlur = useCallback(() => setFocused(false), []);
@@ -48,11 +51,11 @@ export default function MessageInput({
                 { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' },
               ]}
               activeOpacity={0.7}
-              onPress={() => onShortcutPress(item.label)}
+              onPress={() => onShortcutPress(t(item.label))}
             >
               <Iconify icon={item.icon} size={13} color={palette.primary} />
               <Text style={[styles.chipLabel, { color: palette.textDark }]} numberOfLines={1}>
-                {item.label}
+                {t(item.label)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -75,7 +78,7 @@ export default function MessageInput({
             placeholderTextColor={palette.textMuted}
             value={value}
             onChangeText={onChangeText}
-            placeholder={placeholder}
+            placeholder={placeholderText}
             multiline
             maxLength={2000}
             editable={!disabled}
@@ -84,14 +87,14 @@ export default function MessageInput({
             blurOnSubmit={false}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            accessibilityLabel="Pesan untuk MyDompet AI"
+            accessibilityLabel={t('ai.inputA11y')}
           />
           <TouchableOpacity
             style={[styles.sendButton, { backgroundColor: hasText ? COLORS.primary : isDark ? '#263550' : '#E2E8F0' }]}
             onPress={onSend}
             disabled={!hasText || disabled}
             activeOpacity={0.8}
-            accessibilityLabel="Kirim pesan"
+            accessibilityLabel={t('ai.send')}
           >
             <Iconify
               icon="ph:paper-plane-right-fill"

@@ -1,6 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, Animated, ActivityIndicator, ViewStyle } from 'react-native';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface Props {
   onPress: () => void;
@@ -16,11 +18,14 @@ export default function SaveButton({
   onPress,
   disabled = false,
   loading = false,
-  title = 'Simpan Transaksi',
+  title,
   className,
   variant = 'primary',
   fullWidth = true,
 }: Props) {
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const [scale] = React.useState(() => new Animated.Value(1));
 
   const handlePressIn = () => {
@@ -46,17 +51,35 @@ export default function SaveButton({
   const getVariantStyle = (): ViewStyle => {
     switch (variant) {
       case 'secondary':
-        return styles.secondary;
+        return {
+          backgroundColor: palette.card,
+          borderWidth: 1.5,
+          borderColor: palette.border,
+          shadowOpacity: 0,
+          elevation: 0,
+        };
       case 'outline':
-        return styles.outline;
+        return {
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderColor: palette.border,
+          shadowOpacity: 0,
+          elevation: 0,
+        };
       default:
-        return styles.primary;
+        return {
+          backgroundColor: palette.primary,
+          shadowColor: palette.primary,
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 6,
+        };
     }
   };
 
   const getTextColor = (): string => {
-    if (variant === 'outline') return COLORS.primary;
-    return '#fff';
+    if (variant === 'primary') return '#fff';
+    return palette.textDark;
   };
 
   const buttonStyles: ViewStyle[] = [
@@ -78,9 +101,9 @@ export default function SaveButton({
     >
       <Animated.View style={{ transform: [{ scale }] }}>
         {loading ? (
-          <ActivityIndicator size="small" color={variant === 'outline' ? COLORS.primary : '#fff'} style={styles.spinner} />
+          <ActivityIndicator size="small" color={getTextColor()} style={styles.spinner} />
         ) : (
-          <Text style={[styles.text, { color: getTextColor() }]}>{title}</Text>
+          <Text style={[styles.text, { color: getTextColor() }]}>{title ?? t('addTx.save')}</Text>
         )}
       </Animated.View>
     </TouchableOpacity>
@@ -96,30 +119,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 8,
-    shadowColor: COLORS.primary,
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
   },
   fullWidth: {
     width: '100%',
   },
   disabled: {
     opacity: 0.5,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  primary: {
-    backgroundColor: COLORS.primary,
-  },
-  secondary: {
-    backgroundColor: COLORS.orange,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: COLORS.primary,
     shadowOpacity: 0,
     elevation: 0,
   },

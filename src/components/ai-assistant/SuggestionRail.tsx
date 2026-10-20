@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { QuickSuggestion } from '@/types/chat';
+import { useI18n } from '@/i18n';
 
 interface Props {
   suggestions: QuickSuggestion[];
@@ -14,6 +15,7 @@ interface Props {
 export default function SuggestionRail({ suggestions, onPress, compact = false }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   if (!suggestions.length) return null;
 
@@ -43,7 +45,7 @@ export default function SuggestionRail({ suggestions, onPress, compact = false }
             style={[compact ? styles.compactLabel : styles.label, { color: isDark ? '#E6ECF5' : palette.textDark }]}
             numberOfLines={compact ? 1 : 2}
           >
-            {item.label}
+            {t(item.label)}
           </Text>
         </TouchableOpacity>
       ))}

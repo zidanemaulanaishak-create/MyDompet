@@ -5,6 +5,7 @@ import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { formatRupiah, weekOverWeekChange } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 import WeeklyTrendSpline from './WeeklyTrendSpline';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 
 export default function WeeklyHeroHeader({ title, periodLabel, totalExpense, lastWeekExpense, trend, onBack }: Props) {
   const { isDark } = useTheme();
+  const { t } = useI18n();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
   const { width } = useWindowDimensions();
   const change = weekOverWeekChange(totalExpense, lastWeekExpense);
@@ -32,7 +34,7 @@ export default function WeeklyHeroHeader({ title, periodLabel, totalExpense, las
         style={styles.gradient}
       >
         <View style={styles.topRow}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7} accessibilityLabel="Kembali">
+          <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7} accessibilityLabel={t('common.back')}>
             <Iconify icon="ph:caret-left-bold" size={20} color="#FFFFFF" />
           </TouchableOpacity>
           <View style={styles.titleRow}>
@@ -44,7 +46,7 @@ export default function WeeklyHeroHeader({ title, periodLabel, totalExpense, las
         <Text style={styles.period}>{periodLabel}</Text>
 
         <View style={[styles.card, { backgroundColor: palette.card }]}>
-          <Text style={[styles.label, { color: palette.textMuted }]}>Total Pengeluaran</Text>
+          <Text style={[styles.label, { color: palette.textMuted }]}>{t('reports.totalExpense')}</Text>
           <View style={styles.nominalRow}>
             <Text style={[styles.nominal, { color: palette.textDark }]}>{formatRupiah(totalExpense)}</Text>
             <View style={[styles.badge, { backgroundColor: down ? '#E6F7EE' : '#FDECEC' }]}>
@@ -54,7 +56,7 @@ export default function WeeklyHeroHeader({ title, periodLabel, totalExpense, las
             </View>
           </View>
           <Text style={[styles.compare, { color: palette.textMuted }]}>
-            vs {formatRupiah(lastWeekExpense)} minggu lalu
+            {t('weekly.lastWeekCompare', { amount: formatRupiah(lastWeekExpense) })}
           </Text>
           <View style={styles.chartWrap}>
             <WeeklyTrendSpline data={trend} width={Math.min(width - 88, 400)} height={120} />

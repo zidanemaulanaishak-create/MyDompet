@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { MonthFlow, formatCompact } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   data: MonthFlow[];
@@ -13,6 +14,7 @@ const CHART_HEIGHT = 120;
 export default function CashFlowChart({ data }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const max = Math.max(...data.flatMap((d) => [d.income, d.expense]), 1);
   const topTick = Math.ceil(max / 3);
 
@@ -21,11 +23,11 @@ export default function CashFlowChart({ data }: Props) {
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
-          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>Pemasukan</Text>
+          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>{t('reports.income')}</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: '#EF4444' }]} />
-          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>Pengeluaran</Text>
+          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>{t('reports.expense')}</Text>
         </View>
       </View>
 

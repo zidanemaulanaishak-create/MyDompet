@@ -3,6 +3,8 @@ import * as Clipboard from 'expo-clipboard';
 import { Share } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { ChatMessage, QuickSuggestion } from '@/types/chat';
+import { translate } from '@/i18n';
+import { getAppPrefs } from '@/utils/appPrefs';
 import {
   askGemini,
   buildSystemPrompt,
@@ -12,37 +14,52 @@ import {
 } from '@/services/ai';
 import { appendMessage, createSession, loadLatestSession } from '@/services/chatDb';
 
-const DEFAULT_SUGGESTIONS: QuickSuggestion[] = [
-  { id: '1', label: 'Berapa target tabungan harian saya?' },
-  { id: '2', label: 'Tips hemat bulan ini' },
-  { id: '3', label: 'Alokasi dana darurat' },
-  { id: '4', label: 'Catat pengeluaran makan hari ini' },
-  { id: '5', label: 'Cek ringkasan minggu ini' },
-  { id: '6', label: 'Buatkan budget 50/30/20' },
+interface SuggestionKey {
+  id: string;
+  key: string;
+  icon?: string;
+}
+
+const DEFAULT_SUGGESTION_KEYS: SuggestionKey[] = [
+  { id: '1', key: 'ai.sug1' },
+  { id: '2', key: 'ai.sug2' },
+  { id: '3', key: 'ai.sug3' },
+  { id: '4', key: 'ai.sug4' },
+  { id: '5', key: 'ai.sug5' },
+  { id: '6', key: 'ai.sug6' },
 ];
 
-const FOLLOW_UP_SUGGESTIONS: QuickSuggestion[][] = [
+const FOLLOW_UP_SUGGESTION_KEYS: SuggestionKey[][] = [
   [
-    { id: 'f1a', label: 'Bagaimana cara mempercepatnya?' },
-    { id: 'f1b', label: 'Ide tambahan penghasilan' },
-    { id: 'f1c', label: 'Simulasikan target 6 bulan' },
-    { id: 'f1d', label: 'Ingatkan saya tiap minggu' },
+    { id: 'f1a', key: 'ai.follow1a' },
+    { id: 'f1b', key: 'ai.follow1b' },
+    { id: 'f1c', key: 'ai.follow1c' },
+    { id: 'f1d', key: 'ai.follow1d' },
   ],
   [
-    { id: 'f2a', label: 'Kategori mana yang paling boros?' },
-    { id: 'f2b', label: 'Buatkan rencana mingguan' },
-    { id: 'f2c', label: 'Bandingkan dengan bulan lalu' },
-    { id: 'f2d', label: 'Tips hemat makan di luar' },
+    { id: 'f2a', key: 'ai.follow2a' },
+    { id: 'f2b', key: 'ai.follow2b' },
+    { id: 'f2c', key: 'ai.follow2c' },
+    { id: 'f2d', key: 'ai.follow2d' },
   ],
   [
-    { id: 'f3a', label: 'Instrumen apa yang cocok?' },
-    { id: 'f3b', label: 'Berapa lama waktu tercapainya?' },
-    { id: 'f3c', label: 'Risiko tiap instrumen?' },
-    { id: 'f3d', label: 'Mulai dari nominal kecil' },
+    { id: 'f3a', key: 'ai.follow3a' },
+    { id: 'f3b', key: 'ai.follow3b' },
+    { id: 'f3c', key: 'ai.follow3c' },
+    { id: 'f3d', key: 'ai.follow3d' },
   ],
 ];
 
 const HISTORY_LIMIT = 16;
+
+function buildSuggestionLabels(keys: SuggestionKey[]): QuickSuggestion[] {
+  const locale = getAppPrefs().locale ?? 'id';
+  return keys.map((k) => ({
+    id: k.id,
+    label: translate(locale, k.key),
+    icon: k.icon,
+  }));
+}
 
 export interface UseChatOptions {
   context?: ChatContextSnapshot;
@@ -55,24 +72,24 @@ function generateId(): string {
 
 function pickFollowUps(text: string): QuickSuggestion[] {
   const lower = text.toLowerCase();
-  if (/target|tabungan|darurat/.test(lower)) return FOLLOW_UP_SUGGESTIONS[0];
-  if (/hemat|boros|efisien|penghemat/.test(lower)) return FOLLOW_UP_SUGGESTIONS[1];
-  if (/investasi|risiko|instrumen|saham|reksadana/.test(lower)) return FOLLOW_UP_SUGGESTIONS[2];
-  return DEFAULT_SUGGESTIONS;
+  if (/target|tabungan|darurat|savings|emergency|goal/.test(lower)) return buildSuggestionLabels(FOLLOW_UP_SUGGESTION_KEYS[0]);
+  if (/hemat|boros|efisien|penghemat|save|budget|spend|reduce|cut/.test(lower)) return buildSuggestionLabels(FOLLOW_UP_SUGGESTION_KEYS[1]);
+  if (/investasi|risiko|instrumen|saham|reksadana|invest|risk|stock|mutual/.test(lower)) return buildSuggestionLabels(FOLLOW_UP_SUGGESTION_KEYS[2]);
+  return buildSuggestionLabels(DEFAULT_SUGGESTION_KEYS);
 }
 
 function errorMessage(error: unknown): string {
   if (error instanceof GeminiError) {
     switch (error.code) {
       case 'NO_KEY':
-        return 'AI belum dikonfigurasi. Tambahkan EXPO_PUBLIC_GEMINI_API_KEY di file .env lalu restart aplikasi.';
+        return translate(getAppPrefs().locale ?? 'id', 'ai.errNoKey');
       case 'RATE_LIMIT':
-        return 'Kuota gratis Gemini sedang habis. Coba lagi beberapa saat lagi.';
+        return translate(getAppPrefs().locale ?? 'id', 'ai.errRateLimit');
       default:
-        return 'Maaf, layanan AI sedang bermasalah. Cek koneksimu dan coba lagi.';
+        return translate(getAppPrefs().locale ?? 'id', 'ai.errService');
     }
   }
-  return 'Maaf, terjadi kesalahan. Coba lagi ya.';
+  return translate(getAppPrefs().locale ?? 'id', 'ai.errGeneric');
 }
 
 export function useChat(initialQuery?: string, options?: UseChatOptions) {
@@ -81,7 +98,7 @@ export function useChat(initialQuery?: string, options?: UseChatOptions) {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
-  const [suggestions, setSuggestions] = useState<QuickSuggestion[]>(DEFAULT_SUGGESTIONS);
+  const [suggestions, setSuggestions] = useState<QuickSuggestion[]>(buildSuggestionLabels(DEFAULT_SUGGESTION_KEYS));
   const scrollViewRef = useRef<any>(null);
   const isMounted = useRef(true);
   const hasSentInitial = useRef(false);
@@ -279,7 +296,7 @@ export function useChat(initialQuery?: string, options?: UseChatOptions) {
     setMessages([]);
     setInputText('');
     setIsTyping(false);
-    setSuggestions(DEFAULT_SUGGESTIONS);
+    setSuggestions(buildSuggestionLabels(DEFAULT_SUGGESTION_KEYS));
     setShowSuggestions(true);
     sessionIdRef.current = null;
     hasSentInitial.current = true;

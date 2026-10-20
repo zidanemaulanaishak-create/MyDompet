@@ -50,6 +50,39 @@ export function formatRupiah(n: number): string {
   return `Rp ${Math.round(n).toLocaleString('id-ID')}`;
 }
 
+const SHORT_MONTHS_ID = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mei',
+  'Jun',
+  'Jul',
+  'Agu',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Des',
+];
+
+export function formatDeadlineLabel(ts: number): string {
+  if (!Number.isFinite(ts) || ts <= 0) return '';
+  const d = new Date(ts);
+  return `${SHORT_MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+export function daysLeftLabel(deadlineTs: number, locale: string): string {
+  if (!Number.isFinite(deadlineTs) || deadlineTs <= 0) return '';
+  const diff = Math.ceil((deadlineTs - Date.now()) / 86400000);
+  if (diff < 0) {
+    return locale === 'en' ? 'Overdue' : 'Terlewat';
+  }
+  if (diff === 0) {
+    return locale === 'en' ? 'Due today' : 'Jatuh tempo hari ini';
+  }
+  return locale === 'en' ? `${diff} days left` : `${diff} hari lagi`;
+}
+
 export function formatCompact(n: number): string {
   const abs = Math.abs(n);
   if (abs >= 1_000_000) {

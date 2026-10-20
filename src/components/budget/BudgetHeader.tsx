@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { formatMoneyPlain } from '@/utils/money';
 import { percentUsed, remainingBudget } from '@/utils/budget';
+import { useI18n } from '@/i18n';
 
 interface Props {
   monthLabel: string;
@@ -21,6 +22,7 @@ export default function BudgetHeader({
   onPressInfo,
   onPressEdit,
 }: Props) {
+  const { t } = useI18n();
   const remaining = remainingBudget(limit, spent);
   const used = percentUsed(spent, limit);
 
@@ -48,13 +50,13 @@ export default function BudgetHeader({
       </View>
 
       <View className="flex-row items-center justify-between mt-6">
-        <Text className="text-[#B9C2FF] text-lg tracking-wider font-semibold">SISA BUDGET</Text>
+        <Text className="text-[#B9C2FF] text-lg tracking-wider font-semibold">{t('budget.remaining')}</Text>
         <TouchableOpacity
           className="rounded-full border border-white/40 px-3.5 py-1"
           activeOpacity={0.8}
           onPress={onPressEdit}
         >
-          <Text className="text-white text-lg font-bold">Edit</Text>
+          <Text className="text-white text-lg font-bold">{t('common.edit')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -71,10 +73,10 @@ export default function BudgetHeader({
         </View>
         <View className="flex-row items-center justify-between mt-2">
           <Text className="text-white text-lg font-medium">
-            Terpakai {formatMoneyPlain(spent)}
+            {t('budget.usedAmount', { amount: formatMoneyPlain(spent) })}
           </Text>
           <Text className="text-[#B9C2FF] text-lg">
-            dari {formatMoneyPlain(limit)} ({used}%)
+            {t('budget.fromLimit', { amount: formatMoneyPlain(limit), percent: used })}
           </Text>
         </View>
       </View>

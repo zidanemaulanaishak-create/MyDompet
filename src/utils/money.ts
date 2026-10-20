@@ -1,8 +1,10 @@
 import { getCurrencyByCode } from '@/constants/currencies';
 import { TransactionType } from '@/constants/categoryVisuals';
+import { getAppPrefs } from '@/utils/appPrefs';
 
 function formatNumber(value: number): string {
-  return new Intl.NumberFormat('id-ID', {
+  const locale = getAppPrefs().locale ?? 'id';
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'id-ID', {
     maximumFractionDigits: 0,
   }).format(value);
 }

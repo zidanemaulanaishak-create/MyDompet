@@ -7,6 +7,8 @@ import {
   itemType,
   resolveCategory,
 } from '@/constants/categoryVisuals';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { formatMoney } from '@/utils/money';
 
 interface RowProps {
@@ -17,6 +19,8 @@ interface RowProps {
 }
 
 export function TransactionRow({ item, onPress, onLongPress, subtitle }: RowProps) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const type = itemType(item);
   const category = resolveCategory(item);
   const bgColor = getCategoryColor(item);
@@ -41,16 +45,16 @@ export function TransactionRow({ item, onPress, onLongPress, subtitle }: RowProp
         <Iconify icon={icon} size={22} />
       </View>
       <View className="flex-1 pr-2">
-        <Text className="text-lg font-semibold text-[#0F172A]" numberOfLines={1}>
+        <Text className="text-lg font-semibold" style={{ color: palette.textDark }} numberOfLines={1}>
           {item.name}
         </Text>
-        <Text className="text-lg text-[#64748B] mt-0.5" numberOfLines={1}>
+        <Text className="text-lg mt-0.5" style={{ color: palette.textMuted }} numberOfLines={1}>
           {subtitle ?? category?.label ?? item.category ?? ''}
         </Text>
       </View>
       <Text
         className="text-lg font-semibold"
-        style={{ color: type === 'income' ? '#16A34A' : '#DC2626' }}
+        style={{ color: type === 'income' ? palette.green : palette.red }}
         numberOfLines={1}
       >
         {amount}

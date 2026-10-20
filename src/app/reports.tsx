@@ -9,11 +9,13 @@ import CashFlowTab from '@/components/reports/CashFlowTab';
 import BalanceTab from '@/components/reports/BalanceTab';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 export default function ReportsScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const { transactions } = useTransactions();
   const params = useLocalSearchParams<{ period?: ReportPeriod }>();
 
@@ -25,7 +27,7 @@ export default function ReportsScreen() {
 
   const filtered = useMemo(() => filterByPeriod(transactions, period), [transactions, period]);
 
-  const title = tab === 'flow' ? 'Laporan Keuangan' : 'Total Keuanganmu';
+  const title = tab === 'flow' ? t('reports.financeTitle') : t('reports.balanceTitle');
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) router.back();

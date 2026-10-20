@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { CategoryTotal, formatRupiah } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   title: string;
@@ -17,6 +18,7 @@ interface Props {
 export default function CategoryBreakdownCard({ title, total, items, filterLabel, onFilterPress, compact = false }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   return (
     <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
@@ -38,7 +40,7 @@ export default function CategoryBreakdownCard({ title, total, items, filterLabel
       <Text style={[styles.total, { color: palette.textDark }]}>{formatRupiah(total)}</Text>
 
       {items.length === 0 ? (
-        <Text style={[styles.empty, { color: palette.textMuted }]}>Belum ada data pada periode ini.</Text>
+        <Text style={[styles.empty, { color: palette.textMuted }]}>{t('reports.noDataThisPeriod')}</Text>
       ) : (
         <View style={styles.list}>
           {items.map((it) => (

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface Props {
   onMenuPress: () => void;
@@ -13,6 +14,7 @@ interface Props {
 export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   return (
     <View style={[styles.header, { backgroundColor: palette.card, borderBottomColor: isDark ? '#263550' : '#E8ECF3' }]}>
@@ -21,7 +23,7 @@ export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
           style={[styles.backButton, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9' }]}
           onPress={onMenuPress}
           activeOpacity={0.7}
-          accessibilityLabel="Kembali"
+          accessibilityLabel={t('common.back')}
         >
           <Iconify icon="ph:arrow-left-bold" size={20} color={palette.textDark} />
         </TouchableOpacity>
@@ -31,7 +33,7 @@ export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
             <Text style={[styles.title, { color: palette.textDark }]}>MyGpt</Text>
             <View style={styles.statusRow}>
               <View style={[styles.dot, { backgroundColor: COLORS.green }]} />
-              <Text style={[styles.status, { color: palette.textMuted }]}>Online • Siap membantu</Text>
+              <Text style={[styles.status, { color: palette.textMuted }]}>{t('ai.status')}</Text>
             </View>
           </View>
         </View>
@@ -40,7 +42,7 @@ export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
           style={[styles.optionsButton, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9' }]}
           onPress={onOptionsPress}
           activeOpacity={0.7}
-          accessibilityLabel="Opsi chat"
+          accessibilityLabel={t('ai.chatOptions')}
         >
           <Iconify icon="ph:dots-three-vertical-bold" size={19} color={palette.textDark} />
         </TouchableOpacity>

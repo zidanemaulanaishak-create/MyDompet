@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
-import { ReportPeriod, PERIOD_LABELS } from '@/utils/reports';
+import { ReportPeriod } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   value: ReportPeriod;
@@ -11,9 +12,16 @@ interface Props {
 
 const OPTIONS: ReportPeriod[] = ['month', 'sixMonths', 'year'];
 
+const PERIOD_KEYS: Record<ReportPeriod, string> = {
+  month: 'reports.periodMonth',
+  sixMonths: 'reports.periodSixMonths',
+  year: 'reports.periodYear',
+};
+
 export default function PeriodSelector({ value, onChange }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   return (
     <View style={styles.row}>
@@ -31,7 +39,7 @@ export default function PeriodSelector({ value, onChange }: Props) {
             onPress={() => onChange(opt)}
           >
             <Text style={[styles.label, { color: active ? COLORS.primary : palette.textMuted }]}>
-              {PERIOD_LABELS[opt]}
+              {t(PERIOD_KEYS[opt])}
             </Text>
           </TouchableOpacity>
         );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 interface PrimaryButtonProps {
   label: string;
@@ -17,6 +18,9 @@ export default function PrimaryButton({
   disabled,
   className = '',
 }: PrimaryButtonProps) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -24,7 +28,7 @@ export default function PrimaryButton({
       activeOpacity={0.85}
       className={`rounded-full bg-primary py-4 items-center justify-center ${className}`}
       style={{
-        shadowColor: COLORS.primary,
+        shadowColor: palette.primary,
         shadowOpacity: 0.4,
         shadowRadius: 14,
         shadowOffset: { width: 0, height: 8 },

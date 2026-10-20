@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 interface Props {
   icon: string;
@@ -18,23 +19,26 @@ export default function EmptyState({
   actionLabel,
   onAction,
 }: Props) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   return (
     <View className="items-center py-8 px-4">
       <View
         className="w-14 h-14 rounded-full items-center justify-center mb-3"
-        style={{ backgroundColor: COLORS.chipBlue }}
+        style={{ backgroundColor: palette.chipBlue }}
       >
-        <Iconify icon={icon} size={26} color={COLORS.primary} />
+        <Iconify icon={icon} size={26} color={palette.primary} />
       </View>
-      <Text className="text-lg font-bold text-textDark">{title}</Text>
+      <Text className="text-lg font-bold" style={{ color: palette.textDark }}>{title}</Text>
       {description ? (
-        <Text className="text-lg text-textMuted text-center mt-1 max-w-[220px]">
+        <Text className="text-lg text-center mt-1 max-w-[220px]" style={{ color: palette.textMuted }}>
           {description}
         </Text>
       ) : null}
       {actionLabel && onAction ? (
         <TouchableOpacity
-          className="bg-primary rounded-xl px-4 py-2 mt-3"
+          className="rounded-xl px-4 py-2 mt-3"
+          style={{ backgroundColor: palette.primary }}
           activeOpacity={0.8}
           onPress={onAction}
         >

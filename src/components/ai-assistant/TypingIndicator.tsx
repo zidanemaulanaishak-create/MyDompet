@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 export default function TypingIndicator() {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const animation = useRef(new Animated.Value(0));
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function TypingIndicator() {
           {/* eslint-disable-next-line react-hooks/refs */}
           <Animated.View style={[styles.dot, dotStyle()]} />
         </View>
-        <Text style={[styles.label, { color: palette.textMuted }]}>AI sedang mengetik...</Text>
+        <Text style={[styles.label, { color: palette.textMuted }]}>{t('ai.typing')}</Text>
       </View>
     </View>
   );

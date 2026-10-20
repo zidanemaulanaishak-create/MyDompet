@@ -9,6 +9,7 @@ import PeriodSelector from './PeriodSelector';
 import CashFlowChart from './CashFlowChart';
 import CategoryBreakdownCard from './CategoryBreakdownCard';
 import { ReportPeriod, monthlyFlow, breakdownByType, summarize, formatRupiah } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   transactions: TransactionItem[];
@@ -20,6 +21,7 @@ interface Props {
 export default function CashFlowTab({ transactions, period, onPeriodChange, onSeeDetail }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   const [incomeCatLabel, setIncomeCatLabel] = useState('Semua');
   const [expenseCatLabel, setExpenseCatLabel] = useState('Semua');
@@ -41,17 +43,17 @@ export default function CashFlowTab({ transactions, period, onPeriodChange, onSe
   return (
     <View style={styles.wrap}>
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
-        <Text style={[styles.cardHead, { color: palette.textMuted }]}>Sisa keuangan periode ini</Text>
+        <Text style={[styles.cardHead, { color: palette.textMuted }]}>{t('reports.balanceThisPeriod')}</Text>
         <Text style={[styles.bigBalance, { color: palette.textDark }]}>{formatRupiah(summary.balance)}</Text>
         <View style={styles.metaRow}>
           <View style={styles.meta}>
             <View style={[styles.metaDot, { backgroundColor: '#10B981' }]} />
-            <Text style={[styles.metaLabel, { color: palette.textMuted }]}>Pemasukan</Text>
+            <Text style={[styles.metaLabel, { color: palette.textMuted }]}>{t('reports.income')}</Text>
             <Text style={[styles.metaValue, { color: palette.textDark }]}>{formatRupiah(summary.income)}</Text>
           </View>
           <View style={styles.meta}>
             <View style={[styles.metaDot, { backgroundColor: '#EF4444' }]} />
-            <Text style={[styles.metaLabel, { color: palette.textMuted }]}>Pengeluaran</Text>
+            <Text style={[styles.metaLabel, { color: palette.textMuted }]}>{t('reports.expense')}</Text>
             <Text style={[styles.metaValue, { color: palette.textDark }]}>{formatRupiah(summary.expense)}</Text>
           </View>
         </View>
@@ -61,21 +63,21 @@ export default function CashFlowTab({ transactions, period, onPeriodChange, onSe
       </View>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
-        <Text style={[styles.cardTitle, { color: palette.textDark }]}>Grafik Arus Keuangan</Text>
+        <Text style={[styles.cardTitle, { color: palette.textDark }]}>{t('reports.cashFlowChartTitle')}</Text>
         <View style={styles.chart}>
           <CashFlowChart data={chartData} />
         </View>
       </View>
 
       <CategoryBreakdownCard
-        title="Pemasukan"
+        title={t('reports.income')}
         total={incomeFiltered.reduce((s, b) => s + b.total, 0)}
         items={incomeFiltered}
-        filterLabel={incomeCatLabel}
+        filterLabel={incomeCatLabel === 'Semua' ? t('common.all') : incomeCatLabel}
         onFilterPress={() => {
           const cats = getCategoriesForType('income');
-          Alert.alert('Filter Pemasukan', 'Pilih kategori:', [
-            { text: 'Semua', onPress: () => setIncomeCatLabel('Semua') },
+          Alert.alert(t('reports.filterIncome'), t('reports.chooseCategory'), [
+            { text: t('common.all'), onPress: () => setIncomeCatLabel('Semua') },
             ...cats.map((c) => ({ text: c.label, onPress: () => setIncomeCatLabel(c.label) })),
           ]);
         }}
@@ -83,14 +85,14 @@ export default function CashFlowTab({ transactions, period, onPeriodChange, onSe
       />
 
       <CategoryBreakdownCard
-        title="Pengeluaran"
+        title={t('reports.expense')}
         total={expenseFiltered.reduce((s, b) => s + b.total, 0)}
         items={expenseFiltered}
-        filterLabel={expenseCatLabel}
+        filterLabel={expenseCatLabel === 'Semua' ? t('common.all') : expenseCatLabel}
         onFilterPress={() => {
           const cats = getCategoriesForType('expense');
-          Alert.alert('Filter Pengeluaran', 'Pilih kategori:', [
-            { text: 'Semua', onPress: () => setExpenseCatLabel('Semua') },
+          Alert.alert(t('reports.filterExpense'), t('reports.chooseCategory'), [
+            { text: t('common.all'), onPress: () => setExpenseCatLabel('Semua') },
             ...cats.map((c) => ({ text: c.label, onPress: () => setExpenseCatLabel(c.label) })),
           ]);
         }}
@@ -101,7 +103,7 @@ export default function CashFlowTab({ transactions, period, onPeriodChange, onSe
         activeOpacity={0.85}
         onPress={() => onSeeDetail('expense')}
       >
-        <Text style={styles.actionLabel}>Lihat Detail Pengeluaran</Text>
+        <Text style={styles.actionLabel}>{t('reports.viewExpenseDetail')}</Text>
         <Iconify icon="ph:arrow-right-bold" size={16} color="#FFFFFF" />
       </TouchableOpacity>
     </View>

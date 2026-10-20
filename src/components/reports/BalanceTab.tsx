@@ -7,6 +7,7 @@ import { TransactionItem } from '@/data/dummyData';
 import PeriodSelector from './PeriodSelector';
 import DonutChart from './DonutChart';
 import { ReportPeriod, summarize, formatRupiah } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   transactions: TransactionItem[];
@@ -17,6 +18,7 @@ interface Props {
 
 export default function BalanceTab({ transactions, period, onPeriodChange, onSeeDetail }: Props) {
   const { isDark } = useTheme();
+  const { t } = useI18n();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
 
   const summary = useMemo(() => summarize(transactions), [transactions]);
@@ -28,28 +30,28 @@ export default function BalanceTab({ transactions, period, onPeriodChange, onSee
   return (
     <View style={styles.wrap}>
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
-        <Text style={[styles.label, { color: palette.textMuted }]}>Total kas / saldo</Text>
+        <Text style={[styles.label, { color: palette.textMuted }]}>{t('reports.balanceLabel')}</Text>
         <Text style={[styles.big, { color: palette.textDark }]}>{formatRupiah(summary.balance)}</Text>
-        <Text style={[styles.sub, { color: palette.textMuted }]}>Keuangan hari ini</Text>
+        <Text style={[styles.sub, { color: palette.textMuted }]}>{t('reports.todayFinance')}</Text>
         <View style={styles.period}>
           <PeriodSelector value={period} onChange={onPeriodChange} />
         </View>
       </View>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
-        <Text style={[styles.sectionTitle, { color: palette.textDark }]}>Distribusi Arus Keuangan</Text>
+        <Text style={[styles.sectionTitle, { color: palette.textDark }]}>{t('reports.cashFlowDistribution')}</Text>
         <View style={styles.donutWrap}>
-          <DonutChart percent={incomePct} label="Pemasukan" />
+          <DonutChart percent={incomePct} label={t('reports.income')} />
         </View>
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: COLORS.primary }]} />
-            <Text style={[styles.legendText, { color: palette.textDark }]}>Pemasukan</Text>
+            <Text style={[styles.legendText, { color: palette.textDark }]}>{t('reports.income')}</Text>
             <Text style={[styles.legendPct, { color: palette.textDark }]}>{incomePct}%</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: '#F87171' }]} />
-            <Text style={[styles.legendText, { color: palette.textDark }]}>Pengeluaran</Text>
+            <Text style={[styles.legendText, { color: palette.textDark }]}>{t('reports.expense')}</Text>
             <Text style={[styles.legendPct, { color: palette.textDark }]}>{expensePct}%</Text>
           </View>
         </View>
@@ -57,7 +59,7 @@ export default function BalanceTab({ transactions, period, onPeriodChange, onSee
 
       <TouchableOpacity style={styles.action} activeOpacity={0.85} onPress={onSeeDetail}>
         <Iconify icon="ph:list-bold" size={17} color="#FFFFFF" />
-        <Text style={styles.actionLabel}>Lihat Semua Transaksi</Text>
+        <Text style={styles.actionLabel}>{t('reports.viewAllTransactions')}</Text>
       </TouchableOpacity>
     </View>
   );

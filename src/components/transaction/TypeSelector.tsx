@@ -1,32 +1,28 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 type TxType = 'expense' | 'income';
 
 interface TypeOption {
   type: TxType;
-  label: string;
+  labelKey: string;
   icon: string;
-  color: string;
-  bgActive: string;
 }
 
 const OPTIONS: TypeOption[] = [
   {
     type: 'expense',
-    label: 'Pengeluaran',
+    labelKey: 'addTx.tabExpense',
     icon: 'ph:arrow-up-right-bold',
-    color: COLORS.red,
-    bgActive: COLORS.red,
   },
   {
     type: 'income',
-    label: 'Pemasukan',
+    labelKey: 'addTx.tabIncome',
     icon: 'ph:arrow-down-left-bold',
-    color: COLORS.green,
-    bgActive: COLORS.green,
   },
 ];
 
@@ -37,6 +33,9 @@ interface Props {
 }
 
 export default function TypeSelector({ value, onChange, className }: Props) {
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const [optionWidth, setOptionWidth] = React.useState(0);
 
   const handleLayout = (e: LayoutChangeEvent) => {
@@ -44,10 +43,12 @@ export default function TypeSelector({ value, onChange, className }: Props) {
     setOptionWidth(Math.floor(w));
   };
 
+  const accent = (type: TxType) => (type === 'expense' ? palette.red : palette.green);
+
   return (
     <View
-      className={`bg-chipBlue rounded-xl ${className || ''}`}
-      style={styles.container}
+      className={`rounded-xl ${className || ''}`}
+      style={[styles.container, { backgroundColor: palette.chipBlue }]}
       onLayout={handleLayout}
     >
       <View style={styles.row}>
@@ -59,7 +60,7 @@ export default function TypeSelector({ value, onChange, className }: Props) {
               style={[
                 styles.option,
                 optionWidth > 0 && { width: optionWidth },
-                active && { backgroundColor: option.bgActive },
+                active && { backgroundColor: accent(option.type) },
               ]}
               activeOpacity={0.85}
               onPress={() => onChange(option.type)}
@@ -67,15 +68,15 @@ export default function TypeSelector({ value, onChange, className }: Props) {
               <Iconify
                 icon={option.icon}
                 size={18}
-                color={active ? '#fff' : option.color}
+                color={active ? '#fff' : accent(option.type)}
               />
               <Text
                 style={[
                   styles.label,
-                  { color: active ? '#fff' : COLORS.textMuted },
+                  { color: active ? '#fff' : palette.textMuted },
                 ]}
               >
-                {option.label}
+                {t(option.labelKey)}
               </Text>
             </TouchableOpacity>
           );

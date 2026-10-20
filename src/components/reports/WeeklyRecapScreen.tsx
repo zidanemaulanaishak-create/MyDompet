@@ -7,7 +7,6 @@ import {
   compareTopCategories,
   filterByWeek,
   getWeekRange,
-  formatWeekLabel,
   summarize,
 } from '@/utils/reports';
 import DailySpendingChart from './DailySpendingChart';
@@ -15,6 +14,7 @@ import TopCategoriesComparison from './TopCategoriesComparison';
 import WeeklyAIInsightCard from './WeeklyAIInsightCard';
 import WeeklyHeroHeader from './WeeklyHeroHeader';
 import { useTransactions } from '@/context/transaction-context';
+import { useI18n, monthName } from '@/i18n';
 
 interface Props {
   onBack: () => void;
@@ -24,6 +24,7 @@ interface Props {
 export default function WeeklyRecapScreen({ onBack, onOpenAI }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t, locale } = useI18n();
 
   const { transactions } = useTransactions();
 
@@ -32,8 +33,13 @@ export default function WeeklyRecapScreen({ onBack, onOpenAI }: Props) {
     const { from, to } = getWeekRange(now);
     const lastWeekStart = new Date(from);
     lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-    return { from, to, lastWeekStart, label: formatWeekLabel(from, to) };
+    return { from, to, lastWeekStart };
   }, []);
+
+  const periodLabel =
+    data.from.getMonth() === data.to.getMonth()
+      ? t('weekly.summarySameMonth', { fromDay: data.from.getDate(), toDay: data.to.getDate(), month: monthName(locale, data.to.getMonth()) })
+      : t('weekly.summaryAcrossMonths', { fromDay: data.from.getDate(), fromMonth: monthName(locale, data.from.getMonth()), toDay: data.to.getDate(), month: monthName(locale, data.to.getMonth()) });
 
   const thisWeek = useMemo(() => filterByWeek(transactions, data.from), [transactions, data.from]);
   const lastWeek = useMemo(() => filterByWeek(transactions, data.lastWeekStart), [transactions, data.lastWeekStart]);
@@ -46,8 +52,8 @@ export default function WeeklyRecapScreen({ onBack, onOpenAI }: Props) {
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       <WeeklyHeroHeader
-        title="Insight Mingguan"
-        periodLabel={data.label}
+        title={t('weekly.insight')}
+        periodLabel={periodLabel}
         totalExpense={summary.expense}
         lastWeekExpense={lastSummary.expense}
         trend={daily.map((d) => d.amount)}

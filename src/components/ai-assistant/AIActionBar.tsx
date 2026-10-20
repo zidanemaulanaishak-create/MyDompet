@@ -14,11 +14,11 @@ interface Props {
 type ActionType = 'copy' | 'like' | 'dislike' | 'share' | 'more';
 
 const ACTIONS: readonly { icon: string; label: string; action: ActionType }[] = [
-  { icon: 'ph:copy-bold', label: 'Salin', action: 'copy' },
-  { icon: 'ph:thumbs-up-bold', label: 'Suka', action: 'like' },
-  { icon: 'ph:thumbs-down-bold', label: 'Tidak Suka', action: 'dislike' },
-  { icon: 'ph:share-network-bold', label: 'Bagikan', action: 'share' },
-  { icon: 'ph:dots-three-bold', label: 'Lainnya', action: 'more' },
+  { icon: 'ph:copy-bold', label: 'ai.action.copy', action: 'copy' },
+  { icon: 'ph:thumbs-up-bold', label: 'ai.action.like', action: 'like' },
+  { icon: 'ph:thumbs-down-bold', label: 'ai.action.dislike', action: 'dislike' },
+  { icon: 'ph:share-network-bold', label: 'ai.action.share', action: 'share' },
+  { icon: 'ph:dots-three-bold', label: 'ai.action.more', action: 'more' },
 ];
 
 export default function AIActionBar({

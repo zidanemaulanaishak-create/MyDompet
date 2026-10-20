@@ -6,12 +6,18 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { Iconify } from 'react-native-iconify';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 import ScanFrame from '@/components/scan/ScanFrame';
 import ScanHelpSheet from '@/components/scan/ScanHelpSheet';
 
 export default function ScanScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [flash, setFlash] = useState(false);
@@ -29,18 +35,18 @@ export default function ScanScreen() {
       setGalleryBusy(true);
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Izin galeri', 'Aktifkan izin galeri untuk memilih foto.');
+        Alert.alert(t('upload.permissionTitle'), t('upload.permissionMessage'));
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.8 });
       if (result.canceled || !result.assets?.length) return;
       router.push({ pathname: '/upload', params: { scanUri: result.assets[0].uri } });
     } catch {
-      Alert.alert('Gagal', 'Tidak bisa membuka galeri.');
+      Alert.alert(t('upload.errorDefaultTitle'), t('upload.errorOpenGallery'));
     } finally {
       setGalleryBusy(false);
     }
-  }, [router]);
+  }, [router, t]);
 
   const takePhoto = useCallback(async () => {
     if (taking) return;
@@ -51,30 +57,35 @@ export default function ScanScreen() {
       if (!photo?.uri) return;
       router.push({ pathname: '/upload', params: { scanUri: photo.uri } });
     } catch {
-      Alert.alert('Gagal', 'Tidak bisa mengambil foto.');
+      Alert.alert(t('upload.errorDefaultTitle'), t('scan.errorTakePhoto'));
     } finally {
       setTaking(false);
     }
-  }, [router, taking]);
+  }, [router, taking, t]);
 
   if (Platform.OS === 'web') {
     return (
       <View style={styles.webRoot}>
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity style={styles.circleBtn} onPress={handleBack} activeOpacity={0.7} accessibilityLabel="Kembali">
+          <TouchableOpacity style={styles.circleBtn} onPress={handleBack} activeOpacity={0.7} accessibilityLabel={t('common.back')}>
             <Iconify icon="ph:arrow-left-bold" size={20} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Scan Struk</Text>
+          <Text style={styles.headerTitle}>{t('scan.title')}</Text>
           <View style={styles.circleBtn} />
         </View>
         <View style={styles.webBody}>
           <View style={styles.webIcon}>
             <Iconify icon="ph:image-bold" size={30} color="#38BDF8" />
           </View>
-          <Text style={styles.webTitle}>Kamera tidak tersedia di browser</Text>
-          <Text style={styles.webSub}>Pilih foto struk dari perangkat untuk melanjutkan.</Text>
-          <TouchableOpacity style={styles.webButton} activeOpacity={0.85} onPress={openGallery} disabled={galleryBusy}>
-            <Text style={styles.webButtonLabel}>Pilih dari Galeri / Upload Foto</Text>
+          <Text style={styles.webTitle}>{t('scan.browserUnavailable')}</Text>
+          <Text style={[styles.webSub, { color: palette.textMuted }]}>{t('scan.browserUnavailableSub')}</Text>
+          <TouchableOpacity
+            style={[styles.webButton, { backgroundColor: palette.primary }]}
+            activeOpacity={0.85}
+            onPress={openGallery}
+            disabled={galleryBusy}
+          >
+            <Text style={styles.webButtonLabel}>{t('scan.galleryUpload')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -88,13 +99,17 @@ export default function ScanScreen() {
   if (!permission.granted) {
     return (
       <View style={styles.darkCenter}>
-        <Text style={styles.webTitle}>Izin kamera dibutuhkan</Text>
-        <Text style={styles.webSub}>Aktifkan akses kamera untuk scan struk belanja.</Text>
-        <TouchableOpacity style={styles.webButton} activeOpacity={0.85} onPress={requestPermission}>
-          <Text style={styles.webButtonLabel}>Aktifkan Kamera</Text>
+        <Text style={styles.webTitle}>{t('scan.permissionNeeded')}</Text>
+        <Text style={[styles.webSub, { color: palette.textMuted }]}>{t('scan.permissionMessage')}</Text>
+        <TouchableOpacity
+          style={[styles.webButton, { backgroundColor: palette.primary }]}
+          activeOpacity={0.85}
+          onPress={requestPermission}
+        >
+          <Text style={styles.webButtonLabel}>{t('scan.enableCamera')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.ghostButton} activeOpacity={0.7} onPress={handleBack}>
-          <Text style={styles.ghostLabel}>Kembali</Text>
+          <Text style={[styles.ghostLabel, { color: palette.textMuted }]}>{t('common.back')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -105,30 +120,30 @@ export default function ScanScreen() {
       <CameraView ref={cameraRef} style={styles.camera} facing="back" flash={flash ? 'on' : 'off'}>
         <View style={styles.dimTop} />
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity style={styles.circleBtn} onPress={handleBack} activeOpacity={0.7} accessibilityLabel="Kembali">
+          <TouchableOpacity style={styles.circleBtn} onPress={handleBack} activeOpacity={0.7} accessibilityLabel={t('common.back')}>
             <Iconify icon="ph:arrow-left-bold" size={20} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Scan Struk</Text>
-          <TouchableOpacity style={styles.circleBtn} onPress={() => setHelpVisible(true)} activeOpacity={0.7} accessibilityLabel="Bantuan scan">
+          <Text style={styles.headerTitle}>{t('scan.title')}</Text>
+          <TouchableOpacity style={styles.circleBtn} onPress={() => setHelpVisible(true)} activeOpacity={0.7} accessibilityLabel={t('scan.helpA11y')}>
             <Iconify icon="ph:question-bold" size={18} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.pillWrap}>
-          <Text style={styles.pill}>Foto struk dan biarkan AI menganalisis transaksimu secara otomatis.</Text>
+          <Text style={styles.pill}>{t('scan.pill')}</Text>
         </View>
 
         <ScanFrame />
 
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 20 }]}>
           <View style={styles.sideAction}>
-            <TouchableOpacity style={styles.roundBtn} onPress={openGallery} activeOpacity={0.7} disabled={galleryBusy} accessibilityLabel="Buka galeri">
+            <TouchableOpacity style={styles.roundBtn} onPress={openGallery} activeOpacity={0.7} disabled={galleryBusy} accessibilityLabel={t('scan.galleryA11y')}>
               <Iconify icon="ph:image-bold" size={22} color="#FFFFFF" />
             </TouchableOpacity>
-            <Text style={styles.sideLabel}>Galeri</Text>
+            <Text style={styles.sideLabel}>{t('scan.gallery')}</Text>
           </View>
 
-          <TouchableOpacity style={styles.shutterOuter} onPress={takePhoto} activeOpacity={0.8} disabled={taking} accessibilityLabel="Ambil foto">
+          <TouchableOpacity style={styles.shutterOuter} onPress={takePhoto} activeOpacity={0.8} disabled={taking} accessibilityLabel={t('scan.shutterA11y')}>
             <View style={styles.shutterInner} />
           </TouchableOpacity>
 
@@ -141,7 +156,7 @@ export default function ScanScreen() {
             >
               <Iconify icon="ph:lightning-bold" size={22} color={flash ? '#38BDF8' : '#FFFFFF'} />
             </TouchableOpacity>
-            <Text style={styles.sideLabel}>Flash</Text>
+            <Text style={styles.sideLabel}>{t('scan.flash')}</Text>
           </View>
         </View>
       </CameraView>
@@ -173,9 +188,9 @@ const styles = StyleSheet.create({
   webBody: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
   webIcon: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(56,189,248,0.15)', marginBottom: 18 },
   webTitle: { color: '#FFFFFF', fontSize: 17, fontWeight: '800', textAlign: 'center' },
-  webSub: { color: '#94A3B8', fontSize: 17, textAlign: 'center', marginTop: 8, marginBottom: 20 },
-  webButton: { backgroundColor: '#1A42BA', borderRadius: 14, paddingHorizontal: 20, paddingVertical: 14 },
+  webSub: { fontSize: 17, textAlign: 'center', marginTop: 8, marginBottom: 20 },
+  webButton: { borderRadius: 14, paddingHorizontal: 20, paddingVertical: 14 },
   webButtonLabel: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
   ghostButton: { marginTop: 12, padding: 10 },
-  ghostLabel: { color: '#94A3B8', fontSize: 17, fontWeight: '700' },
+  ghostLabel: { fontSize: 17, fontWeight: '700' },
 });

@@ -3,6 +3,8 @@ import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'r
 import Svg, { Circle } from 'react-native-svg';
 import { Iconify } from 'react-native-iconify';
 import { useRouter } from 'expo-router';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 interface AuthScreenHeaderProps {
   title: string;
@@ -11,6 +13,8 @@ interface AuthScreenHeaderProps {
 export default function AuthScreenHeader({ title }: AuthScreenHeaderProps) {
   const { width } = useWindowDimensions();
   const router = useRouter();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
 
   const goBack = () => {
     if (router.canGoBack()) {
@@ -24,7 +28,7 @@ export default function AuthScreenHeader({ title }: AuthScreenHeaderProps) {
     <View style={{ height: 230 }}>
       <View className="absolute inset-0">
         <Svg width={width} height={230}>
-          <Circle cx={58} cy={-12} r={222} fill="#2563EB" />
+          <Circle cx={58} cy={-12} r={222} fill={palette.primary} />
         </Svg>
       </View>
 
@@ -35,7 +39,7 @@ export default function AuthScreenHeader({ title }: AuthScreenHeaderProps) {
         hitSlop={10}
         activeOpacity={0.85}
       >
-        <Iconify icon="ph:arrow-left" size={20} color="#2563EB" />
+        <Iconify icon="ph:arrow-left" size={20} color={palette.primary} />
       </TouchableOpacity>
 
       <Text
@@ -51,7 +55,7 @@ export default function AuthScreenHeader({ title }: AuthScreenHeaderProps) {
         activeOpacity={0.7}
         onPress={() => console.log('info')}
       >
-        <Iconify icon="ph:info" size={23} color="#2563EB" />
+        <Iconify icon="ph:info" size={23} color={palette.primary} />
       </TouchableOpacity>
     </View>
   );

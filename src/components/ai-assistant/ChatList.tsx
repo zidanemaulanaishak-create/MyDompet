@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { ChatMessage, QuickSuggestion } from '@/types/chat';
+import { useI18n } from '@/i18n';
 import MessageBubble from './MessageBubble';
 import QuickSuggestions from './QuickSuggestions';
 import TypingIndicator from './TypingIndicator';
@@ -30,6 +31,7 @@ const ChatList = forwardRef<ChatListRef, Props>(
   ({ messages, isTyping, showSuggestions, suggestions, onSuggestionPress, onLike, onCopy, onShare, onMore, userName }, ref) => {
     const { isDark } = useTheme();
     const palette = getThemeColors(isDark ? 'dark' : 'light');
+    const { t } = useI18n();
     const scrollViewRef = useRef<ScrollView>(null);
 
     useImperativeHandle(ref, () => ({
@@ -48,15 +50,15 @@ const ChatList = forwardRef<ChatListRef, Props>(
             <View style={[styles.heroAvatar, { backgroundColor: COLORS.primary }]}>
               <Iconify icon="ph:sparkle-fill" size={30} color="#FFFFFF" />
             </View>
-            <Text style={[styles.greeting, { color: palette.textDark }]}>Hai, {userName}!</Text>
+            <Text style={[styles.greeting, { color: palette.textDark }]}>{t('ai.greeting', { name: userName })}</Text>
             <Text style={[styles.sub, { color: palette.textMuted }]}>
-              Aku asisten keuanganmu. Tanya soal budget, pengeluaran, atau minta tips hemat.
+              {t('ai.heroIntro')}
             </Text>
           </View>
 
           {showSuggestions && suggestions.length > 0 ? (
             <View style={styles.suggestSection}>
-              <Text style={[styles.suggestTitle, { color: palette.textDark }]}>Coba tanyakan</Text>
+              <Text style={[styles.suggestTitle, { color: palette.textDark }]}>{t('ai.tryAsk')}</Text>
               <QuickSuggestions suggestions={suggestions} onPress={onSuggestionPress} />
             </View>
           ) : null}
@@ -76,7 +78,7 @@ const ChatList = forwardRef<ChatListRef, Props>(
       >
         <View style={styles.dateDivider}>
           <Text style={[styles.dateLabel, { color: palette.textMuted, backgroundColor: isDark ? '#1E293B' : '#EDF2F7' }]}>
-            Hari ini
+            {t('common.today')}
           </Text>
         </View>
         {messages.map((message) => (

@@ -15,8 +15,11 @@ import AuthField from "@/components/auth/AuthField";
 import SocialButtons from "@/components/auth/SocialButtons";
 import OrDivider from "@/components/auth/OrDivider";
 import PrimaryButton from "@/components/auth/PrimaryButton";
+import { getThemeColors } from "@/constants/colors";
+import { useTheme } from "@/context/theme-context";
 import { isEmailValid, useAuth } from "@/context/auth-context";
 import type { SocialProvider } from "@/services/socialAuth";
+import { useI18n } from "@/i18n";
 
 interface RegisterErrors {
   name?: string;
@@ -27,6 +30,9 @@ interface RegisterErrors {
 export default function RegisterScreen() {
   const router = useRouter();
   const { signUp, signInWithProvider } = useAuth();
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? "dark" : "light");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,22 +60,20 @@ export default function RegisterScreen() {
 
   const handleSignUp = async () => {
     const next: RegisterErrors = {
-      name: name.trim().length < 3 ? "Nama minimal 3 karakter." : undefined,
+      name: name.trim().length < 3 ? t("auth.errNameMin") : undefined,
       email: !email.trim()
-        ? "Email wajib diisi."
+        ? t("auth.errEmailRequired")
         : !isEmailValid(email)
-          ? "Format email tidak valid."
+          ? t("auth.errEmailInvalid")
           : undefined,
       password: !password
-        ? "Password wajib diisi."
+        ? t("auth.errPasswordRequired")
         : password.length < 8
-          ? "Password minimal 8 karakter."
+          ? t("auth.errPasswordMin")
           : undefined,
     };
 
-    const nextTermsError = !agreed
-      ? "Anda harus menyetujui Terms & Condition."
-      : undefined;
+    const nextTermsError = !agreed ? t("auth.errTermsRequired") : undefined;
 
     setErrors(next);
     setTermsError(nextTermsError);
@@ -89,18 +93,15 @@ export default function RegisterScreen() {
 
   const handleSocial = async (provider: SocialProvider) => {
     if (!agreed) {
-      setTermsError("Anda harus menyetujui Terms & Condition.");
-      Alert.alert(
-        "Syarat belum disetujui",
-        "Setujui Terms & Condition terlebih dahulu untuk mendaftar."
-      );
+      setTermsError(t("auth.errTermsRequired"));
+      Alert.alert(t("auth.termsAlertTitle"), t("auth.termsAlertMsg"));
       return;
     }
     setLoadingProvider(provider);
     try {
       const errorMsg = await signInWithProvider(provider);
       if (errorMsg) {
-        Alert.alert("Gagal mendaftar", errorMsg);
+        Alert.alert(t("auth.errSignUpFailed"), errorMsg);
       }
     } finally {
       setLoadingProvider(null);
@@ -113,14 +114,15 @@ export default function RegisterScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <BlueHeader
-        title="Create Account"
-        subtitle="Fill your information below or register with your social account."
+        title={t("auth.registerHeaderTitle")}
+        subtitle={t("auth.registerHeaderSub")}
         onBack={goBack}
       />
 
       <ScrollView
-        className="flex-1 bg-white px-6 pt-6"
+        className="flex-1 px-6 pt-6"
         style={{
+          backgroundColor: palette.card,
           borderTopLeftRadius: 44,
           borderTopRightRadius: 44,
           marginTop: -36,
@@ -130,27 +132,27 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <AuthField
-          label="Name"
+          label={t("auth.name")}
           value={name}
           onChangeText={(v) => update("name", v)}
-          placeholder="John Doe"
+          placeholder={t("auth.namePlaceholder")}
           icon="ph:user"
           autoCapitalize="words"
           error={errors.name}
         />
 
         <AuthField
-          label="Email"
+          label={t("auth.email")}
           value={email}
           onChangeText={(v) => update("email", v)}
-          placeholder="example@gmail.com"
+          placeholder={t("auth.emailPlaceholder")}
           icon="ph:envelope-simple"
           keyboardType="email-address"
           error={errors.email}
         />
 
         <AuthField
-          label="Password"
+          label={t("auth.password")}
           value={password}
           onChangeText={(v) => update("password", v)}
           placeholder="••••••••"
@@ -169,40 +171,43 @@ export default function RegisterScreen() {
         >
           <View
             className={`w-5 h-5 rounded-lg items-center justify-center ${
-              agreed
-                ? "bg-primary border border-primary"
-                : "bg-[#EAECEF] border border-[#D8DBE0]"
+              agreed ? "bg-primary border border-primary" : "border"
             }`}
+            style={
+              agreed
+                ? undefined
+                : { backgroundColor: palette.divider, borderColor: palette.border }
+            }
           >
             {agreed ? (
               <Iconify icon="ph:check-bold" size={13} color="#FFFFFF" />
             ) : null}
           </View>
-          <Text className="ml-2.5 text-lg text-[#4B4F59]">
-            Agree with{" "}
+          <Text className="ml-2.5 text-lg" style={{ color: palette.textMuted }}>
+            {t("auth.agreeWith")}{" "}
             <Text className="font-bold text-orange">Terms & Condition</Text>
           </Text>
         </TouchableOpacity>
         {termsError ? (
-          <Text className="ml-1 mt-1.5 text-lg text-[#EF4444]">
+          <Text className="ml-1 mt-1.5 text-lg" style={{ color: palette.red }}>
             {termsError}
           </Text>
         ) : null}
 
         <View className="mt-8">
-          <PrimaryButton label="Sign Up" onPress={handleSignUp} />
+          <PrimaryButton label={t("auth.registerTitle")} onPress={handleSignUp} />
         </View>
 
-        <OrDivider text="Or sign up with" />
+        <OrDivider text={t("auth.orSignUpWith")} />
 
         <SocialButtons onPress={handleSocial} loadingProvider={loadingProvider} />
 
         <View className="flex-row justify-center items-center mt-7">
-          <Text className="text-[#8A8D9F] text-lg">
-            Already have an account?{" "}
+          <Text className="text-lg" style={{ color: palette.textMuted }}>
+            {t("auth.alreadyHaveAccount")}{" "}
           </Text>
           <Link href="/login">
-            <Text className="text-orange text-lg font-bold">Sign In</Text>
+            <Text className="text-orange text-lg font-bold">{t("auth.loginTitle")}</Text>
           </Link>
         </View>
       </ScrollView>

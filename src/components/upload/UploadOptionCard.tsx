@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 interface Props {
   icon: string;
@@ -11,16 +12,23 @@ interface Props {
 }
 
 export default function UploadOptionCard({ icon, title, subtitle, onPress }: Props) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={onPress}>
-      <View style={styles.iconWrap}>
-        <Iconify icon={icon} size={22} color={COLORS.primary} />
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}
+      activeOpacity={0.7}
+      onPress={onPress}
+    >
+      <View style={[styles.iconWrap, { backgroundColor: isDark ? '#1C2942' : '#EEF2F7' }]}>
+        <Iconify icon={icon} size={22} color={palette.primary} />
       </View>
       <View style={styles.textWrap}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Text style={[styles.title, { color: palette.textDark }]}>{title}</Text>
+        <Text style={[styles.subtitle, { color: palette.textMuted }]}>{subtitle}</Text>
       </View>
-      <Iconify icon="ph:caret-right-bold" size={16} color={COLORS.textMuted} />
+      <Iconify icon="ph:caret-right-bold" size={16} color={palette.textMuted} />
     </TouchableOpacity>
   );
 }
@@ -30,9 +38,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
     borderRadius: 16,
     padding: 16,
     shadowColor: '#1A2E5A',
@@ -47,9 +53,8 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EEF2F7',
   },
   textWrap: { flex: 1 },
-  title: { fontSize: 17, fontWeight: '700', color: '#0F172A' },
-  subtitle: { fontSize: 17, color: '#64748B', marginTop: 3 },
+  title: { fontSize: 17, fontWeight: '700' },
+  subtitle: { fontSize: 17, marginTop: 3 },
 });

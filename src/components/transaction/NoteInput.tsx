@@ -1,6 +1,8 @@
 import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 export interface NoteInputRef {
   focus: () => void;
@@ -25,17 +27,22 @@ const NoteInput = forwardRef<NoteInputRef, Props>(
     {
       value,
       onChangeText,
-      placeholder = 'Misal: Makan siang di warteg',
+      placeholder,
       maxLength = 200,
       error,
       className,
-      label = 'Catatan',
+      label,
       autoFocus = false,
     },
     ref
   ) => {
+    const { isDark } = useTheme();
+    const { t } = useI18n();
+    const palette = getThemeColors(isDark ? 'dark' : 'light');
     const inputRef = useRef<TextInput>(null);
     const [isFocused, setIsFocused] = useState(false);
+    const labelText = label ?? t('common.note');
+    const placeholderText = placeholder ?? t('addTx.notePlaceholderDefault');
 
     useImperativeHandle(ref, () => ({
       focus: () => inputRef.current?.focus(),
@@ -51,13 +58,19 @@ const NoteInput = forwardRef<NoteInputRef, Props>(
     };
 
     return (
-      <View className={`bg-card rounded-2xl ${className || ''}`} style={styles.container}>
+      <View
+        className={`rounded-2xl ${className || ''}`}
+        style={[styles.container, { backgroundColor: palette.card }]}
+      >
         <View style={styles.header}>
-          <Text className="text-lg text-textMuted">{label}</Text>
+          <Text className="text-lg" style={{ color: palette.textMuted }}>
+            {labelText}
+          </Text>
           <Text
             style={[
               styles.charCount,
-              value.length > maxLength * 0.9 && styles.charCountWarning,
+              { color: palette.textMuted },
+              value.length > maxLength * 0.9 && [styles.charCountWarning, { color: palette.orange }],
             ]}
           >
             {value.length}/{maxLength}
@@ -67,22 +80,23 @@ const NoteInput = forwardRef<NoteInputRef, Props>(
           ref={inputRef}
           style={[
             styles.input,
-            isFocused && styles.inputFocused,
-            error && styles.inputError,
+            { color: palette.textDark },
+            isFocused && [styles.inputFocused, { borderColor: palette.primary }],
+            error && [styles.inputError, { borderColor: palette.red }],
           ]}
           multiline
           numberOfLines={4}
-          placeholder={placeholder}
-          placeholderTextColor={COLORS.textMuted}
+          placeholder={placeholderText}
+          placeholderTextColor={palette.textMuted}
           value={value}
           onChangeText={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           autoFocus={autoFocus}
           textAlignVertical="top"
-          selectionColor={COLORS.primary}
+          selectionColor={palette.primary}
         />
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {error && <Text style={[styles.errorText, { color: palette.red }]}>{error}</Text>}
       </View>
     );
   }
@@ -102,28 +116,23 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 18,
-    color: COLORS.textMuted,
   },
   charCountWarning: {
-    color: COLORS.orange,
+    fontWeight: '600',
   },
   input: {
     fontSize: 17,
-    color: COLORS.textDark,
     lineHeight: 22,
     minHeight: 100,
   },
   inputFocused: {
     borderWidth: 1.5,
-    borderColor: COLORS.primary,
   },
   inputError: {
     borderWidth: 1.5,
-    borderColor: COLORS.red,
   },
   errorText: {
     fontSize: 18,
-    color: COLORS.red,
     marginTop: 6,
   },
 });

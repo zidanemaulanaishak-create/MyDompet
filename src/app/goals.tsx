@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, View, Alert, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Iconify } from 'react-native-iconify';
@@ -8,19 +8,31 @@ import GoalsOverview from '@/components/goals/GoalsOverview';
 import GoalsFilterTabs from '@/components/goals/GoalsFilterTabs';
 import GoalItemCard from '@/components/goals/GoalItemCard';
 import GoalsEmptyState from '@/components/goals/GoalsEmptyState';
-import AddGoalSheet from '@/components/goals/AddGoalSheet';
-import DepositSheet from '@/components/goals/DepositSheet';
-import { FINANCIAL_GOALS, FinancialGoal, GoalFilter } from '@/data/goalsData';
+import AddGoalSheet, { GoalFormData } from '@/components/goals/AddGoalSheet';
+import DepositSheet, { CashflowMode } from '@/components/goals/DepositSheet';
+import GoalDetailSheet from '@/components/goals/GoalDetailSheet';
+import { FinancialGoal, GoalFilter } from '@/data/goalsData';
 import { filterGoals, summarizeGoals } from '@/utils/goals';
-import { COLORS } from '@/constants/colors';
+import { COLORS, getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useGoals } from '@/context/goal-context';
+import { useI18n } from '@/i18n';
 
 export default function GoalsScreen() {
   const router = useRouter();
+  const { t } = useI18n();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const insets = useSafeAreaInsets();
-  const [goals, setGoals] = useState<FinancialGoal[]>(FINANCIAL_GOALS);
+  const { goals, isLoading, refresh, addGoal, updateGoal, deleteGoal, deposit, withdraw } = useGoals();
+
   const [filter, setFilter] = useState<GoalFilter>('all');
   const [showAdd, setShowAdd] = useState(false);
-  const [depositTarget, setDepositTarget] = useState<FinancialGoal | null>(null);
+  const [editing, setEditing] = useState<FinancialGoal | null>(null);
+  const [cashflowTarget, setCashflowTarget] = useState<FinancialGoal | null>(null);
+  const [cashflowMode, setCashflowMode] = useState<CashflowMode>('deposit');
+  const [detailTarget, setDetailTarget] = useState<FinancialGoal | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const filtered = useMemo(() => filterGoals(goals, filter), [goals, filter]);
   const summary = useMemo(() => summarizeGoals(goals), [goals]);
@@ -30,46 +42,90 @@ export default function GoalsScreen() {
     else router.replace('/home');
   }, [router]);
 
-  const handleCardPress = useCallback((g: FinancialGoal) => {
-    Alert.alert(g.name, `Terkumpul ${g.saved.toLocaleString('id-ID')} dari ${g.target.toLocaleString('id-ID')}\nDeadline: ${g.deadline}`);
+  const openCashflow = useCallback((g: FinancialGoal, mode: CashflowMode) => {
+    setDetailTarget(null);
+    setCashflowMode(mode);
+    setCashflowTarget(g);
   }, []);
 
-  const handleAddGoal = useCallback((data: { name: string; target: number; deadline: string; imageUri?: string }) => {
-    const deadlineTs = Date.now() + 180 * 86400000;
-    const newGoal: FinancialGoal = {
-      id: `g${Date.now()}`,
-      name: data.name,
-      icon: data.imageUri ? '' : 'ph:piggy-bank-bold',
-      iconBg: data.imageUri ? '#EEF2FF' : '#FDF2E9',
-      iconColor: data.imageUri ? COLORS.primary : '#C2410C',
-      imageUri: data.imageUri,
-      deadline: data.deadline,
-      deadlineTs,
-      saved: 0,
-      target: data.target,
-      createdAt: Date.now(),
-    };
-    setGoals((prev) => [newGoal, ...prev]);
-    setShowAdd(false);
-  }, []);
+  const handleSubmitGoal = useCallback(
+    async (data: GoalFormData) => {
+      setSaving(true);
+      try {
+        const err = editing
+          ? await updateGoal(editing.id, {
+              name: data.name,
+              target: data.target,
+              deadlineTs: data.deadlineTs,
+              imageUri: data.imageUri,
+            })
+          : await addGoal({
+              name: data.name,
+              target: data.target,
+              deadlineTs: data.deadlineTs,
+              imageUri: data.imageUri,
+            });
+        if (err) {
+          Alert.alert(t('goals.saveFailed'), err);
+          return;
+        }
+        setShowAdd(false);
+        setEditing(null);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [editing, addGoal, updateGoal, t]
+  );
 
-  const handleDeposit = useCallback((g: FinancialGoal, amount: number) => {
-    setGoals((prev) =>
-      prev.map((x) => (x.id === g.id ? { ...x, saved: Math.min(x.target, x.saved + amount) } : x))
-    );
-    setDepositTarget(null);
-  }, []);
+  const handleCashflow = useCallback(
+    async (g: FinancialGoal, amount: number, mode: CashflowMode) => {
+      setSaving(true);
+      try {
+        const err = mode === 'withdraw' ? await withdraw(g.id, amount) : await deposit(g.id, amount);
+        if (err) {
+          Alert.alert(t('goals.saveFailed'), err);
+          return;
+        }
+        setCashflowTarget(null);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [deposit, withdraw, t]
+  );
+
+  const handleDelete = useCallback(
+    (g: FinancialGoal) => {
+      Alert.alert(t('goals.deleteTitle'), t('goals.deleteMsg', { name: g.name }), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            const err = await deleteGoal(g.id);
+            if (err) {
+              Alert.alert(t('goals.deleteFailed'), err);
+              return;
+            }
+            setDetailTarget(null);
+          },
+        },
+      ]);
+    },
+    [deleteGoal, t]
+  );
 
   const emptyAll = goals.length === 0;
-  const emptyFilter = !emptyAll && filtered.length === 0;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: palette.bg }]}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}
       >
         <GoalsHeader onBack={handleBack} />
 
@@ -84,15 +140,24 @@ export default function GoalsScreen() {
         {!emptyAll ? <GoalsFilterTabs value={filter} onChange={setFilter} /> : null}
 
         <View style={styles.list}>
-          {emptyAll ? (
-            <GoalsEmptyState onCreate={() => setShowAdd(true)} />
-          ) : emptyFilter ? (
+          {isLoading && emptyAll ? (
+            <View style={styles.loading}>
+              <ActivityIndicator size="large" color={palette.primary} />
+            </View>
+          ) : emptyAll ? (
+            <GoalsEmptyState onCreate={() => { setEditing(null); setShowAdd(true); }} />
+          ) : filtered.length === 0 ? (
             <View style={styles.emptyFilter}>
-              <GoalsEmptyState onCreate={() => setShowAdd(true)} />
+              <GoalsEmptyState onCreate={() => { setEditing(null); setShowAdd(true); }} />
             </View>
           ) : (
             filtered.map((g) => (
-              <GoalItemCard key={g.id} goal={g} onPress={handleCardPress} onDeposit={setDepositTarget} />
+              <GoalItemCard
+                key={g.id}
+                goal={g}
+                onPress={setDetailTarget}
+                onDeposit={(goal) => openCashflow(goal, 'deposit')}
+              />
             ))
           )}
         </View>
@@ -100,24 +165,45 @@ export default function GoalsScreen() {
 
       <TouchableOpacity
         style={[styles.fab, { bottom: insets.bottom + 50, right: 45 }]}
-        onPress={() => setShowAdd(true)}
+        onPress={() => { setEditing(null); setShowAdd(true); }}
         activeOpacity={0.85}
-        accessibilityLabel="Tambah target"
+        accessibilityLabel={t('goals.addAccessibility')}
       >
         <Iconify icon="ph:plus-bold" size={30} color="#FFFFFF" />
       </TouchableOpacity>
 
-      <AddGoalSheet visible={showAdd} onClose={() => setShowAdd(false)} onSubmit={handleAddGoal} />
-      <DepositSheet goal={depositTarget} onClose={() => setDepositTarget(null)} onSubmit={handleDeposit} />
+      <AddGoalSheet
+        visible={showAdd}
+        initial={editing}
+        saving={saving}
+        onClose={() => { setShowAdd(false); setEditing(null); }}
+        onSubmit={handleSubmitGoal}
+      />
+      <DepositSheet
+        goal={cashflowTarget}
+        mode={cashflowMode}
+        saving={saving}
+        onClose={() => setCashflowTarget(null)}
+        onSubmit={handleCashflow}
+      />
+      <GoalDetailSheet
+        goal={detailTarget}
+        onClose={() => setDetailTarget(null)}
+        onDeposit={(g) => openCashflow(g, 'deposit')}
+        onWithdraw={(g) => openCashflow(g, 'withdraw')}
+        onEdit={(g) => { setEditing(g); setShowAdd(true); }}
+        onDelete={handleDelete}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F8F9FA' },
+  root: { flex: 1 },
   scroll: { flex: 1 },
   list: { paddingHorizontal: 16, paddingTop: 16, gap: 14 },
   emptyFilter: { opacity: 0.6 },
+  loading: { alignItems: 'center', paddingTop: 40 },
   fab: {
     position: 'absolute',
     right: 20,

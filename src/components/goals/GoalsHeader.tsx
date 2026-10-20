@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/colors';
+import { useI18n } from '@/i18n';
 
 interface Props {
   onBack: () => void;
@@ -10,6 +11,7 @@ interface Props {
 
 export default function GoalsHeader({ onBack }: Props) {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
   return (
     <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
       {/* Glow decorative circles */}
@@ -21,16 +23,16 @@ export default function GoalsHeader({ onBack }: Props) {
           style={styles.backBtn}
           onPress={onBack}
           activeOpacity={0.7}
-          accessibilityLabel="Kembali"
+          accessibilityLabel={t('common.back')}
         >
           <Iconify icon="ph:caret-left-bold" size={22} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.title}>Target Keuangan</Text>
+        <Text style={styles.title}>{t('goals.title')}</Text>
         <View style={styles.spacer} />
       </View>
 
       <Text style={styles.subtitle}>
-        Wujudkan impian finansialmu secara bertahap & terencana.
+        {t('goals.subtitle')}
       </Text>
     </View>
   );

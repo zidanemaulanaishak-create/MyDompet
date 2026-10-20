@@ -5,8 +5,11 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTransactions } from '@/context/transaction-context';
 import { TransactionItem } from '@/data/dummyData';
 import { resolveCategory, itemType } from '@/constants/categoryVisuals';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { endOfDay, monthKey, monthLabel, parseItemDate, startOfDay } from '@/utils/dates';
 import { getPeriodRange, ReportPeriod } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 import { HistoryHeader } from '@/components/history/HistoryHeader';
 import { HistorySearchBar } from '@/components/history/HistorySearchBar';
 import { HistoryGroup } from '@/components/history/HistoryGroup';
@@ -21,6 +24,9 @@ interface HistoryGroupData {
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const router = useRouter();
   const params = useLocalSearchParams<{ type?: string; period?: ReportPeriod }>();
   const { transactions, deleteTransaction } = useTransactions();
@@ -123,26 +129,26 @@ export default function TransactionsScreen() {
 
   const handleLongPressItem = useCallback(
     (item: TransactionItem) => {
-      Alert.alert('Hapus transaksi?', item.name, [
-        { text: 'Batal', style: 'cancel' },
+      Alert.alert(t('transactions.deleteTitle'), item.name, [
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Hapus',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteTransaction(item.id);
             } catch {
-              Alert.alert('Gagal menghapus', 'Coba lagi.');
+              Alert.alert(t('transactions.deleteFailed'), t('common.tryAgain'));
             }
           },
         },
       ]);
     },
-    [deleteTransaction]
+    [deleteTransaction, t]
   );
 
   return (
-    <View className="flex-1 bg-bg">
+    <View className="flex-1" style={{ backgroundColor: palette.bg }}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 104 }}
         showsVerticalScrollIndicator={false}
@@ -162,12 +168,12 @@ export default function TransactionsScreen() {
 
         {isFiltering ? (
           <View className="flex-row items-center justify-between px-5 pb-3">
-            <Text className="text-lg text-[#64748B]">
-              Menampilkan {filtered.length} transaksi
-              {typeFilter ? (typeFilter === 'income' ? ' • Pemasukan' : ' • Pengeluaran') : ''}
+            <Text className="text-lg" style={{ color: palette.textMuted }}>
+              {t('transactions.showingCount', { count: filtered.length })}
+              {typeFilter ? ` • ${typeFilter === 'income' ? t('transactions.income') : t('transactions.expense')}` : ''}
             </Text>
             <TouchableOpacity onPress={resetFilters} hitSlop={8}>
-              <Text className="text-lg font-bold text-[#1A42BA]">Reset Filter</Text>
+              <Text className="text-lg font-bold" style={{ color: palette.primary }}>{t('transactions.resetFilter')}</Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -176,11 +182,11 @@ export default function TransactionsScreen() {
           <View className="px-5 pt-6">
             <EmptyState
               icon="ph:receipt"
-              title={isFiltering ? 'Tidak ada hasil' : 'Belum ada transaksi'}
+              title={isFiltering ? t('transactions.noResults') : t('transactions.emptyTitle')}
               description={
                 isFiltering
-                  ? 'Coba ubah kata kunci atau filter.'
-                  : 'Transaksi masuk dan keluar akan tampil di sini.'
+                  ? t('transactions.noResultsDesc')
+                  : t('transactions.emptyDesc')
               }
             />
           </View>

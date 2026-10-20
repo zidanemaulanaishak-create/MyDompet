@@ -15,7 +15,11 @@ import { useAuth } from "@/context/auth-context";
 import { useTheme } from "@/context/theme-context";
 import { useTransactions } from "@/context/transaction-context";
 import { getThemeColors } from "@/constants/colors";
+import { useI18n, numberForLocale } from "@/i18n";
+import { useSettings } from "@/context/settings-context";
 import FinanceProfileSheet from "@/components/profile/FinanceProfileSheet";
+import LanguageSheet from "@/components/profile/LanguageSheet";
+import EditProfileSheet from "@/components/profile/EditProfileSheet";
 
 const SECTION_ACCENT = "#64748B";
 const HEADER_SUBTEXT = "#E2E8F0";
@@ -33,8 +37,8 @@ function initialsOf(name: string) {
   return (first + last).toUpperCase();
 }
 
-function formatMoney(value: number) {
-  return value.toLocaleString("id-ID");
+function formatMoney(value: number, locale: string) {
+  return numberForLocale(locale as 'id' | 'en', value);
 }
 
 interface SummaryCardProps {
@@ -177,17 +181,21 @@ function SectionTitle({ title, isDark }: { title: string; isDark: boolean }) {
 }
 
 const OCCUPATION_LABEL: Record<string, string> = {
-  pekerja: "Pekerja",
-  pelajar: "Pelajar",
-  mahasiswa: "Mahasiswa",
+  pekerja: "profile.occupationWorker",
+  pelajar: "profile.occupationStudent",
+  mahasiswa: "profile.occupationCollege",
 };
 
 export default function ProfileScreen() {
-  const { user, onboarding, setOnboarding, signOut } = useAuth();
+  const { user, onboarding, setOnboarding, signOut, updateName } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { transactions } = useTransactions();
+  const { t, locale } = useI18n();
+  const { language, setLanguage } = useSettings();
   const [loading, setLoading] = React.useState(false);
   const [showFinanceSheet, setShowFinanceSheet] = React.useState(false);
+  const [showLanguageSheet, setShowLanguageSheet] = React.useState(false);
+  const [showEditSheet, setShowEditSheet] = React.useState(false);
 
   const palette = getThemeColors(isDark ? "dark" : "light");
 
@@ -195,8 +203,12 @@ export default function ProfileScreen() {
   const email = user?.email ?? "";
 
   const incomeSubtitle =
-    (onboarding?.occupation ? OCCUPATION_LABEL[onboarding.occupation] ?? "—" : "Belum diatur") +
-    (onboarding?.mainIncome ? ` · Rp ${formatMoney(onboarding.mainIncome)}/bln` : "");
+    (onboarding?.occupation
+      ? t(OCCUPATION_LABEL[onboarding.occupation] ?? "—")
+      : t("profile.notSet")) +
+    (onboarding?.mainIncome
+      ? ` · Rp ${formatMoney(onboarding.mainIncome, locale)}${t("profile.perMonth")}`
+      : "");
 
   const summary = useMemo(() => {
     const now = new Date();
@@ -225,7 +237,7 @@ export default function ProfileScreen() {
   };
 
   const comeSoon = (feature: string) => {
-    Alert.alert(feature, "Fitur ini akan segera hadir di MyDompet.");
+    Alert.alert(feature, t("profile.comingSoon"));
   };
 
   return (
@@ -251,15 +263,15 @@ export default function ProfileScreen() {
         <View className="flex-row items-start justify-between">
           <View className="flex-1 pt-1">
             <Text className="text-white text-lg font-extrabold tracking-tight">
-              Profil & Pengaturan
+              {t("profile.title")}
             </Text>
             <Text className="text-[#C7CFFF] text-lg mt-1 font-medium">
-              Atur data dan preferensi akunmu
+              {t("profile.subtitle")}
             </Text>
           </View>
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => comeSoon("Edit Profil")}
+            onPress={() => setShowEditSheet(true)}
             style={styles.editButton}
           >
             <Iconify icon="ph:pencil-bold" size={16} color="#FFFFFF" />
@@ -292,7 +304,7 @@ export default function ProfileScreen() {
           <View className="mt-3.5 flex-row items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5">
             <Iconify icon="ph:shield-check-bold" size={14} color="#38BDF8" />
             <Text className="text-white/90 text-lg font-semibold">
-              Akun terverifikasi
+              {t("profile.verified")}
             </Text>
           </View>
         </View>
@@ -311,8 +323,8 @@ export default function ProfileScreen() {
           ]}
         >
           <SummaryCard
-            label="Pemasukan Hari Ini"
-            value={`+Rp ${formatMoney(summary.income)}`}
+            label={t("profile.incomeToday")}
+            value={`+Rp ${formatMoney(summary.income, locale)}`}
             icon="ph:arrow-down-left-bold"
             tone="income"
             palette={palette}
@@ -325,8 +337,8 @@ export default function ProfileScreen() {
             }}
           />
           <SummaryCard
-            label="Pengeluaran Hari Ini"
-            value={`-Rp ${formatMoney(summary.expense)}`}
+            label={t("profile.expenseToday")}
+            value={`-Rp ${formatMoney(summary.expense, locale)}`}
             icon="ph:arrow-up-right-bold"
             tone="expense"
             palette={palette}
@@ -337,7 +349,7 @@ export default function ProfileScreen() {
 
       {/* Kelompok Keuangan */}
       <View className="px-4 mt-7">
-        <SectionTitle title="Keuangan" isDark={isDark} />
+        <SectionTitle title={t("profile.finance")} isDark={isDark} />
         <View
           style={[
             styles.group,
@@ -349,7 +361,7 @@ export default function ProfileScreen() {
         >
           <MenuRow
             icon="ph:wallet-bold"
-            title="Pendapatan & Profesi"
+            title={t("profile.financeProfile")}
             subtitle={incomeSubtitle}
             onPress={() => setShowFinanceSheet(true)}
             palette={palette}
@@ -361,7 +373,7 @@ export default function ProfileScreen() {
 
       {/* Kelompok 1: Kelola Akun */}
       <View className="px-4 mt-7">
-        <SectionTitle title="Kelola Akun" isDark={isDark} />
+        <SectionTitle title={t("profile.manageAccount")} isDark={isDark} />
         <View
           style={[
             styles.group,
@@ -373,25 +385,25 @@ export default function ProfileScreen() {
         >
           <MenuRow
             icon="ph:gear-bold"
-            title="Pengaturan Akun"
-            subtitle="Kontrol pengaturan data dan lainnya"
-            onPress={() => comeSoon("Pengaturan Akun")}
+            title={t("profile.accountSettings")}
+            subtitle={t("profile.accountSettingsSubtitle")}
+            onPress={() => comeSoon(t("profile.accountSettings"))}
             palette={palette}
             isDark={isDark}
           />
           <MenuRow
             icon="ph:question-bold"
-            title="Bantuan"
-            subtitle="Kirim dan pantau laporanmu di sini"
-            onPress={() => comeSoon("Bantuan")}
+            title={t("profile.help")}
+            subtitle={t("profile.helpSubtitle")}
+            onPress={() => comeSoon(t("profile.help"))}
             palette={palette}
             isDark={isDark}
           />
           <MenuRow
             icon="ph:bell-bold"
-            title="Notifikasi"
-            subtitle="Kontrol notifikasimu di sini"
-            onPress={() => comeSoon("Notifikasi")}
+            title={t("profile.notifications")}
+            subtitle={t("profile.notificationsSubtitle")}
+            onPress={() => comeSoon(t("profile.notifications"))}
             palette={palette}
             isDark={isDark}
             last
@@ -401,7 +413,7 @@ export default function ProfileScreen() {
 
       {/* Kelompok 2: Aksesibilitas */}
       <View className="px-4 mt-6">
-        <SectionTitle title="Aksesibilitas" isDark={isDark} />
+        <SectionTitle title={t("profile.accessibility")} isDark={isDark} />
         <View
           style={[
             styles.group,
@@ -413,8 +425,8 @@ export default function ProfileScreen() {
         >
           <MenuRow
             icon="ph:moon-bold"
-            title="Mode Gelap"
-            subtitle="Atur tampilan sesuai keinginanmu"
+            title={t("profile.darkMode")}
+            subtitle={t("profile.darkModeSubtitle")}
             palette={palette}
             isDark={isDark}
             trailing={
@@ -432,9 +444,13 @@ export default function ProfileScreen() {
           />
           <MenuRow
             icon="ph:globe-bold"
-            title="Bahasa"
-            subtitle="Pilih bahasamu di sini"
-            onPress={() => comeSoon("Bahasa")}
+            title={t("profile.language")}
+            subtitle={
+              language === "id"
+                ? t("profile.langIndonesian")
+                : t("profile.langEnglish")
+            }
+            onPress={() => setShowLanguageSheet(true)}
             palette={palette}
             isDark={isDark}
             last
@@ -455,8 +471,8 @@ export default function ProfileScreen() {
         >
           <MenuRow
             icon="ph:sign-out-bold"
-            title="Keluar"
-            subtitle="Keluar akun dan menyimpannya"
+            title={t("profile.signOut")}
+            subtitle={t("profile.signOutSubtitle")}
             onPress={handleSignOut}
             danger
             loading={loading}
@@ -471,7 +487,7 @@ export default function ProfileScreen() {
             style={{ backgroundColor: palette.primary }}
           />
           <Text className="text-lg ml-2" style={{ color: palette.textMuted }}>
-            MyDompet v1.0.0
+            {t("profile.version")}
           </Text>
         </View>
       </View>
@@ -485,6 +501,24 @@ export default function ProfileScreen() {
           await setOnboarding(data);
           setShowFinanceSheet(false);
         }}
+      />
+
+      <LanguageSheet
+        visible={showLanguageSheet}
+        current={language}
+        onClose={() => setShowLanguageSheet(false)}
+        onSelect={(lang) => {
+          void setLanguage(lang);
+          setShowLanguageSheet(false);
+        }}
+      />
+
+      <EditProfileSheet
+        visible={showEditSheet}
+        name={name}
+        email={email}
+        onClose={() => setShowEditSheet(false)}
+        onSubmit={(nextName) => updateName(nextName)}
       />
     </ScrollView>
   );

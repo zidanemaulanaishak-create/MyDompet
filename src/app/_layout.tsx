@@ -2,13 +2,16 @@
 import React from 'react';
 import { Image } from 'expo-image';
 import { View, StatusBar } from 'react-native';
-import { Redirect, Slot, usePathname } from 'expo-router';
+import { Redirect, Slot, usePathname, useRootNavigationState } from 'expo-router';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import BottomNav from '@/components/ui/BottomNav';
 import { AuthProvider, useAuth } from '@/context/auth-context';
-import { ThemeProvider } from '@/context/theme-context';
+import { ThemeProvider, useTheme } from '@/context/theme-context';
+import { SettingsProvider } from '@/context/settings-context';
 import { TransactionProvider } from '@/context/transaction-context';
 import { BudgetProvider } from '@/context/budget-context';
+import { GoalProvider } from '@/context/goal-context';
+import { getThemeColors } from '@/constants/colors';
 import '../global.css';
 
 const PUBLIC_ROUTES: string[] = ['/welcome', '/login', '/register', '/verify', '/auth-callback'];
@@ -31,9 +34,21 @@ function BootSplash() {
 
 function RootNavigator() {
   const pathname = usePathname();
+  const rootNavigationState = useRootNavigationState();
   const { user, isReady, onboarding, onboardingReady } = useAuth();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
 
   if (!isReady || !onboardingReady) {
+    return <BootSplash />;
+  }
+
+  // Tunggu NavigationContainer + expo-linking selesai resolve initial URL
+  // sebelum me-render <Redirect />. Redirect memanggil router.replace lewat
+  // useFocusEffect; jika dipanggil saat linking masih resolve promise
+  // (Linking.getInitialURL), RN melempar "state update on not-yet-mounted".
+  // Pola ini sesuai panduan Authentication Expo Router v57.
+  if (!rootNavigationState?.key) {
     return <BootSplash />;
   }
 
@@ -60,14 +75,18 @@ function RootNavigator() {
     }
   }
 
+  const chromeBg = plainChrome ? (isDark ? palette.bg : '#FFFFFF') : palette.primary;
+  const statusBg = plainChrome ? chromeBg : '#1A42BA';
+  const barStyle = hasBlueHeader || !plainChrome ? 'light-content' : isDark ? 'light-content' : 'dark-content';
+
   return (
     <SafeAreaView
-      className={`flex-1 ${plainChrome ? 'bg-white' : 'bg-primary'}`}
+      style={{ flex: 1, backgroundColor: chromeBg }}
       edges={plainChrome ? [] : ['top']}
     >
       <StatusBar
-        barStyle={hasBlueHeader || (!plainChrome) ? 'light-content' : 'dark-content'}
-        backgroundColor={hasBlueHeader || (!plainChrome) ? '#1A42BA' : '#FFFFFF'}
+        barStyle={barStyle}
+        backgroundColor={statusBg}
         translucent={hasBlueHeader}
       />
       <View className="flex-1">
@@ -81,15 +100,19 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <TransactionProvider>
-            <BudgetProvider>
-              <RootNavigator />
-            </BudgetProvider>
-          </TransactionProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <SettingsProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <TransactionProvider>
+              <BudgetProvider>
+                <GoalProvider>
+                  <RootNavigator />
+                </GoalProvider>
+              </BudgetProvider>
+            </TransactionProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 interface Props {
   type: 'expense' | 'income';
@@ -11,8 +12,17 @@ interface Props {
 const PRESETS = [10000, 50000, 100000, 500000];
 
 export default function QuickAmountChips({ type, onSelect, currentValue }: Props) {
-  const accent = type === 'expense' ? COLORS.red : COLORS.green;
-  const bgTint = type === 'expense' ? '#FEF2F2' : '#ECFDF5';
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const accent = type === 'expense' ? palette.red : palette.green;
+  const bgTint =
+    type === 'expense'
+      ? isDark
+        ? 'rgba(239,68,68,0.15)'
+        : '#FEF2F2'
+      : isDark
+        ? 'rgba(16,185,129,0.15)'
+        : '#ECFDF5';
 
   return (
     <View style={styles.container}>

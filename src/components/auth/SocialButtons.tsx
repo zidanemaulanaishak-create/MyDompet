@@ -1,6 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import type { SocialProvider } from '@/services/socialAuth';
 
 const SOCIALS: { key: SocialProvider; icon: string }[] = [
@@ -20,6 +22,9 @@ export default function SocialButtons({
   loadingProvider = null,
   disabled = false,
 }: SocialButtonsProps) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+
   return (
     <View className="flex-row gap-3">
       {SOCIALS.map((s) => {
@@ -30,11 +35,11 @@ export default function SocialButtons({
             activeOpacity={0.8}
             disabled={disabled || loadingProvider !== null}
             onPress={() => onPress(s.key)}
-            className="flex-1 h-12 rounded-2xl bg-[#F8F9FA] items-center justify-center"
-            style={{ borderWidth: 1, borderColor: '#ECEEF2' }}
+            className="flex-1 h-12 rounded-2xl items-center justify-center"
+            style={{ backgroundColor: palette.inputBg, borderWidth: 1, borderColor: palette.border }}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#1A42BA" />
+              <ActivityIndicator size="small" color={palette.primary} />
             ) : (
               <View>
                 <Iconify icon={s.icon} size={22} />

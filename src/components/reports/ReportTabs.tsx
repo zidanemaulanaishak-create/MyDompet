@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 export type ReportTab = 'flow' | 'balance';
 
@@ -11,14 +12,15 @@ interface Props {
   onChange: (tab: ReportTab) => void;
 }
 
-const TABS: { key: ReportTab; label: string; icon: string }[] = [
-  { key: 'flow', label: 'Arus Keuangan', icon: 'ph:arrows-left-right-bold' },
-  { key: 'balance', label: 'Total Keuangan', icon: 'ph:wallet-bold' },
+const TABS: { key: ReportTab; labelKey: string; icon: string }[] = [
+  { key: 'flow', labelKey: 'reports.flowTab', icon: 'ph:arrows-left-right-bold' },
+  { key: 'balance', labelKey: 'reports.balanceTab', icon: 'ph:wallet-bold' },
 ];
 
 export default function ReportTabs({ active, onChange }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   return (
     <View style={[styles.wrap, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
@@ -33,7 +35,7 @@ export default function ReportTabs({ active, onChange }: Props) {
           >
             <Iconify icon={tab.icon} size={17} color={isActive ? '#FFFFFF' : palette.textMuted} />
             <Text style={[styles.label, { color: isActive ? '#FFFFFF' : palette.textMuted }]} numberOfLines={1}>
-              {tab.label}
+              {t(tab.labelKey)}
             </Text>
           </TouchableOpacity>
         );

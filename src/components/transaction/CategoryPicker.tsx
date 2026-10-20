@@ -12,8 +12,10 @@ import {
   Easing,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { Category, getCategoriesForType } from '@/constants/categories';
+import { useI18n } from '@/i18n';
 
 interface Props {
   visible: boolean;
@@ -30,11 +32,15 @@ export default function CategoryPicker({
   onSelect,
   selectedCategoryId,
   type,
-  title = 'Pilih Kategori',
+  title,
 }: Props) {
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const [searchQuery, setSearchQuery] = useState('');
   // eslint-disable-next-line react-hooks/refs
   const translateY = useRef(new Animated.Value(500)).current;
+  const titleText = title ?? t('addTx.selectCategory');
 
   const categories = getCategoriesForType(type);
 
@@ -113,21 +119,22 @@ export default function CategoryPicker({
           style={[
             styles.bottomSheet,
             {
+              backgroundColor: palette.card,
               transform: [{ translateY }],
             },
           ]}
         >
           <View style={styles.handleContainer}>
-            <View style={styles.handle} />
+            <View style={[styles.handle, { backgroundColor: palette.track }]} />
           </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
+          <View style={[styles.header, { borderBottomColor: palette.border }]}>
+            <Text style={[styles.title, { color: palette.textDark }]}>{titleText}</Text>
             <TouchableOpacity
               onPress={handleBackdropPress}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Iconify icon="ph:x-bold" size={24} color={COLORS.textMuted} />
+              <Iconify icon="ph:x-bold" size={24} color={palette.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -135,13 +142,16 @@ export default function CategoryPicker({
             <Iconify
               icon="ph:magnifying-glass-bold"
               size={20}
-              color={COLORS.textMuted}
+              color={palette.textMuted}
               style={styles.searchIcon}
             />
             <TextInput
-              style={styles.searchInput}
-              placeholder="Cari kategori..."
-              placeholderTextColor={COLORS.textMuted}
+              style={[
+                styles.searchInput,
+                { backgroundColor: palette.inputBg, color: palette.textDark, borderColor: palette.border },
+              ]}
+              placeholder={t('addTx.searchCategory')}
+              placeholderTextColor={palette.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoFocus={true}
@@ -154,8 +164,8 @@ export default function CategoryPicker({
           >
             {filteredCategories.length === 0 ? (
               <View style={styles.emptyState}>
-                <Iconify icon="ph:folder-bold" size={48} color={COLORS.textMuted} />
-                <Text style={styles.emptyText}>Tidak ada kategori ditemukan</Text>
+                <Iconify icon="ph:folder-bold" size={48} color={palette.textMuted} />
+                <Text style={[styles.emptyText, { color: palette.textMuted }]}>{t('addTx.noCategoryFound')}</Text>
               </View>
             ) : (
               filteredCategories.map((category) => (
@@ -163,7 +173,11 @@ export default function CategoryPicker({
                   key={category.id}
                   style={[
                     styles.categoryItem,
-                    selectedCategoryId === category.id && styles.categoryItemSelected,
+                    { backgroundColor: palette.inputBg },
+                    selectedCategoryId === category.id && [
+                      styles.categoryItemSelected,
+                      { backgroundColor: palette.chipBlue, borderColor: palette.primary },
+                    ],
                   ]}
                   onPress={() => handleSelect(category)}
                   activeOpacity={0.8}
@@ -172,26 +186,27 @@ export default function CategoryPicker({
                     style={[
                       styles.iconWrapper,
                       selectedCategoryId === category.id
-                        ? { backgroundColor: COLORS.chipBlue }
-                        : { backgroundColor: '#F8F9FA' },
+                        ? { backgroundColor: palette.chipBlue }
+                        : { backgroundColor: palette.inputBg },
                     ]}
                   >
                     <Iconify
                       icon={category.icon}
                       size={22}
-                      color={selectedCategoryId === category.id ? COLORS.primary : COLORS.textDark}
+                      color={selectedCategoryId === category.id ? palette.primary : palette.textDark}
                     />
                   </View>
                   <Text
                     style={[
                       styles.categoryLabel,
-                      selectedCategoryId === category.id && styles.categoryLabelSelected,
+                      { color: palette.textDark },
+                      selectedCategoryId === category.id && [styles.categoryLabelSelected, { color: palette.primary }],
                     ]}
                   >
                     {category.label}
                   </Text>
                   {selectedCategoryId === category.id && (
-                    <Iconify icon="ph:check-bold" size={20} color={COLORS.primary} />
+                    <Iconify icon="ph:check-bold" size={20} color={palette.primary} />
                   )}
                 </TouchableOpacity>
               ))
@@ -206,11 +221,10 @@ export default function CategoryPicker({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(15,23,42,0.6)',
     justifyContent: 'flex-end',
   },
   bottomSheet: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -228,7 +242,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#D9D9D9',
   },
   header: {
     flexDirection: 'row',
@@ -237,12 +250,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textDark,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -257,11 +268,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 18,
-    color: COLORS.textDark,
-    backgroundColor: '#F8F9FA',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderWidth: 1,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -275,12 +285,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 16,
     marginBottom: 8,
-    backgroundColor: '#F8F9FA',
   },
   categoryItemSelected: {
-    backgroundColor: COLORS.chipBlue,
     borderWidth: 2,
-    borderColor: COLORS.primary,
   },
   iconWrapper: {
     width: 44,
@@ -293,11 +300,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '500',
-    color: COLORS.textDark,
     marginLeft: 14,
   },
   categoryLabelSelected: {
-    color: COLORS.primary,
     fontWeight: '600',
   },
   emptyState: {
@@ -307,6 +312,5 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 12,
     fontSize: 18,
-    color: COLORS.textMuted,
   },
 });

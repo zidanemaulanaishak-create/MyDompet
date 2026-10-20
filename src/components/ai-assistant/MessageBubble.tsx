@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { ChatMessage } from '@/types/chat';
+import { useI18n, type Locale } from '@/i18n';
 import AIActionBar from './AIActionBar';
 import { parseMessageContent } from '@/utils/messageFormatter';
 
@@ -16,7 +17,8 @@ interface Props {
   showActionBar?: boolean;
 }
 
-const timeFormat = (date: Date) => date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+const timeFormat = (locale: Locale, date: Date) =>
+  date.toLocaleTimeString(locale === 'en' ? 'en-US' : 'id-ID', { hour: '2-digit', minute: '2-digit' });
 
 function MessageContent({ parts, color, accent }: { parts: ReturnType<typeof parseMessageContent>; color: string; accent: string }) {
   return (
@@ -49,6 +51,7 @@ function MessageContent({ parts, color, accent }: { parts: ReturnType<typeof par
 export default function MessageBubble({ message, onLike, onCopy, onShare, onMore, showActionBar = true }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { locale } = useI18n();
   const [fade] = useState(() => new Animated.Value(0));
   const [slide] = useState(() => new Animated.Value(10));
 
@@ -70,7 +73,7 @@ export default function MessageBubble({ message, onLike, onCopy, onShare, onMore
             <MessageContent parts={parts} color="#FFFFFF" accent="#FDE68A" />
           </View>
         </View>
-        <Text style={[styles.userTimestamp, { color: palette.textMuted }]}>{timeFormat(message.timestamp)}</Text>
+        <Text style={[styles.userTimestamp, { color: palette.textMuted }]}>{timeFormat(locale, message.timestamp)}</Text>
       </Animated.View>
     );
   }

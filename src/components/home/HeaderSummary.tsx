@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { COLORS } from '@/constants/colors';
+import { useI18n } from '@/i18n';
 
 interface Props {
   name: string;
@@ -38,11 +39,12 @@ export default function HeaderSummary({
   totalExpense,
 }: Props) {
   const { width } = useWindowDimensions();
+  const { t } = useI18n();
   const scrollRef = useRef<ScrollView>(null);
   const [active, setActive] = useState(0);
   const [showBalance, setShowBalance] = useState(true);
 
-  const TABS = [monthLabel, 'Total Saldo'];
+  const TABS = [monthLabel, t('home.totalBalance')];
 
   const SLIDES = [
     {
@@ -55,7 +57,7 @@ export default function HeaderSummary({
     {
       key: 'total',
       amount: totalBalance,
-      date: 'Total Seluruh Periode',
+      date: t('home.totalPeriod'),
       income: totalIncome,
       expense: totalExpense,
     },
@@ -75,10 +77,10 @@ export default function HeaderSummary({
 
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 11) return 'Selamat Pagi';
-    if (h < 15) return 'Selamat Siang';
-    if (h < 19) return 'Selamat Sore';
-    return 'Selamat Malam';
+    if (h < 11) return t('home.goodMorning');
+    if (h < 15) return t('home.goodAfternoon');
+    if (h < 19) return t('home.goodEvening');
+    return t('home.goodNight');
   })();
 
   const initials = name
@@ -96,7 +98,7 @@ export default function HeaderSummary({
           <Text className="text-white text-base text-[#B9C2FF] font-semibold">
             {greeting},
           </Text>
-          <Text className="text-white text-2xl font-bold">Halo {name}!</Text>
+          <Text className="text-white text-2xl font-bold">{t('home.hello', { name })}</Text>
         </View>
 
         <View className="flex-row items-center gap-3">

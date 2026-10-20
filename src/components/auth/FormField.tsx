@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface FormFieldProps {
   label: string;
@@ -17,7 +20,7 @@ export default function FormField({
   label,
   value,
   onChangeText,
-  placeholder = 'Type here...',
+  placeholder,
   secure,
   error,
   keyboardType = 'default',
@@ -25,19 +28,24 @@ export default function FormField({
 }: FormFieldProps) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(true);
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
 
   return (
     <View className="mt-5">
       <Text className="text-[#8FA6CE] text-lg font-semibold">{label}</Text>
       <View
-        className={`mt-2 flex-row items-center rounded-xl px-4 ${
-          focused ? 'border border-[#3B82F6]' : 'border border-transparent'
-        }`}
-        style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+        className="mt-2 flex-row items-center rounded-xl px-4"
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          borderColor: focused ? palette.primary : 'transparent',
+        }}
       >
         <TextInput
           className="flex-1 py-3.5 text-white text-lg"
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('auth.typeHere')}
           placeholderTextColor="#64748B"
           value={value}
           onChangeText={onChangeText}

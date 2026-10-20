@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { TopCategoryComparison, formatRupiah } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   items: TopCategoryComparison[];
@@ -12,22 +13,23 @@ interface Props {
 export default function TopCategoriesComparison({ items }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
 
   return (
     <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
-      <Text style={[styles.title, { color: palette.textDark }]}>Pengeluaran Terbanyak</Text>
+      <Text style={[styles.title, { color: palette.textDark }]}>{t('weekly.topCategories')}</Text>
       <Text style={[styles.sub, { color: isDark ? '#94A3B8' : '#64748B' }]}>
-        Perbandingan kategori pengeluaran teratas kamu
+        {t('weekly.topCategoriesSub')}
       </Text>
 
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: palette.primary }]} />
-          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>Minggu ini</Text>
+          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>{t('weekly.thisWeek')}</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: COLORS.sky }]} />
-          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>Minggu lalu</Text>
+          <Text style={[styles.legendLabel, { color: palette.textMuted }]}>{t('weekly.lastWeek')}</Text>
         </View>
       </View>
 
@@ -37,10 +39,10 @@ export default function TopCategoriesComparison({ items }: Props) {
             <Iconify icon="ph:chart-bar-bold" size={30} color={palette.textMuted} />
           </View>
           <Text style={[styles.emptyText, { color: palette.textDark }]}>
-            Belum ada data untuk kategori terbanyak.
+            {t('weekly.topEmpty')}
           </Text>
           <Text style={[styles.emptySub, { color: palette.textMuted }]}>
-            Catat lebih banyak transaksi untuk melihat analisis.
+            {t('weekly.topEmptySub')}
           </Text>
         </View>
       ) : (

@@ -1,7 +1,9 @@
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 export interface AmountInputRef {
   focus: () => void;
@@ -31,11 +33,15 @@ const AmountInput = forwardRef<AmountInputRef, Props>(
       error,
       disabled = false,
       className,
-      label = 'Nominal',
+      label,
     },
     ref
   ) => {
+    const { isDark } = useTheme();
+    const { t } = useI18n();
+    const palette = getThemeColors(isDark ? 'dark' : 'light');
     const inputRef = useRef<TextInput>(null);
+    const labelText = label ?? t('common.amount');
 
     const formatNumber = (numStr: string): string => {
       const cleaned = numStr.replace(/[^\d]/g, '');
@@ -55,7 +61,7 @@ const AmountInput = forwardRef<AmountInputRef, Props>(
 
     const numericValue = parseValue(value);
     const displayValue = numericValue > 0 ? numericValue.toLocaleString('id-ID') : value;
-    const signColor = type === 'expense' ? COLORS.red : COLORS.green;
+    const signColor = type === 'expense' ? palette.red : palette.green;
 
     useImperativeHandle(ref, () => ({
       focus: () => inputRef.current?.focus(),
@@ -65,41 +71,46 @@ const AmountInput = forwardRef<AmountInputRef, Props>(
     }));
 
     return (
-      <View className={`bg-card rounded-2xl p-4 shadow-sm ${className || ''}`}>
-        <Text className="text-lg text-textMuted mb-3 font-semibold">{label}</Text>
+      <View
+        className={`rounded-2xl p-4 shadow-sm ${className || ''}`}
+        style={{ backgroundColor: palette.card }}
+      >
+        <Text className="text-lg mb-3 font-semibold" style={{ color: palette.textMuted }}>
+          {labelText}
+        </Text>
         <View style={styles.amountRow}>
           <View style={styles.prefix}>
             <Text style={[styles.sign, { color: signColor }]}>
               {type === 'expense' ? '-' : '+'}
             </Text>
-            <Text style={styles.symbol}>{currencySymbol}</Text>
+            <Text style={[styles.symbol, { color: palette.textDark }]}>{currencySymbol}</Text>
           </View>
           <View style={styles.inputContainer}>
             <TextInput
               ref={inputRef}
-              style={styles.input}
+              style={[styles.input, { color: palette.textDark }]}
               keyboardType="number-pad"
               placeholder="0"
-              placeholderTextColor="#C1C5D4"
+              placeholderTextColor={palette.textMuted}
               value={displayValue}
               onChangeText={handleChangeText}
               editable={!disabled}
-              selectionColor={COLORS.primary}
+              selectionColor={palette.primary}
             />
             {numericValue > 0 && (
               <TouchableOpacity
-                style={styles.clearButton}
+                style={[styles.clearButton, { backgroundColor: palette.divider }]}
                 onPress={() => onChangeText('', 0)}
                 activeOpacity={0.7}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Iconify icon="ph:x-bold" size={16} color={COLORS.textMuted} />
+                <Iconify icon="ph:x-bold" size={16} color={palette.textMuted} />
               </TouchableOpacity>
             )}
           </View>
         </View>
         {error ? (
-          <Text style={[styles.error, { color: COLORS.red }]}>{error}</Text>
+          <Text style={[styles.error, { color: palette.red }]}>{error}</Text>
         ) : null}
       </View>
     );
@@ -126,7 +137,6 @@ const styles = StyleSheet.create({
   symbol: {
     fontSize: 20,
     fontWeight: '700',
-    color: COLORS.textDark,
   },
   inputContainer: {
     flex: 1,
@@ -135,7 +145,6 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 40,
     fontWeight: '700',
-    color: COLORS.textDark,
     textAlign: 'right',
     paddingVertical: 4,
     paddingRight: 40,
@@ -150,7 +159,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F1F3F5',
   },
   error: {
     fontSize: 18,

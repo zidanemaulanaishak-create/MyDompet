@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { useRouter, usePathname } from 'expo-router';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface NavItemConfig {
   key: string;
@@ -17,14 +18,14 @@ const NAV_ITEMS: NavItemConfig[] = [
   {
     key: 'home',
     route: '/home',
-    label: 'Home',
+    label: 'nav.home',
     iconActive: 'ph:house-fill',
     iconInactive: 'ph:house',
   },
   {
     key: 'transactions',
     route: '/transactions',
-    label: 'Transactions',
+    label: 'nav.transactions',
     iconActive: 'ph:receipt-fill',
     iconInactive: 'ph:receipt',
   },
@@ -34,14 +35,14 @@ const NAV_ITEMS_RIGHT: NavItemConfig[] = [
   {
     key: 'budget',
     route: '/budget',
-    label: 'Budget',
+    label: 'nav.budget',
     iconActive: 'ph:chart-bar-fill',
     iconInactive: 'ph:chart-bar',
   },
   {
     key: 'profile',
     route: '/profile',
-    label: 'Profile',
+    label: 'nav.profile',
     iconActive: 'ph:user-fill',
     iconInactive: 'ph:user',
   },
@@ -50,6 +51,7 @@ const NAV_ITEMS_RIGHT: NavItemConfig[] = [
 function NavItem({ item, active }: { item: NavItemConfig; active: boolean }) {
   const router = useRouter();
   const { isDark } = useTheme();
+  const { t } = useI18n();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
 
   return (
@@ -66,7 +68,7 @@ function NavItem({ item, active }: { item: NavItemConfig; active: boolean }) {
         className="text-xs font-semibold"
         style={{ color: active ? palette.primary : palette.textMuted }}
       >
-        {item.label}
+        {t(item.label)}
       </Text>
     </TouchableOpacity>
   );
@@ -80,6 +82,7 @@ export default function BottomNav({ onFabPress }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { isDark } = useTheme();
+  const { t } = useI18n();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
   const bg = isDark ? palette.card : palette.bg;
 
@@ -98,6 +101,7 @@ export default function BottomNav({ onFabPress }: Props) {
           className="w-[56px] h-[56px] rounded-full bg-orange items-center justify-center -mt-9"
           style={styles.fab}
           activeOpacity={0.85}
+          accessibilityLabel={t('nav.add')}
           onPress={onFabPress ?? (() => router.push('/add-transaction' as any))}
         >
           <Iconify icon="ph:plus-bold" size={28} color="#fff" />

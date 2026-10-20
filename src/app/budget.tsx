@@ -7,6 +7,8 @@ import BudgetInsightCard from '@/components/budget/BudgetInsightCard';
 import BudgetAskAI from '@/components/budget/BudgetAskAI';
 import BudgetCategoryList from '@/components/budget/BudgetCategoryList';
 import BudgetLimitSheet from '@/components/budget/BudgetLimitSheet';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { BudgetCategory, currentBudgetMonthKey } from '@/data/budgetData';
 import { useBudget } from '@/context/budget-context';
 import { useTransactions } from '@/context/transaction-context';
@@ -18,6 +20,7 @@ import {
   totalSpent,
 } from '@/utils/budget';
 import { monthLabel } from '@/utils/dates';
+import { useI18n } from '@/i18n';
 
 interface SheetMode {
   categoryId?: string;
@@ -26,6 +29,9 @@ interface SheetMode {
 
 export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const { transactions } = useTransactions();
   const { getBudgetsForMonth, setLimit, removeBudget } = useBudget();
 
@@ -70,15 +76,13 @@ export default function BudgetScreen() {
   }, [openAdd]);
 
   const onPressInfo = useCallback(() => {
-    Alert.alert(
-      'Sisa Budget',
-      'Sisa budget dihitung dari total limit kategori dikurangi pengeluaran bulan ini.'
-    );
-  }, []);
+    Alert.alert(t('budget.remainingInfoTitle'), t('budget.remainingInfo'));
+  }, [t]);
 
   return (
     <ScrollView
-      className="flex-1 bg-bg"
+      className="flex-1"
+      style={{ backgroundColor: palette.bg }}
       contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       showsVerticalScrollIndicator={false}
     >

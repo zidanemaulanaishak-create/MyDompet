@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { EXPENSE_CATEGORIES, getCategoryById } from '@/constants/categories';
 import { parseRupiah, formatRupiahInput } from '@/context/onboarding';
 import { monthLabel } from '@/utils/dates';
+import { useI18n } from '@/i18n';
 
 interface Props {
   visible: boolean;
@@ -62,6 +64,9 @@ function BudgetSheetBody({
   onDelete?: (categoryId: string) => Promise<void>;
 }) {
   const isEdit = !!categoryId;
+  const { t } = useI18n();
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   const meta = isEdit && categoryId ? getCategoryById(categoryId, 'expense') : undefined;
 
   const available = EXPENSE_CATEGORIES.filter((c) => !budgetedCategoryIds.includes(c.id));
@@ -75,97 +80,122 @@ function BudgetSheetBody({
   const handleSave = () => {
     const nominal = parseRupiah(limitText);
     if (!selectedId) {
-      Alert.alert('Pilih kategori', 'Pilih kategori terlebih dahulu.');
+      Alert.alert(t('budget.pickCategory'), t('budget.pickCategoryFirst'));
       return;
     }
     if (nominal <= 0) {
-      Alert.alert('Nominal invalid', 'Isi limit budget dengan angka lebih dari 0.');
+      Alert.alert(t('budget.amountInvalid'), t('budget.limitInvalidMsg'));
       return;
     }
     onSave(selectedId, nominal)
       .then(onClose)
-      .catch(() => Alert.alert('Gagal menyimpan', 'Coba lagi.'));
+      .catch(() => Alert.alert(t('budget.saveFailed'), t('common.tryAgain')));
   };
 
   const handleDelete = () => {
     if (!categoryId) return;
-    Alert.alert('Hapus budget?', meta?.label ?? categoryId, [
-      { text: 'Batal', style: 'cancel' },
+    Alert.alert(t('budget.deleteTitle'), meta?.label ?? categoryId, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Hapus',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () =>
           onDelete?.(categoryId)
             .then(onClose)
-            .catch(() => Alert.alert('Gagal menghapus', 'Coba lagi.')),
+            .catch(() => Alert.alert(t('budget.deleteFailed'), t('common.tryAgain'))),
       },
     ]);
   };
 
   return (
     <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
-      <View style={styles.sheet}>
-        <View style={styles.handle} />
+      <View style={[styles.sheet, { backgroundColor: palette.card }]}>
+        <View style={[styles.handle, { backgroundColor: palette.track }]} />
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>{isEdit ? 'Edit Budget' : 'Tambah Budget'}</Text>
-            <Text style={styles.subtitle}>{monthLabel(monthKey)}</Text>
+            <Text style={[styles.title, { color: palette.textDark }]}>{isEdit ? t('budget.editSheetTitle') : t('budget.addSheetTitle')}</Text>
+            <Text style={[styles.subtitle, { color: palette.textMuted }]}>{monthLabel(monthKey)}</Text>
           </View>
           <TouchableOpacity onPress={onClose} hitSlop={8}>
-            <Iconify icon="ph:x-bold" size={22} color={COLORS.textMuted} />
+            <Iconify icon="ph:x-bold" size={22} color={palette.textMuted} />
           </TouchableOpacity>
         </View>
 
         {isEdit && meta ? (
-          <View style={styles.selectedRow}>
-            <Text style={styles.selectedLabel}>{meta.label}</Text>
-            <Text style={styles.selectedHint}>Kategori pengeluaran</Text>
+          <View
+            style={[
+              styles.selectedRow,
+              { backgroundColor: palette.inputBg, borderColor: palette.border },
+            ]}
+          >
+            <Text style={[styles.selectedLabel, { color: palette.textDark }]}>{meta.label}</Text>
+            <Text style={[styles.selectedHint, { color: palette.textMuted }]}>{t('budget.expenseCategory')}</Text>
           </View>
         ) : available.length > 0 ? (
           <>
-            <Text style={styles.label}>Pilih Kategori</Text>
+            <Text style={[styles.label, { color: palette.textDark }]}>{t('budget.pickCategory')}</Text>
             {available.map((c) => {
               const active = c.id === selectedId;
               return (
                 <TouchableOpacity
                   key={c.id}
-                  style={[styles.chip, active && styles.chipActive]}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: palette.inputBg, borderColor: palette.border },
+                    active && {
+                      backgroundColor: palette.chipBlue,
+                      borderColor: palette.primary,
+                    },
+                  ]}
                   activeOpacity={0.8}
                   onPress={() => setSelectedId(c.id)}
                 >
-                  <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
+                  <Text
+                    style={[
+                      styles.chipLabel,
+                      { color: active ? palette.primary : palette.textDark },
+                      active && styles.chipLabelActive,
+                    ]}
+                  >
                     {c.label}
                   </Text>
                   {active ? (
-                    <Iconify icon="ph:check-bold" size={16} color={COLORS.primary} />
+                    <Iconify icon="ph:check-bold" size={16} color={palette.primary} />
                   ) : null}
                 </TouchableOpacity>
               );
             })}
           </>
         ) : (
-          <Text style={styles.emptyText}>
-            Semua kategori pengeluaran sudah punya budget bulan ini.
+          <Text style={[styles.emptyText, { color: palette.textMuted }]}>
+            {t('budget.allBudgeted')}
           </Text>
         )}
 
-        <Text style={styles.label}>Limit Bulanan</Text>
+        <Text style={[styles.label, { color: palette.textDark }]}>{t('budget.monthlyLimit')}</Text>
         <TextInput
-          style={styles.input}
-          placeholder="cth: 250000"
-          placeholderTextColor={COLORS.textMuted}
+          style={[
+            styles.input,
+            { backgroundColor: palette.inputBg, borderColor: palette.border, color: palette.textDark },
+          ]}
+          placeholder={t('budget.limitPlaceholder')}
+          placeholderTextColor={palette.textMuted}
           keyboardType="numeric"
           value={limitText}
-          onChangeText={(t) => setLimitText(formatRupiahInput(parseRupiah(t)))}
+          onChangeText={(val) => setLimitText(formatRupiahInput(parseRupiah(val)))}
         />
 
-        <TouchableOpacity style={styles.save} activeOpacity={0.85} onPress={handleSave}>
-          <Text style={styles.saveLabel}>Simpan</Text>
+        <TouchableOpacity
+          style={[styles.save, { backgroundColor: palette.primary }]}
+          activeOpacity={0.85}
+          onPress={handleSave}
+        >
+          <Text style={styles.saveLabel}>{t('common.save')}</Text>
         </TouchableOpacity>
 
         {isEdit ? (
           <TouchableOpacity style={styles.delete} activeOpacity={0.85} onPress={handleDelete}>
-            <Text style={styles.deleteLabel}>Hapus Budget Kategori</Text>
+            <Text style={[styles.deleteLabel, { color: palette.red }]}>{t('budget.deleteCategoryBudget')}</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -176,7 +206,6 @@ function BudgetSheetBody({
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.45)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -187,7 +216,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 5,
     borderRadius: 3,
-    backgroundColor: '#D9D9D9',
     marginTop: 10,
     marginBottom: 14,
   },
@@ -197,52 +225,43 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 8,
   },
-  title: { fontSize: 18, fontWeight: '700', color: COLORS.textDark },
-  subtitle: { fontSize: 14, color: COLORS.textMuted, marginTop: 2 },
-  label: { fontSize: 14, fontWeight: '700', color: COLORS.textDark, marginTop: 12, marginBottom: 8 },
+  title: { fontSize: 18, fontWeight: '700' },
+  subtitle: { fontSize: 14, marginTop: 2 },
+  label: { fontSize: 14, fontWeight: '700', marginTop: 12, marginBottom: 8 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F8F9FA',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginBottom: 8,
   },
-  chipActive: { backgroundColor: COLORS.chipBlue, borderColor: COLORS.primary },
-  chipLabel: { fontSize: 15, fontWeight: '600', color: COLORS.textDark },
-  chipLabelActive: { color: COLORS.primary, fontWeight: '700' },
+  chipLabel: { fontSize: 15, fontWeight: '600' },
+  chipLabelActive: { fontWeight: '700' },
   selectedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F8F9FA',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     marginTop: 12,
   },
-  selectedLabel: { fontSize: 15, fontWeight: '700', color: COLORS.textDark },
-  selectedHint: { fontSize: 13, color: COLORS.textMuted },
-  emptyText: { fontSize: 14, color: COLORS.textMuted, marginTop: 12 },
+  selectedLabel: { fontSize: 15, fontWeight: '700' },
+  selectedHint: { fontSize: 13 },
+  emptyText: { fontSize: 14, marginTop: 12 },
   input: {
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 17,
     fontWeight: '700',
-    color: COLORS.textDark,
-    backgroundColor: '#F8F9FA',
   },
   save: {
-    backgroundColor: COLORS.primary,
     borderRadius: 16,
     paddingVertical: 15,
     alignItems: 'center',
@@ -254,5 +273,5 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  deleteLabel: { color: COLORS.red, fontSize: 15, fontWeight: '700' },
+  deleteLabel: { fontSize: 15, fontWeight: '700' },
 });

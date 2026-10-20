@@ -1,4 +1,5 @@
 import { TransactionItem } from '@/data/dummyData';
+import { getAppPrefs } from '@/utils/appPrefs';
 
 const MONTHS: Record<string, number> = {
   januari: 0,
@@ -44,12 +45,14 @@ export function monthKey(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
 }
 
-const MONTH_LABEL = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' });
-
 export function monthLabel(key: string): string {
-  if (!key) return 'Tanpa Tanggal';
+  const locale = getAppPrefs().locale ?? 'id';
+  if (!key) return locale === 'en' ? 'No date' : 'Tanpa Tanggal';
   const [year, m] = key.split('-').map(Number);
-  return MONTH_LABEL.format(new Date(year, m - 1, 1));
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'id-ID', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(year, m - 1, 1));
 }
 
 export function startOfDay(d: Date): Date {

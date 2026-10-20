@@ -4,6 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { DaySpending, formatRupiah } from '@/utils/reports';
+import { useI18n } from '@/i18n';
 
 interface Props {
   data: DaySpending[];
@@ -14,18 +15,19 @@ const BAR_HEIGHT = 110;
 export default function DailySpendingChart({ data }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const max = Math.max(...data.map((d) => d.amount), 1);
   const empty = data.every((d) => d.amount === 0);
   const todayIdx = (new Date().getDay() + 6) % 7;
 
   return (
     <View style={[styles.card, { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E2E8F0' }]}>
-      <Text style={[styles.title, { color: palette.textDark }]}>Pola Keuangan Harian</Text>
+      <Text style={[styles.title, { color: palette.textDark }]}>{t('weekly.dailyPattern')}</Text>
       {empty ? (
         <View style={styles.emptyWrap}>
           <View style={[styles.dashed, { borderColor: isDark ? '#334155' : '#CBD5E1' }]}>
-            <Text style={[styles.emptyText, { color: palette.textMuted }]}>Belum ada pengeluaran minggu ini</Text>
-            <Text style={[styles.emptySub, { color: palette.textMuted }]}>Catat transaksi untuk melihat pola harianmu</Text>
+            <Text style={[styles.emptyText, { color: palette.textMuted }]}>{t('weekly.noExpenseThisWeek')}</Text>
+            <Text style={[styles.emptySub, { color: palette.textMuted }]}>{t('weekly.logToSeePattern')}</Text>
           </View>
         </View>
       ) : (
@@ -55,7 +57,7 @@ export default function DailySpendingChart({ data }: Props) {
         </View>
       )}
       <TouchableOpacity style={[styles.cta, { backgroundColor: palette.primary }]} activeOpacity={0.85}>
-        <Text style={styles.ctaLabel}>Catat Transaksi Hari Ini</Text>
+        <Text style={styles.ctaLabel}>{t('weekly.logToday')}</Text>
         <Iconify icon="ph:plus-bold" size={16} color="#FFFFFF" />
       </TouchableOpacity>
     </View>

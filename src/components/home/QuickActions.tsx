@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { COLORS, getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { QuickActionItem } from '@/data/dummyData';
 
 interface Props {
@@ -38,10 +39,12 @@ function ActionIcon({ item }: { item: QuickActionItem }) {
 }
 
 export default function QuickActions({ items, onPress }: Props) {
+  const { isDark } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
   return (
     <View
-      className="bg-card mb-4 mx-4 -mt-12 rounded-2xl px-2 pt-4 pb-3"
-      style={styles.card}
+      className="mb-4 mx-4 -mt-12 rounded-2xl px-2 pt-4 pb-3"
+      style={[styles.card, { backgroundColor: palette.card }]}
     >
       <View className="flex-row justify-between items-start gap-2">
         {items.map((item) => (
@@ -52,7 +55,7 @@ export default function QuickActions({ items, onPress }: Props) {
             onPress={() => onPress?.(item)}
           >
             <ActionIcon item={item} />
-            <Text className="text-textDark text-xs text-center leading-[16px] font-medium" numberOfLines={2}>
+            <Text className="text-xs text-center leading-[16px] font-medium" style={{ color: palette.textDark }} numberOfLines={2}>
               {item.label}
             </Text>
           </TouchableOpacity>

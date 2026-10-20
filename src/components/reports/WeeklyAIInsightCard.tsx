@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { COLORS, getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface Props {
   txCount: number;
@@ -13,6 +14,7 @@ interface Props {
 export default function WeeklyAIInsightCard({ txCount, threshold = 5, onAction }: Props) {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const unlocked = txCount >= threshold;
   const remaining = Math.max(0, threshold - txCount);
   const progress = Math.min(1, txCount / threshold);
@@ -30,12 +32,12 @@ export default function WeeklyAIInsightCard({ txCount, threshold = 5, onAction }
         </View>
         <View style={styles.textWrap}>
           <Text style={[styles.title, { color: palette.textDark }]}>
-            {unlocked ? 'Insight AI Siap Dibuka' : 'Insight Belum Bisa Dibuat'}
+            {unlocked ? t('weekly.aiUnlocked') : t('weekly.aiLocked')}
           </Text>
           <Text style={[styles.sub, { color: isDark ? '#A9B8D0' : '#3E5879' }]}>
             {unlocked
-              ? 'Cukup data minggu ini. Buka analisis AI untuk pola pengeluaranmu.'
-              : `Tinggal catat ${remaining} transaksi lagi di minggu ini untuk membuka analisis AI secara otomatis.`}
+              ? t('weekly.aiUnlockedSub')
+              : t('weekly.aiLockedSub', { count: remaining })}
           </Text>
         </View>
       </View>
@@ -45,12 +47,12 @@ export default function WeeklyAIInsightCard({ txCount, threshold = 5, onAction }
         />
       </View>
       <Text style={[styles.count, { color: isDark ? '#A9B8D0' : '#3E5879' }]}>
-        {txCount}/{threshold} transaksi minggu ini
+        {t('weekly.aiCount', { count: txCount, threshold })}
       </Text>
       {unlocked ? (
         <TouchableOpacity style={[styles.cta, { backgroundColor: palette.primary }]} activeOpacity={0.85} onPress={onAction}>
           <Iconify icon="ph:sparkle-bold" size={16} color="#FFFFFF" />
-          <Text style={styles.ctaLabel}>Lihat Analisis AI</Text>
+          <Text style={styles.ctaLabel}>{t('weekly.viewAI')}</Text>
         </TouchableOpacity>
       ) : null}
     </View>

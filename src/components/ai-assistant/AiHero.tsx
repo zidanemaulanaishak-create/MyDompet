@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { QuickSuggestion } from '@/types/chat';
+import { useI18n } from '@/i18n';
 
 export interface PopularTopic {
   id: string;
@@ -10,19 +11,19 @@ export interface PopularTopic {
 }
 
 export const POPULAR_TOPICS: PopularTopic[] = [
-  { id: 't1', label: 'Berapa target tabungan harian saya?', icon: 'ph:target-bold' },
-  { id: 't2', label: 'Alokasi dana darurat yang ideal', icon: 'ph:shield-check-bold' },
-  { id: 't3', label: 'Tips hemat bulan ini', icon: 'ph:piggy-bank-bold' },
-  { id: 't4', label: 'Kategori mana yang paling boros?', icon: 'ph:chart-pie-slice-bold' },
-  { id: 't5', label: 'Buatkan rencana mingguan', icon: 'ph:calendar-check-bold' },
-  { id: 't6', label: 'Instrumen investasi yang cocok?', icon: 'ph:bank-bold' },
+  { id: 't1', label: 'ai.topic.dailySavings', icon: 'ph:target-bold' },
+  { id: 't2', label: 'ai.topic.emergencyFund', icon: 'ph:shield-check-bold' },
+  { id: 't3', label: 'ai.topic.savingTips', icon: 'ph:piggy-bank-bold' },
+  { id: 't4', label: 'ai.topic.wastefulCategory', icon: 'ph:chart-pie-slice-bold' },
+  { id: 't5', label: 'ai.topic.weeklyPlan', icon: 'ph:calendar-check-bold' },
+  { id: 't6', label: 'ai.topic.investment', icon: 'ph:bank-bold' },
 ];
 
 const HERO_CHIPS: QuickSuggestion[] = [
-  { id: 'h1', label: 'Catat transaksi otomatis' },
-  { id: 'h2', label: 'Tips hemat bulan ini' },
-  { id: 'h3', label: 'Bandingkan keuangan' },
-  { id: 'h4', label: 'Target tabungan' },
+  { id: 'h1', label: 'ai.chipAutoRecord' },
+  { id: 'h2', label: 'ai.chipBudgetTips' },
+  { id: 'h3', label: 'ai.chipCompareFinance' },
+  { id: 'h4', label: 'ai.chipSavingsGoal' },
 ];
 
 interface Props {
@@ -33,23 +34,24 @@ interface Props {
 }
 
 export default function AiHero({ userName, onChipPress, onTopicPress, onSeeAllPress }: Props) {
+  const { t } = useI18n();
   return (
     <View style={styles.hero}>
-      <Text style={styles.greeting}>Hai, {userName}!</Text>
-      <Text style={styles.sub}>Ada yang bisa MyGpt bantu hari ini?</Text>
+      <Text style={styles.greeting}>{t('ai.greeting', { name: userName })}</Text>
+      <Text style={styles.sub}>{t('ai.helpToday')}</Text>
 
       <View style={styles.chips}>
         {HERO_CHIPS.map((chip) => (
           <TouchableOpacity key={chip.id} style={styles.chip} activeOpacity={0.7} onPress={() => onChipPress(chip)}>
-            <Text style={styles.chipLabel} numberOfLines={1}>{chip.label}</Text>
+            <Text style={styles.chipLabel} numberOfLines={1}>{t(chip.label)}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <View style={styles.sectionHead}>
-        <Text style={styles.sectionTitle}>Topik Populer</Text>
+        <Text style={styles.sectionTitle}>{t('ai.popularTopics')}</Text>
         <TouchableOpacity onPress={onSeeAllPress} activeOpacity={0.7} hitSlop={8}>
-          <Text style={styles.seeAll}>Lihat Semua</Text>
+          <Text style={styles.seeAll}>{t('ai.seeAll')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -59,7 +61,7 @@ export default function AiHero({ userName, onChipPress, onTopicPress, onSeeAllPr
             <View style={styles.cardIcon}>
               <Iconify icon={topic.icon} size={18} color="#FFFFFF" />
             </View>
-            <Text style={styles.cardLabel} numberOfLines={3}>{topic.label}</Text>
+            <Text style={styles.cardLabel} numberOfLines={3}>{t(topic.label)}</Text>
           </TouchableOpacity>
         ))}
       </View>

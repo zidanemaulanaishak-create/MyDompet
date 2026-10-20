@@ -11,16 +11,21 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Iconify } from 'react-native-iconify';
 import PrimaryButton from '@/components/auth/PrimaryButton';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { useAuth } from '@/context/auth-context';
 import { getPendingAuth, setPendingAuth } from '@/context/auth-flow';
+import { useI18n } from '@/i18n';
 
 const CODE_LENGTH = 4;
 
 export default function VerifyCodeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  
+  const { isDark } = useTheme();
+  const { t } = useI18n();
+  const palette = getThemeColors(isDark ? 'dark' : 'light');
+
 
   const pending = getPendingAuth();
   const [code, setCode] = useState(() => Array(CODE_LENGTH).fill('0'));
@@ -65,7 +70,7 @@ export default function VerifyCodeScreen() {
 
   const handleVerify = async () => {
     if (!codeFilled) {
-      setError('Masukkan kode verifikasi 4 digit.');
+      setError(t('auth.errCodeRequired'));
       return;
     }
 
@@ -81,7 +86,8 @@ export default function VerifyCodeScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
+      className="flex-1"
+      style={{ backgroundColor: palette.bg }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View className="flex-1 px-6" style={{ paddingTop: insets.top + 10, paddingBottom: 32 }}>
@@ -90,18 +96,19 @@ export default function VerifyCodeScreen() {
             onPress={goBack}
             activeOpacity={0.85}
             hitSlop={10}
-            className="w-11 h-11 rounded-full bg-[#F1F2F4] items-center justify-center"
+            className="w-11 h-11 rounded-full items-center justify-center"
+            style={{ backgroundColor: palette.inputBg }}
           >
-            <Iconify icon="ph:arrow-left" size={22} color="#172031" />
+            <Iconify icon="ph:arrow-left" size={22} color={palette.textDark} />
           </TouchableOpacity>
         </View>
 
         <View className="mt-4">
-          <Text className="text-center text-[#172031] text-[26px] font-extrabold tracking-tight">
-            Verify Code
+          <Text className="text-center text-[26px] font-extrabold tracking-tight" style={{ color: palette.textDark }}>
+            {t('auth.verifyCodeTitle')}
           </Text>
-          <Text className="px-4 mt-2 text-center text-[#8A8D9F] text-lg leading-5">
-            Enter the verification code we sent to {email}
+          <Text className="px-4 mt-2 text-center text-lg leading-5" style={{ color: palette.textMuted }}>
+            {t('auth.verifySentTo', { email })}
           </Text>
         </View>
 
@@ -112,8 +119,13 @@ export default function VerifyCodeScreen() {
               ref={(ref) => {
                 inputsRef.current[i] = ref;
               }}
-              className="w-16 h-16 rounded-2xl bg-[#F8F9FA] text-center text-[#172031] text-[24px] font-bold"
-              style={{ borderWidth: 1, borderColor: focusedIndex === i ? COLORS.sky : '#E7E9EF' }}
+              className="w-16 h-16 rounded-2xl text-center text-[24px] font-bold"
+              style={{
+                backgroundColor: palette.inputBg,
+                color: palette.textDark,
+                borderWidth: 1,
+                borderColor: focusedIndex === i ? palette.sky : palette.border,
+              }}
               maxLength={1}
               keyboardType="number-pad"
               value={digit}
@@ -128,16 +140,16 @@ export default function VerifyCodeScreen() {
         </View>
 
         <View className="flex-row justify-center items-center mt-7">
-          <Text className="text-[#8A8D9F] text-lg">Didn&apos;t receive OTP? </Text>
+          <Text className="text-lg" style={{ color: palette.textMuted }}>{t('auth.otpNotReceived')} </Text>
           <TouchableOpacity activeOpacity={0.7}>
-            <Text className="text-orange text-lg font-bold">Resend code</Text>
+            <Text className="text-orange text-lg font-bold">{t('auth.resendCode')}</Text>
           </TouchableOpacity>
         </View>
 
-        {error ? <Text className="mt-5 text-center text-lg text-[#EF4444]">{error}</Text> : null}
+        {error ? <Text className="mt-5 text-center text-lg" style={{ color: palette.red }}>{error}</Text> : null}
 
         <View className="flex-1 justify-end mt-8">
-          <PrimaryButton label="Verify" onPress={handleVerify} loading={loading} />
+          <PrimaryButton label={t('auth.verify')} onPress={handleVerify} loading={loading} />
         </View>
       </View>
     </KeyboardAvoidingView>

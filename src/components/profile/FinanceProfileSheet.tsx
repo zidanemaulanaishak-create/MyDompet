@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { COLORS } from '@/constants/colors';
+import { useI18n } from '@/i18n';
 import { Occupation, parseRupiah, formatRupiahInput } from '@/context/onboarding';
 
 interface Props {
@@ -12,10 +13,10 @@ interface Props {
   onSubmit: (data: { occupation: Occupation; mainIncome: number }) => void;
 }
 
-const OCCUPATIONS: { key: Occupation; label: string; icon: string }[] = [
-  { key: 'pekerja', label: 'Pekerja', icon: 'ph:briefcase-bold' },
-  { key: 'pelajar', label: 'Pelajar', icon: 'ph:graduation-cap-bold' },
-  { key: 'mahasiswa', label: 'Mahasiswa', icon: 'ph:student-bold' },
+const OCCUPATIONS: { key: Occupation; labelKey: string; icon: string }[] = [
+  { key: 'pekerja', labelKey: 'profile.occupationWorker', icon: 'ph:briefcase-bold' },
+  { key: 'pelajar', labelKey: 'profile.occupationStudent', icon: 'ph:graduation-cap-bold' },
+  { key: 'mahasiswa', labelKey: 'profile.occupationCollege', icon: 'ph:student-bold' },
 ];
 
 export default function FinanceProfileSheet({
@@ -29,15 +30,16 @@ export default function FinanceProfileSheet({
   const [incomeText, setIncomeText] = useState(
     mainIncome ? formatRupiahInput(mainIncome) : ''
   );
+  const { t } = useI18n();
 
   const handleSave = () => {
     const nominal = parseRupiah(incomeText);
     if (!selected) {
-      Alert.alert('Pilih profesi', 'Pilih salah satu profesi kamu terlebih dahulu.');
+      Alert.alert(t('profile.selectOccupation'), t('profile.selectOccupationMsg'));
       return;
     }
     if (nominal <= 0) {
-      Alert.alert('Nominal invalid', 'Isi pendapatan bulanan dengan angka lebih dari 0.');
+      Alert.alert(t('profile.invalidAmount'), t('profile.invalidAmountMsg'));
       return;
     }
     onSubmit({ occupation: selected, mainIncome: nominal });
@@ -50,13 +52,13 @@ export default function FinanceProfileSheet({
           <View style={styles.sheet}>
             <View style={styles.handle} />
             <View style={styles.header}>
-              <Text style={styles.title}>Pendapatan & Profesi</Text>
+              <Text style={styles.title}>{t('profile.financeProfile')}</Text>
               <TouchableOpacity onPress={onClose} hitSlop={8}>
                 <Iconify icon="ph:x-bold" size={22} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.label}>Profesi</Text>
+            <Text style={styles.label}>{t('profile.occupation')}</Text>
             <View style={styles.chips}>
               {OCCUPATIONS.map((o) => {
                 const active = o.key === selected;
@@ -73,17 +75,17 @@ export default function FinanceProfileSheet({
                       color={active ? '#FFFFFF' : COLORS.primary}
                     />
                     <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
-                      {o.label}
+                      {t(o.labelKey)}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
 
-            <Text style={styles.label}>Pendapatan Bulanan</Text>
+            <Text style={styles.label}>{t('profile.monthlyIncome')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="cth: 5000000"
+              placeholder={t('profile.incomePlaceholder')}
               placeholderTextColor={COLORS.textMuted}
               keyboardType="numeric"
               value={incomeText}
@@ -91,7 +93,7 @@ export default function FinanceProfileSheet({
             />
 
             <TouchableOpacity style={styles.save} activeOpacity={0.85} onPress={handleSave}>
-              <Text style={styles.saveLabel}>Simpan</Text>
+              <Text style={styles.saveLabel}>{t('common.save')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

@@ -19,17 +19,19 @@ import { useBudget } from '@/context/budget-context';
 import { monthKey } from '@/utils/dates';
 import { buildContextSnapshot } from '@/services/snapshot';
 import { QuickSuggestion } from '@/types/chat';
+import { useI18n } from '@/i18n';
 
 export default function AIAssistantScreen() {
   const { isDark } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t } = useI18n();
   const { user, onboarding } = useAuth();
   const { transactions } = useTransactions();
   const { getBudgetsForMonth } = useBudget();
   const router = useRouter();
   const params = useLocalSearchParams<{ q?: string }>();
   const scrollViewRef = useRef<any>(null);
-  const userName = user ? getFirstName(user.name) : 'Teman';
+  const userName = user ? getFirstName(user.name) : t('ai.friend');
 
   const currentMonthKey = monthKey(new Date());
 
@@ -77,8 +79,8 @@ export default function AIAssistantScreen() {
   }, [revealSuggestions]);
 
   const handleSuggestionPress = useCallback((suggestion: QuickSuggestion) => {
-    sendMessage(suggestion.label);
-  }, [sendMessage]);
+    sendMessage(t(suggestion.label));
+  }, [sendMessage, t]);
 
   const scrollToBottom = useCallback(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });

@@ -54,6 +54,36 @@ export const profileDict: Dict = {
     'profile.errNameRequired': 'Nama lengkap wajib diisi.',
     'profile.errNameMin': 'Nama minimal 3 karakter.',
     'profile.errUpdateFailed': 'Gagal memperbarui profil. Coba lagi.',
+    'profile.accountSettingsSheetTitle': 'Pengaturan Akun',
+    'profile.dataManagement': 'Kelola Data',
+    'profile.resetFinance': 'Atur Ulang Profil Keuangan',
+    'profile.resetFinanceSubtitle': 'Hapus profesi dan pendapatan bulanan kamu',
+    'profile.resetFinanceTitle': 'Atur Ulang Profil Keuangan?',
+    'profile.resetFinanceMsg':
+      'Profesi dan pendapatan bulanan akan dihapus. Transaksi, anggaran, dan target tetap aman.',
+    'profile.notificationsSheetTitle': 'Notifikasi',
+    'profile.notifBudget': 'Pengingat Anggaran',
+    'profile.notifBudgetDesc': 'Ingatkan saat pengeluaran mendekati batas',
+    'profile.notifGoal': 'Pengingat Target',
+    'profile.notifGoalDesc': 'Ingatkan tenggat dan progres target keuangan',
+    'profile.notifPromo': 'Promo & Info',
+    'profile.notifPromoDesc': 'Tips keuangan dan penawaran spesial',
+    'profile.helpSheetTitle': 'Bantuan',
+    'profile.helpContact': 'Hubungi Kami',
+    'profile.helpContactSubtitle': 'Kirim pertanyaan atau laporan masalahmu',
+    'profile.faqTitle': 'Pertanyaan Umum',
+    'profile.faq1Q': 'Bagaimana cara menambah transaksi?',
+    'profile.faq1A':
+      'Ketuk tombol tambah di navigasi bawah, isi nominal, kategori, dan tanggal, lalu simpan.',
+    'profile.faq2Q': 'Apakah data saya aman?',
+    'profile.faq2A':
+      'Ya. Semua data disimpan di akun kamu dan dilindungi Supabase dengan row level security.',
+    'profile.faq3Q': 'Bagaimana mengubah anggaran bulanan?',
+    'profile.faq3A':
+      'Buka tab Anggaran, pilih bulan, lalu ketuk ikon edit pada kategori untuk mengatur batas.',
+    'profile.faq4Q': 'Kenapa AI Assistant tidak menjawab?',
+    'profile.faq4A':
+      'Pastikan koneksi internet stabil. AI memakai data transaksi dan anggaran kamu sebagai konteks.',
   },
   en: {
     'profile.title': 'Profile & Settings',
@@ -109,5 +139,35 @@ export const profileDict: Dict = {
     'profile.errNameRequired': 'Full name is required.',
     'profile.errNameMin': 'Name must be at least 3 characters.',
     'profile.errUpdateFailed': 'Failed to update profile. Try again.',
+    'profile.accountSettingsSheetTitle': 'Account Settings',
+    'profile.dataManagement': 'Data Management',
+    'profile.resetFinance': 'Reset Financial Profile',
+    'profile.resetFinanceSubtitle': 'Remove your occupation and monthly income',
+    'profile.resetFinanceTitle': 'Reset Financial Profile?',
+    'profile.resetFinanceMsg':
+      'Your occupation and monthly income will be removed. Transactions, budgets, and goals stay safe.',
+    'profile.notificationsSheetTitle': 'Notifications',
+    'profile.notifBudget': 'Budget Reminders',
+    'profile.notifBudgetDesc': 'Alert when spending nears the limit',
+    'profile.notifGoal': 'Goal Reminders',
+    'profile.notifGoalDesc': 'Remind deadlines and goal progress',
+    'profile.notifPromo': 'Promos & Info',
+    'profile.notifPromoDesc': 'Money tips and special offers',
+    'profile.helpSheetTitle': 'Help',
+    'profile.helpContact': 'Contact Us',
+    'profile.helpContactSubtitle': 'Send your questions or report an issue',
+    'profile.faqTitle': 'Frequently Asked Questions',
+    'profile.faq1Q': 'How do I add a transaction?',
+    'profile.faq1A':
+      'Tap the add button in the bottom navigation, fill in the amount, category, and date, then save.',
+    'profile.faq2Q': 'Is my data safe?',
+    'profile.faq2A':
+      'Yes. All data is stored in your account and protected by Supabase with row level security.',
+    'profile.faq3Q': 'How do I change my monthly budget?',
+    'profile.faq3A':
+      'Open the Budget tab, pick a month, then tap the edit icon on a category to set its limit.',
+    'profile.faq4Q': 'Why is the AI Assistant not responding?',
+    'profile.faq4A':
+      'Make sure your internet connection is stable. The AI uses your transactions and budgets as context.',
   },
 };

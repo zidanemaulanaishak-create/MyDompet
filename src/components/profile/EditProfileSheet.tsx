@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -29,10 +29,6 @@ export default function EditProfileSheet({ visible, name, email, onClose, onSubm
   const [draft, setDraft] = useState(name);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (visible) setDraft(name);
-  }, [visible, name]);
-
   const handleSave = async () => {
     if (saving) return;
     setSaving(true);
@@ -47,7 +43,13 @@ export default function EditProfileSheet({ visible, name, email, onClose, onSubm
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      onShow={() => setDraft(name)}
+    >
       {visible ? (
         <TouchableOpacity key="open" style={styles.overlay} onPress={onClose} activeOpacity={1}>
           <View style={[styles.sheet, { backgroundColor: palette.card }]}>

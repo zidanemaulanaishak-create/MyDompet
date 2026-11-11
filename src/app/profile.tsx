@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Switch,
@@ -20,6 +19,9 @@ import { useSettings } from "@/context/settings-context";
 import FinanceProfileSheet from "@/components/profile/FinanceProfileSheet";
 import LanguageSheet from "@/components/profile/LanguageSheet";
 import EditProfileSheet from "@/components/profile/EditProfileSheet";
+import NotificationsSheet from "@/components/profile/NotificationsSheet";
+import AccountSettingsSheet from "@/components/profile/AccountSettingsSheet";
+import HelpSheet from "@/components/profile/HelpSheet";
 
 const SECTION_ACCENT = "#64748B";
 const HEADER_SUBTEXT = "#E2E8F0";
@@ -196,6 +198,10 @@ export default function ProfileScreen() {
   const [showFinanceSheet, setShowFinanceSheet] = React.useState(false);
   const [showLanguageSheet, setShowLanguageSheet] = React.useState(false);
   const [showEditSheet, setShowEditSheet] = React.useState(false);
+  const [showAccountSheet, setShowAccountSheet] = React.useState(false);
+  const [showNotificationsSheet, setShowNotificationsSheet] =
+    React.useState(false);
+  const [showHelpSheet, setShowHelpSheet] = React.useState(false);
 
   const palette = getThemeColors(isDark ? "dark" : "light");
 
@@ -234,10 +240,6 @@ export default function ProfileScreen() {
     setLoading(true);
     await signOut();
     setLoading(false);
-  };
-
-  const comeSoon = (feature: string) => {
-    Alert.alert(feature, t("profile.comingSoon"));
   };
 
   return (
@@ -387,7 +389,7 @@ export default function ProfileScreen() {
             icon="ph:gear-bold"
             title={t("profile.accountSettings")}
             subtitle={t("profile.accountSettingsSubtitle")}
-            onPress={() => comeSoon(t("profile.accountSettings"))}
+            onPress={() => setShowAccountSheet(true)}
             palette={palette}
             isDark={isDark}
           />
@@ -395,7 +397,7 @@ export default function ProfileScreen() {
             icon="ph:question-bold"
             title={t("profile.help")}
             subtitle={t("profile.helpSubtitle")}
-            onPress={() => comeSoon(t("profile.help"))}
+            onPress={() => setShowHelpSheet(true)}
             palette={palette}
             isDark={isDark}
           />
@@ -403,7 +405,7 @@ export default function ProfileScreen() {
             icon="ph:bell-bold"
             title={t("profile.notifications")}
             subtitle={t("profile.notificationsSubtitle")}
-            onPress={() => comeSoon(t("profile.notifications"))}
+            onPress={() => setShowNotificationsSheet(true)}
             palette={palette}
             isDark={isDark}
             last
@@ -519,6 +521,21 @@ export default function ProfileScreen() {
         email={email}
         onClose={() => setShowEditSheet(false)}
         onSubmit={(nextName) => updateName(nextName)}
+      />
+
+      <AccountSettingsSheet
+        visible={showAccountSheet}
+        onClose={() => setShowAccountSheet(false)}
+      />
+
+      <NotificationsSheet
+        visible={showNotificationsSheet}
+        onClose={() => setShowNotificationsSheet(false)}
+      />
+
+      <HelpSheet
+        visible={showHelpSheet}
+        onClose={() => setShowHelpSheet(false)}
       />
     </ScrollView>
   );

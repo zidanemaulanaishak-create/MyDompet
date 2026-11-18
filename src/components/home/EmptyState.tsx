@@ -19,8 +19,8 @@ export default function EmptyState({
   actionLabel,
   onAction,
 }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <View className="items-center py-8 px-4">
       <View

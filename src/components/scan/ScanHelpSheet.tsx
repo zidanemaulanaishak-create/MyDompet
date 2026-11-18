@@ -18,9 +18,9 @@ const TIPS = [
 ];
 
 export default function ScanHelpSheet({ visible, onClose }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -31,7 +31,7 @@ export default function ScanHelpSheet({ visible, onClose }: Props) {
           <Text style={[styles.title, { color: palette.textDark }]}>{t('scan.helpTitle')}</Text>
           {TIPS.map((tip, i) => (
             <View key={i} style={styles.tipRow}>
-              <View style={[styles.tipIcon, { backgroundColor: isDark ? '#1C2942' : '#EEF2F7' }]}>
+              <View style={[styles.tipIcon, { backgroundColor: palette.chipBlue }]}>
                 <Iconify icon={tip.icon} size={17} color={palette.primary} />
               </View>
               <Text style={[styles.tipText, { color: palette.textMuted }]}>{t(tip.text)}</Text>

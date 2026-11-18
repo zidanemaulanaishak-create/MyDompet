@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -11,8 +11,8 @@ interface Props {
 }
 
 export default function ReportHeader({ title, onBack }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   return (
@@ -34,7 +34,7 @@ export default function ReportHeader({ title, onBack }: Props) {
         activeOpacity={0.7}
         accessibilityLabel={t('reports.downloadReport')}
       >
-        <Iconify icon="ph:download-simple-bold" size={20} color={COLORS.primary} />
+        <Iconify icon="ph:download-simple-bold" size={20} color={palette.primary} />
       </TouchableOpacity>
     </View>
   );

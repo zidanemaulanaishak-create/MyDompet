@@ -37,9 +37,9 @@ const AmountInput = forwardRef<AmountInputRef, Props>(
     },
     ref
   ) => {
-    const { isDark } = useTheme();
+    const { isDark, accent } = useTheme();
     const { t } = useI18n();
-    const palette = getThemeColors(isDark ? 'dark' : 'light');
+    const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
     const inputRef = useRef<TextInput>(null);
     const labelText = label ?? t('common.amount');
 

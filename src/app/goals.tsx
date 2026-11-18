@@ -13,7 +13,7 @@ import DepositSheet, { CashflowMode } from '@/components/goals/DepositSheet';
 import GoalDetailSheet from '@/components/goals/GoalDetailSheet';
 import { FinancialGoal, GoalFilter } from '@/data/goalsData';
 import { filterGoals, summarizeGoals } from '@/utils/goals';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useGoals } from '@/context/goal-context';
 import { useI18n } from '@/i18n';
@@ -21,8 +21,8 @@ import { useI18n } from '@/i18n';
 export default function GoalsScreen() {
   const router = useRouter();
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const insets = useSafeAreaInsets();
   const { goals, isLoading, refresh, addGoal, updateGoal, deleteGoal, deposit, withdraw } = useGoals();
 
@@ -211,12 +211,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 99,
     elevation: 24,
-    shadowColor: '#1A42BA',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 20,

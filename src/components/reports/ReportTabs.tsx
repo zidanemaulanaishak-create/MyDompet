@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -18,8 +18,8 @@ const TABS: { key: ReportTab; labelKey: string; icon: string }[] = [
 ];
 
 export default function ReportTabs({ active, onChange }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   return (
@@ -29,7 +29,7 @@ export default function ReportTabs({ active, onChange }: Props) {
         return (
           <TouchableOpacity
             key={tab.key}
-            style={[styles.tab, isActive && { backgroundColor: COLORS.primary }]}
+            style={[styles.tab, isActive && { backgroundColor: palette.primary }]}
             activeOpacity={0.8}
             onPress={() => onChange(tab.key)}
           >

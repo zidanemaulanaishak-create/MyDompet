@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors, withAlpha } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
 interface Props {
@@ -12,10 +13,12 @@ interface Props {
 export default function GoalsHeader({ onBack }: Props) {
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
-    <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
+    <View style={[styles.header, { paddingTop: insets.top + 14, backgroundColor: palette.primary }]}>
       {/* Glow decorative circles */}
-      <View style={styles.glowTop} />
+      <View style={[styles.glowTop, { backgroundColor: withAlpha(palette.sky, 0.2) }]} />
       <View style={styles.glowBottom} />
 
       <View style={styles.bar}>
@@ -31,7 +34,7 @@ export default function GoalsHeader({ onBack }: Props) {
         <View style={styles.spacer} />
       </View>
 
-      <Text style={styles.subtitle}>
+      <Text style={[styles.subtitle, { color: palette.onPrimaryMuted }]}>
         {t('goals.subtitle')}
       </Text>
     </View>
@@ -40,7 +43,6 @@ export default function GoalsHeader({ onBack }: Props) {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
     paddingBottom: 72,
     position: 'relative',
@@ -53,7 +55,6 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: 'rgba(56, 189, 248, 0.2)',
   },
   glowBottom: {
     position: 'absolute',
@@ -88,7 +89,6 @@ const styles = StyleSheet.create({
     height: 42,
   },
   subtitle: {
-    color: '#CBD3FF',
     fontSize: 13,
     marginTop: 12,
     lineHeight: 18,

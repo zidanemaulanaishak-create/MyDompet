@@ -13,8 +13,8 @@ import { useI18n } from '@/i18n';
 
 export default function ReportsScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const { transactions } = useTransactions();
   const params = useLocalSearchParams<{ period?: ReportPeriod }>();

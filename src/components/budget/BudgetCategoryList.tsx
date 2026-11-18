@@ -15,8 +15,8 @@ interface Props {
 
 export default function BudgetCategoryList({ categories, onAdd, onEdit }: Props) {
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View className="mb-6">

@@ -42,8 +42,8 @@ const OPTIONS: Option[] = [
 ];
 
 export default function NotificationsSheet({ visible, onClose }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const { notifications, setNotifications } = useSettings();
 
@@ -69,7 +69,7 @@ export default function NotificationsSheet({ visible, onClose }: Props) {
                 style={[styles.row, { borderBottomColor: isDark ? palette.divider : '#F1F5F9' }]}
               >
                 <View
-                  style={[styles.iconBox, { backgroundColor: isDark ? '#172B4D' : '#E8F0FE' }]}
+                  style={[styles.iconBox, { backgroundColor: palette.chipBlue }]}
                 >
                   <Iconify icon={opt.icon} size={20} color={palette.primary} />
                 </View>

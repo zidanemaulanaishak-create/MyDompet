@@ -99,8 +99,8 @@ export default function HistoryFilterSheet({
   dateTo,
   onApplyDates,
 }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const styles = createStyles(palette);
   // eslint-disable-next-line react-hooks/refs

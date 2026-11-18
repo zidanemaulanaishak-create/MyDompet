@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { DaySpending, formatRupiah } from '@/utils/reports';
 import { useI18n } from '@/i18n';
@@ -13,8 +13,8 @@ interface Props {
 const BAR_HEIGHT = 110;
 
 export default function DailySpendingChart({ data }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const max = Math.max(...data.map((d) => d.amount), 1);
   const empty = data.every((d) => d.amount === 0);
@@ -44,7 +44,7 @@ export default function DailySpendingChart({ data }: Props) {
                   <View
                     style={[
                       styles.bar,
-                      { height: h, backgroundColor: isToday ? palette.primary : isDark ? '#334155' : COLORS.chipBlue },
+                      { height: h, backgroundColor: isToday ? palette.primary : isDark ? '#334155' : palette.chipBlue },
                     ]}
                   />
                 </View>

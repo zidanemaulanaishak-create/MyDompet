@@ -22,8 +22,8 @@ interface Props {
 }
 
 export default function WeeklyRecapScreen({ onBack, onOpenAI }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t, locale } = useI18n();
 
   const { transactions } = useTransactions();

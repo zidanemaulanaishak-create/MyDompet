@@ -4,6 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { translate, useI18n } from '@/i18n';
 import { getAppPrefs } from '@/utils/appPrefs';
+import { useTheme } from '@/context/theme-context';
+import { getThemeColors } from '@/constants/colors';
 
 function errorMessage(message: string): string {
   if (/not enabled|provider disabled/i.test(message)) {
@@ -18,6 +20,8 @@ function errorMessage(message: string): string {
 export default function AuthCallbackScreen() {
   const router = useRouter();
   const { t } = useI18n();
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const params = useLocalSearchParams<{
     code?: string;
     error?: string;
@@ -56,7 +60,7 @@ export default function AuthCallbackScreen() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#1A42BA" />
+      <ActivityIndicator size="large" color={palette.primary} />
       <Text style={styles.text}>{t('auth.connecting')}</Text>
     </View>
   );

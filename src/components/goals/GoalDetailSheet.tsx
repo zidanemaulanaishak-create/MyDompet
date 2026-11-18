@@ -4,7 +4,15 @@ import { Iconify } from 'react-native-iconify';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { FinancialGoal } from '@/data/goalsData';
-import { formatCompact, formatRupiah, goalPercent, isGoalDone, monthlySuggestion, daysLeftLabel } from '@/utils/goals';
+import {
+  daysLeftLabel,
+  formatCompact,
+  formatDeadlineLabel,
+  formatRupiah,
+  goalPercent,
+  isGoalDone,
+  monthlySuggestion,
+} from '@/utils/goals';
 import { useI18n } from '@/i18n';
 
 interface Props {
@@ -18,8 +26,8 @@ interface Props {
 
 export default function GoalDetailSheet({ goal, onClose, onDeposit, onWithdraw, onEdit, onDelete }: Props) {
   const { t, locale } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   if (!goal) return null;
 
@@ -44,7 +52,7 @@ export default function GoalDetailSheet({ goal, onClose, onDeposit, onWithdraw, 
               <View style={styles.headText}>
                 <Text style={[styles.name, { color: palette.textDark }]}>{goal.name}</Text>
                 <Text style={[styles.meta, { color: palette.textMuted }]}>
-                  {goal.deadline} · {daysLeftLabel(goal.deadlineTs, locale)}
+                  {formatDeadlineLabel(goal.deadlineTs, locale)} · {daysLeftLabel(goal.deadlineTs, locale)}
                 </Text>
               </View>
             </View>
@@ -130,7 +138,7 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 10, marginTop: 18 },
   primaryBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: '#1A42BA', borderRadius: 14, paddingVertical: 13,
+    borderRadius: 14, paddingVertical: 13,
   },
   primaryLabel: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   secondaryBtn: {

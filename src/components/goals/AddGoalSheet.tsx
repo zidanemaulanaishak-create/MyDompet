@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, Imag
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 import type { FinancialGoal } from '@/data/goalsData';
@@ -36,14 +36,14 @@ function formatNominalInput(n: number): string {
 
 function defaultDeadline(): number {
   const d = new Date();
-  d.setMonth(d.getMonth() + 6);
+  d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
 
 export default function AddGoalSheet({ visible, initial, saving, onClose, onSubmit }: Props) {
-  const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t, locale } = useI18n();
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [name, setName] = useState('');
   const [target, setTarget] = useState('');
   const [deadlineTs, setDeadlineTs] = useState<number>(() => defaultDeadline());
@@ -86,6 +86,9 @@ export default function AddGoalSheet({ visible, initial, saving, onClose, onSubm
     });
     if (!result.canceled && result.assets?.length) setImageUri(result.assets[0].uri);
   };
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
 
   const onPickerChange = (_event: DateTimePickerEvent, selected?: Date) => {
     if (Platform.OS === 'android') setShowPicker(false);
@@ -160,7 +163,7 @@ export default function AddGoalSheet({ visible, initial, saving, onClose, onSubm
             onPress={() => setShowPicker(true)}
           >
             <Iconify icon="ph:calendar-bold" size={20} color={palette.primary} />
-            <Text style={[styles.dateLabel, { color: palette.textDark }]}>{formatDeadlineLabel(deadlineTs)}</Text>
+            <Text style={[styles.dateLabel, { color: palette.textDark }]}>{formatDeadlineLabel(deadlineTs, locale)}</Text>
             <Iconify icon="ph:caret-down-bold" size={16} color={palette.textMuted} />
           </TouchableOpacity>
           {showPicker || Platform.OS === 'ios' ? (
@@ -168,7 +171,7 @@ export default function AddGoalSheet({ visible, initial, saving, onClose, onSubm
               value={new Date(deadlineTs)}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              minimumDate={new Date()}
+              minimumDate={todayStart}
               onChange={onPickerChange}
             />
           ) : null}
@@ -195,7 +198,7 @@ export default function AddGoalSheet({ visible, initial, saving, onClose, onSubm
             </TouchableOpacity>
           ) : null}
 
-          <TouchableOpacity style={styles.save} activeOpacity={0.85} onPress={handleSave} disabled={!!saving}>
+          <TouchableOpacity style={[styles.save, { backgroundColor: palette.primary }]} activeOpacity={0.85} onPress={handleSave} disabled={!!saving}>
             {saving ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
@@ -239,7 +242,7 @@ const styles = StyleSheet.create({
   removeBtn: { alignSelf: 'flex-start', paddingTop: 8 },
   removeLabel: { fontSize: 13, fontWeight: '700' },
   save: {
-    backgroundColor: COLORS.primary, borderRadius: 16,
+    borderRadius: 16,
     paddingVertical: 15, alignItems: 'center', marginTop: 20,
   },
   saveLabel: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },

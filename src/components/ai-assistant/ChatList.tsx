@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { ScrollView, View, Text, StyleSheet, Keyboard } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { ChatMessage, QuickSuggestion } from '@/types/chat';
 import { useI18n } from '@/i18n';
@@ -29,8 +29,8 @@ interface ChatListRef {
 
 const ChatList = forwardRef<ChatListRef, Props>(
   ({ messages, isTyping, showSuggestions, suggestions, onSuggestionPress, onLike, onCopy, onShare, onMore, userName }, ref) => {
-    const { isDark } = useTheme();
-    const palette = getThemeColors(isDark ? 'dark' : 'light');
+    const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
     const { t } = useI18n();
     const scrollViewRef = useRef<ScrollView>(null);
 
@@ -47,7 +47,7 @@ const ChatList = forwardRef<ChatListRef, Props>(
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <View style={[styles.heroAvatar, { backgroundColor: COLORS.primary }]}>
+            <View style={[styles.heroAvatar, { backgroundColor: palette.primary, shadowColor: palette.primary }]}>
               <Iconify icon="ph:sparkle-fill" size={30} color="#FFFFFF" />
             </View>
             <Text style={[styles.greeting, { color: palette.textDark }]}>{t('ai.greeting', { name: userName })}</Text>
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   emptyContent: { width: '100%', maxWidth: 760, alignSelf: 'center', flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 },
   hero: { alignItems: 'center', marginBottom: 28 },
-  heroAvatar: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', marginBottom: 18, shadowColor: COLORS.primary, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 6 },
+  heroAvatar: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', marginBottom: 18, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 8 }, shadowRadius: 16, elevation: 6 },
   greeting: { fontSize: 26, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
   sub: { fontSize: 18, lineHeight: 21, textAlign: 'center', marginTop: 8, maxWidth: 320 },
   suggestSection: { width: '100%' },

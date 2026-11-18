@@ -1,9 +1,10 @@
 import React from 'react';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 const SKIN_1 = '#F6C28B';
 const SKIN_2 = '#E8AE72';
-const SHIRT_2 = '#38BDF8';
 const PANTS = '#2E2A5E';
 const SHOE = '#1E1B4B';
 const HAIR = '#3B2417';
@@ -13,7 +14,17 @@ const WHITE = '#FFFFFF';
 const SPARKLE =
   'M0 -9 C1 -3 3 -1 9 0 C3 1 1 3 0 9 C-1 3 -3 1 -9 0 C-3 -1 -1 -3 0 -9 Z';
 
-export default function WelcomeIllustration() {
+interface WelcomeIllustrationProps {
+  color?: string;
+  secondaryColor?: string;
+}
+
+export default function WelcomeIllustration({ color, secondaryColor }: WelcomeIllustrationProps) {
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
+  const primary = color ?? palette.primary;
+  const secondary = secondaryColor ?? palette.sky;
+
   return (
     <Svg width="100%" height="100%" viewBox="0 0 360 250">
       <Circle cx={180} cy={125} r={100} fill="rgba(255,255,255,0.07)" />
@@ -26,7 +37,7 @@ export default function WelcomeIllustration() {
 
       <G transform="translate(58 40) rotate(-14)">
         <Rect x={0} y={0} width={54} height={36} rx={9} fill={WHITE} />
-        <Rect x={10} y={8} width={34} height={6} rx={3} fill="#1A42BA" />
+        <Rect x={10} y={8} width={34} height={6} rx={3} fill={primary} />
         <Rect x={28} y={20} width={16} height={6} rx={3} fill="#C7CBE0" />
         <Circle cx={14} cy={23} r={4.5} fill="#FF961D" />
       </G>
@@ -76,7 +87,7 @@ export default function WelcomeIllustration() {
       <Path d="M89 66 C89 46 137 46 137 66 C133 58 93 58 89 66 Z" fill={HAIR} />
       <Circle cx={113} cy={70} r={5} fill={WHITE} />
 
-      <Rect x={222} y={106} width={50} height={60} rx={24} fill={SHIRT_2} />
+      <Rect x={222} y={106} width={50} height={60} rx={24} fill={secondary} />
       <Circle cx={247} cy={78} r={24} fill={SKIN_2} />
       <Path d="M223 70 C223 48 271 48 271 70 C267 62 227 62 223 70 Z" fill={HAIR} />
       <Circle cx={247} cy={75} r={5} fill={WHITE} />

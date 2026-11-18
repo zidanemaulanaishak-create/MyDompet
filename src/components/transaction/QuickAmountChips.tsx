@@ -12,9 +12,9 @@ interface Props {
 const PRESETS = [10000, 50000, 100000, 500000];
 
 export default function QuickAmountChips({ type, onSelect, currentValue }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
-  const accent = type === 'expense' ? palette.red : palette.green;
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
+  const toneColor = type === 'expense' ? palette.red : palette.green;
   const bgTint =
     type === 'expense'
       ? isDark
@@ -34,8 +34,8 @@ export default function QuickAmountChips({ type, onSelect, currentValue }: Props
             style={[
               styles.chip,
               {
-                backgroundColor: active ? accent : bgTint,
-                borderColor: active ? accent : 'transparent',
+                backgroundColor: active ? toneColor : bgTint,
+                borderColor: active ? toneColor : 'transparent',
               },
             ]}
             onPress={() => onSelect(preset)}
@@ -44,7 +44,7 @@ export default function QuickAmountChips({ type, onSelect, currentValue }: Props
             <Text
               style={[
                 styles.chipText,
-                { color: active ? '#fff' : accent },
+                { color: active ? '#fff' : toneColor },
               ]}
             >
               Rp {preset.toLocaleString('id-ID')}

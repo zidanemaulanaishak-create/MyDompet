@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { ChatMessage } from '@/types/chat';
 import { useI18n, type Locale } from '@/i18n';
@@ -49,8 +49,8 @@ function MessageContent({ parts, color, accent }: { parts: ReturnType<typeof par
 }
 
 export default function MessageBubble({ message, onLike, onCopy, onShare, onMore, showActionBar = true }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { locale } = useI18n();
   const [fade] = useState(() => new Animated.Value(0));
   const [slide] = useState(() => new Animated.Value(10));
@@ -69,7 +69,7 @@ export default function MessageBubble({ message, onLike, onCopy, onShare, onMore
     return (
       <Animated.View style={[styles.container, { opacity: fade, transform: [{ translateY: slide }] }]}>
         <View style={styles.userRow}>
-          <View style={styles.userBubble}>
+          <View style={[styles.userBubble, { backgroundColor: palette.primary, shadowColor: palette.primary }]}>
             <MessageContent parts={parts} color="#FFFFFF" accent="#FDE68A" />
           </View>
         </View>
@@ -81,7 +81,7 @@ export default function MessageBubble({ message, onLike, onCopy, onShare, onMore
   return (
     <Animated.View style={[styles.container, { opacity: fade, transform: [{ translateY: slide }] }]}>
       <View style={styles.aiRow}>
-        <View style={[styles.aiAvatar, { backgroundColor: COLORS.primary }]}>
+        <View style={[styles.aiAvatar, { backgroundColor: palette.primary }]}>
           <Iconify icon="ph:sparkle-fill" size={12} color="#FFFFFF" />
         </View>
         <View style={styles.aiBody}>
@@ -91,7 +91,7 @@ export default function MessageBubble({ message, onLike, onCopy, onShare, onMore
               { backgroundColor: palette.card, borderColor: isDark ? '#263550' : '#E5EAF1' },
             ]}
           >
-            <MessageContent parts={parts} color={palette.textDark} accent={COLORS.primary} />
+            <MessageContent parts={parts} color={palette.textDark} accent={palette.primary} />
           </View>
           {showActionBar ? (
             <AIActionBar
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   text: { fontSize: 18, lineHeight: 22 },
   bold: { fontWeight: '700' },
   userRow: { alignItems: 'flex-end' },
-  userBubble: { alignSelf: 'flex-end', maxWidth: '80%', backgroundColor: COLORS.primary, borderRadius: 20, borderBottomRightRadius: 6, paddingHorizontal: 15, paddingVertical: 11, shadowColor: COLORS.primary, shadowOpacity: 0.22, shadowOffset: { width: 0, height: 4 }, shadowRadius: 10, elevation: 4 },
+  userBubble: { alignSelf: 'flex-end', maxWidth: '80%', borderRadius: 20, borderBottomRightRadius: 6, paddingHorizontal: 15, paddingVertical: 11, shadowOpacity: 0.22, shadowOffset: { width: 0, height: 4 }, shadowRadius: 10, elevation: 4 },
   userTimestamp: { fontSize: 18, fontWeight: '500', marginTop: 5, marginRight: 4, textAlign: 'right' },
   aiRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   aiAvatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 2, flexShrink: 0 },

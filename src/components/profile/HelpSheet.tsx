@@ -29,8 +29,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function HelpSheet({ visible, onClose }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 

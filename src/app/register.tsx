@@ -30,9 +30,9 @@ interface RegisterErrors {
 export default function RegisterScreen() {
   const router = useRouter();
   const { signUp, signInWithProvider } = useAuth();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? "dark" : "light");
+  const palette = getThemeColors(isDark ? "dark" : "light", accent);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -110,7 +110,8 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-primary"
+      className="flex-1"
+      style={{ backgroundColor: palette.primary }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <BlueHeader
@@ -170,12 +171,10 @@ export default function RegisterScreen() {
           }}
         >
           <View
-            className={`w-5 h-5 rounded-lg items-center justify-center ${
-              agreed ? "bg-primary border border-primary" : "border"
-            }`}
+            className="w-5 h-5 rounded-lg items-center justify-center border"
             style={
               agreed
-                ? undefined
+                ? { backgroundColor: palette.primary, borderColor: palette.primary }
                 : { backgroundColor: palette.divider, borderColor: palette.border }
             }
           >

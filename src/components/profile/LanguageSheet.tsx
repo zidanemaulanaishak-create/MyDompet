@@ -30,8 +30,8 @@ export default function LanguageSheet({
   onClose,
   onSelect,
 }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   return (
@@ -68,7 +68,7 @@ export default function LanguageSheet({
                 onPress={() => onSelect(opt.key)}
               >
                 <View
-                  style={[styles.badge, { backgroundColor: isDark ? '#172B4D' : '#E8F0FE' }]}
+                  style={[styles.badge, { backgroundColor: palette.chipBlue }]}
                 >
                   <Text style={[styles.badgeText, { color: palette.primary }]}>
                     {opt.short}

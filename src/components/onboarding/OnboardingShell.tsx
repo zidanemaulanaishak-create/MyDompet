@@ -29,9 +29,9 @@ export default function OnboardingShell({
   actionDisabled,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const progress = step === 1 ? '50%' : '100%';
 
   return (
@@ -46,7 +46,7 @@ export default function OnboardingShell({
             onPress={onBack}
             activeOpacity={0.7}
             className="w-10 h-10 rounded-full items-center justify-center"
-            style={{ backgroundColor: isDark ? '#1C2942' : '#F0F4FE' }}
+            style={{ backgroundColor: palette.chipBlue }}
             accessibilityLabel={t('common.back')}
           >
             <Iconify icon="ph:arrow-left-bold" size={20} color={palette.primary} />
@@ -108,11 +108,7 @@ export default function OnboardingShell({
           disabled={actionDisabled}
           className="rounded-2xl py-4 items-center"
           style={{
-            backgroundColor: actionDisabled
-              ? isDark
-                ? '#23314D'
-                : '#C3CEEB'
-              : palette.primary,
+            backgroundColor: actionDisabled ? palette.onPrimaryMuted : palette.primary,
             shadowColor: palette.primary,
             shadowOpacity: actionDisabled ? 0 : 0.35,
             shadowRadius: 14,
@@ -120,7 +116,12 @@ export default function OnboardingShell({
             elevation: actionDisabled ? 0 : 6,
           }}
         >
-          <Text className="text-white text-[16px] font-bold">{actionLabel}</Text>
+          <Text
+            className="text-[16px] font-bold"
+            style={{ color: actionDisabled ? palette.primaryDark : '#FFFFFF' }}
+          >
+            {actionLabel}
+          </Text>
         </TouchableOpacity>
         <Text className="text-[12px] text-center mt-3" style={{ color: palette.textMuted }}>
           {t('onboarding.editableNote')}

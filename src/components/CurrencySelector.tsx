@@ -11,8 +11,10 @@ import {
   Keyboard,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { Currency, CURRENCIES } from '@/constants/currencies';
+import { useTheme } from '@/context/theme-context';
+import { useI18n } from '@/i18n';
 
 interface Props {
   selectedCurrency: Currency;
@@ -22,6 +24,9 @@ interface Props {
 }
 
 export default function CurrencySelector({ selectedCurrency, onSelect, style, className }: Props) {
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -55,20 +60,20 @@ export default function CurrencySelector({ selectedCurrency, onSelect, style, cl
   return (
     <View style={style} className={className}>
       <TouchableOpacity
-        style={styles.dropdownButton}
+        style={[styles.dropdownButton, { backgroundColor: palette.inputBg, borderColor: palette.border }]}
         onPress={() => setIsOpen((v) => !v)}
         activeOpacity={0.9}
       >
         <View style={styles.selectedContent}>
           <Text style={styles.flag}>{selectedCurrency.flag}</Text>
           <View style={styles.codeContainer}>
-            <Text style={styles.codeText}>{selectedCurrency.code}</Text>
-            <Text style={styles.symbolText}>
+            <Text style={[styles.codeText, { color: palette.textDark }]}>{selectedCurrency.code}</Text>
+            <Text style={[styles.symbolText, { color: palette.textMuted }]}>
               {selectedCurrency.symbol} - {selectedCurrency.country}
             </Text>
           </View>
         </View>
-        <Iconify icon="ph:caret-down-bold" size={20} color={COLORS.textMuted} />
+        <Iconify icon="ph:caret-down-bold" size={20} color={palette.textMuted} />
       </TouchableOpacity>
 
       <Modal
@@ -82,32 +87,32 @@ export default function CurrencySelector({ selectedCurrency, onSelect, style, cl
           onPress={closeDropdown}
           activeOpacity={1}
         >
-          <View style={styles.bottomSheet}>
+          <View style={[styles.bottomSheet, { backgroundColor: palette.card }]}>
             <View style={styles.handleContainer}>
-              <View style={styles.handle} />
+              <View style={[styles.handle, { backgroundColor: isDark ? palette.divider : '#CBD5E1' }]} />
             </View>
 
             <View style={styles.header}>
-              <Text style={styles.title}>Pilih Mata Uang</Text>
+              <Text style={[styles.title, { color: palette.textDark }]}>{t('profile.currency')}</Text>
               <TouchableOpacity
                 onPress={closeDropdown}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Iconify icon="ph:x-bold" size={22} color={COLORS.textMuted} />
+                <Iconify icon="ph:x-bold" size={22} color={palette.textMuted} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.searchContainer}>
+            <View style={[styles.searchContainer, { backgroundColor: palette.inputBg }]}>
               <Iconify
                 icon="ph:magnifying-glass-bold"
                 size={20}
-                color={COLORS.textMuted}
+                color={palette.textMuted}
                 style={styles.searchIcon}
               />
               <TextInput
-                style={styles.searchInput}
-                placeholder="Cari mata uang..."
-                placeholderTextColor={COLORS.textMuted}
+                style={[styles.searchInput, { color: palette.textDark }]}
+                placeholder={t('common.search')}
+                placeholderTextColor={palette.textMuted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 autoFocus={true}
@@ -120,7 +125,7 @@ export default function CurrencySelector({ selectedCurrency, onSelect, style, cl
             >
               {filteredCurrencies.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <Text style={styles.emptyText}>Mata uang tidak ditemukan</Text>
+                  <Text style={[styles.emptyText, { color: palette.textMuted }]}>{t('common.noData')}</Text>
                 </View>
               ) : (
                 filteredCurrencies.map((currency) => (
@@ -128,20 +133,21 @@ export default function CurrencySelector({ selectedCurrency, onSelect, style, cl
                     key={currency.code}
                     style={[
                       styles.option,
-                      currency.code === selectedCurrency.code && styles.optionSelected,
+                      { backgroundColor: palette.inputBg },
+                      currency.code === selectedCurrency.code && { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : palette.chipBlue },
                     ]}
                     onPress={() => handleSelect(currency)}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.optionFlag}>{currency.flag}</Text>
                     <View style={styles.optionInfo}>
-                      <Text style={styles.optionCode}>{currency.code}</Text>
-                      <Text style={styles.optionDetail}>
+                      <Text style={[styles.optionCode, { color: palette.textDark }]}>{currency.code}</Text>
+                      <Text style={[styles.optionDetail, { color: palette.textMuted }]}>
                         {currency.symbol} - {currency.country}
                       </Text>
                     </View>
                     {currency.code === selectedCurrency.code && (
-                      <Iconify icon="ph:check-bold" size={18} color={COLORS.primary} />
+                      <Iconify icon="ph:check-bold" size={18} color={palette.primary} />
                     )}
                   </TouchableOpacity>
                 ))
@@ -161,9 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     borderRadius: 12,
   },
   selectedContent: {
@@ -181,11 +185,11 @@ const styles = StyleSheet.create({
   codeText: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.textDark,
+    
   },
   symbolText: {
     fontSize: 18,
-    color: COLORS.textMuted,
+    
   },
   overlay: {
     flex: 1,
@@ -193,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   bottomSheet: {
-    backgroundColor: '#FFFFFF',
+    
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -221,12 +225,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: 'transparent',
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.textDark,
+    
   },
   searchContainer: {
     flexDirection: 'row',
@@ -241,8 +245,8 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 17,
-    color: COLORS.textDark,
-    backgroundColor: '#F8F9FA',
+    
+    
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -257,9 +261,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
-  optionSelected: {
-    backgroundColor: '#E8F0FE',
-  },
   optionFlag: {
     fontSize: 26,
     marginRight: 12,
@@ -270,11 +271,11 @@ const styles = StyleSheet.create({
   optionCode: {
     fontSize: 17,
     fontWeight: '600',
-    color: COLORS.textDark,
+    
   },
   optionDetail: {
     fontSize: 18,
-    color: COLORS.textMuted,
+    
     marginTop: 2,
   },
   emptyState: {
@@ -283,6 +284,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: COLORS.textMuted,
+    
   },
 });

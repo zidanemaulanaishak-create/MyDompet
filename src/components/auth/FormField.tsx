@@ -28,13 +28,15 @@ export default function FormField({
 }: FormFieldProps) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(true);
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View className="mt-5">
-      <Text className="text-[#8FA6CE] text-lg font-semibold">{label}</Text>
+      <Text className="text-lg font-semibold" style={{ color: palette.onPrimaryMuted }}>
+        {label}
+      </Text>
       <View
         className="mt-2 flex-row items-center rounded-xl px-4"
         style={{

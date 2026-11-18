@@ -1,3 +1,4 @@
+import React from "react";
 import { getThemeColors } from "@/constants/colors";
 import { useTheme } from "@/context/theme-context";
 import { useI18n } from "@/i18n";
@@ -22,9 +23,9 @@ export default function GoalList({
   onPressItem,
   onAdd,
 }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? "dark" : "light");
+  const palette = getThemeColors(isDark ? "dark" : "light", accent);
   return (
     <View className="rounded-2xl p-4 mb-6 shadow-sm" style={{ backgroundColor: palette.card }}>
       <TouchableOpacity

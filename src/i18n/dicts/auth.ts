@@ -39,6 +39,7 @@ export const authDict: Dict = {
     'auth.forgotAlertMsg': 'Fitur lupa kata sandi akan segera hadir.',
     'auth.errLoginFailed': 'Gagal masuk',
     'auth.errSignUpFailed': 'Gagal mendaftar',
+    'auth.errEmailTaken': 'Email sudah terdaftar. Silakan masuk.',
     'auth.registerHeaderTitle': 'Buat Akun',
     'auth.registerHeaderSub':
       'Isi informasi kamu di bawah atau daftar dengan akun sosial.',
@@ -100,6 +101,7 @@ export const authDict: Dict = {
     'auth.forgotAlertMsg': 'Forgot password feature is coming soon.',
     'auth.errLoginFailed': 'Sign in failed',
     'auth.errSignUpFailed': 'Sign up failed',
+    'auth.errEmailTaken': 'This email is already registered. Please sign in.',
     'auth.registerHeaderTitle': 'Create Account',
     'auth.registerHeaderSub':
       'Fill your information below or register with your social account.',

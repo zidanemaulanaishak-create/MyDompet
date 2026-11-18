@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { GoalFilter } from '@/data/goalsData';
 import { useI18n } from '@/i18n';
@@ -18,8 +18,8 @@ const TABS: { key: GoalFilter; labelKey: string }[] = [
 
 export default function GoalsFilterTabs({ value, onChange }: Props) {
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <View style={styles.row}>
       {TABS.map((tab) => {
@@ -27,7 +27,7 @@ export default function GoalsFilterTabs({ value, onChange }: Props) {
         return (
           <TouchableOpacity
             key={tab.key}
-            style={[styles.chip, active ? styles.chipActive : [styles.chipIdle, { backgroundColor: palette.divider }]]}
+            style={[styles.chip, active ? { backgroundColor: palette.primary } : [styles.chipIdle, { backgroundColor: palette.divider }]]}
             activeOpacity={0.8}
             onPress={() => onChange(tab.key)}
           >
@@ -44,7 +44,6 @@ export default function GoalsFilterTabs({ value, onChange }: Props) {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginTop: 16 },
   chip: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20 },
-  chipActive: { backgroundColor: COLORS.primary },
   chipIdle: {},
   chipLabel: { fontSize: 14, fontWeight: '700' },
   chipLabelActive: { color: '#FFFFFF' },

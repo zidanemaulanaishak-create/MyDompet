@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { useRouter, usePathname } from 'expo-router';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -50,9 +50,9 @@ const NAV_ITEMS_RIGHT: NavItemConfig[] = [
 
 function NavItem({ item, active }: { item: NavItemConfig; active: boolean }) {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <TouchableOpacity
@@ -81,9 +81,9 @@ interface Props {
 export default function BottomNav({ onFabPress }: Props) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const bg = isDark ? palette.card : palette.bg;
 
   return (
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   fab: {
-    shadowColor: COLORS.orange,
+    shadowColor: '#FF961D',
     shadowOpacity: 0.55,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 },

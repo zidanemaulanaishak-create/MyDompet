@@ -22,8 +22,8 @@ interface Props {
 }
 
 export default function AccountSettingsSheet({ visible, onClose }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const { currencyCode, setCurrencyCode } = useSettings();
   const { user, resetOnboarding } = useAuth();
@@ -87,11 +87,7 @@ export default function AccountSettingsSheet({ visible, onClose }: Props) {
                       styles.currencyChip,
                       {
                         borderColor: active ? palette.primary : palette.border,
-                        backgroundColor: active
-                          ? isDark
-                            ? '#172B4D'
-                            : '#E8F0FE'
-                          : 'transparent',
+                        backgroundColor: active ? palette.chipBlue : 'transparent',
                       },
                     ]}
                   >

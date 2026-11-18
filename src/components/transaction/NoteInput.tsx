@@ -36,9 +36,9 @@ const NoteInput = forwardRef<NoteInputRef, Props>(
     },
     ref
   ) => {
-    const { isDark } = useTheme();
+    const { isDark, accent } = useTheme();
     const { t } = useI18n();
-    const palette = getThemeColors(isDark ? 'dark' : 'light');
+    const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
     const inputRef = useRef<TextInput>(null);
     const [isFocused, setIsFocused] = useState(false);
     const labelText = label ?? t('common.note');

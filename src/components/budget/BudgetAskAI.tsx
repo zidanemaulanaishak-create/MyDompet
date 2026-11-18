@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Iconify } from 'react-native-iconify';
-import { getThemeColors } from '@/constants/colors';
+import { getThemeColors, mixHex } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -16,8 +16,8 @@ export const BUDGET_SUGGESTIONS: string[] = [
 export default function BudgetAskAI() {
   const router = useRouter();
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   const handlePress = (q: string) => {
     router.push({ pathname: '/ai-assistant', params: { q } });
@@ -25,7 +25,7 @@ export default function BudgetAskAI() {
 
   return (
     <LinearGradient
-      colors={isDark ? ['#172B4D', '#16233D'] : ['#E8F0FE', '#F6FAFF']}
+      colors={[palette.chipBlue, mixHex(palette.chipBlue, palette.bg, isDark ? 0.45 : 0.55)]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.card}
@@ -47,7 +47,7 @@ export default function BudgetAskAI() {
           <TouchableOpacity
             key={i}
             className="rounded-[10px] px-3 py-2.5 mr-2 max-w-[150px]"
-            style={{ backgroundColor: isDark ? '#1C2942' : '#D4E4FF' }}
+            style={{ backgroundColor: palette.chipBlue }}
             activeOpacity={0.85}
             onPress={() => handlePress(t(s))}
           >

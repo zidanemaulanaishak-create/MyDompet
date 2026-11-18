@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -29,8 +29,8 @@ export default function MessageInput({
   disabled = false,
   placeholder,
 }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const [focused, setFocused] = useState(false);
   const hasText = value.trim().length > 0;
@@ -68,7 +68,7 @@ export default function MessageInput({
             styles.inputWrap,
             {
               backgroundColor: palette.card,
-              borderColor: focused ? COLORS.primary : isDark ? '#263550' : '#E2E8F0',
+              borderColor: focused ? palette.primary : isDark ? '#263550' : '#E2E8F0',
               shadowOpacity: focused ? 0.16 : 0.07,
             },
           ]}
@@ -90,7 +90,7 @@ export default function MessageInput({
             accessibilityLabel={t('ai.inputA11y')}
           />
           <TouchableOpacity
-            style={[styles.sendButton, { backgroundColor: hasText ? COLORS.primary : isDark ? '#263550' : '#E2E8F0' }]}
+            style={[styles.sendButton, { backgroundColor: hasText ? palette.primary : isDark ? '#263550' : '#E2E8F0' }]}
             onPress={onSend}
             disabled={!hasText || disabled}
             activeOpacity={0.8}

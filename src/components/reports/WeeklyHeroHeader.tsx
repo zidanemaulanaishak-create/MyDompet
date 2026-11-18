@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { formatRupiah, weekOverWeekChange } from '@/utils/reports';
 import { useI18n } from '@/i18n';
@@ -18,9 +18,9 @@ interface Props {
 }
 
 export default function WeeklyHeroHeader({ title, periodLabel, totalExpense, lastWeekExpense, trend, onBack }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { width } = useWindowDimensions();
   const change = weekOverWeekChange(totalExpense, lastWeekExpense);
   const down = change <= 0;
@@ -39,7 +39,7 @@ export default function WeeklyHeroHeader({ title, periodLabel, totalExpense, las
           </TouchableOpacity>
           <View style={styles.titleRow}>
             <Text style={styles.title}>{title}</Text>
-            <Iconify icon="ph:sparkle-bold" size={18} color={COLORS.orange} />
+            <Iconify icon="ph:sparkle-bold" size={18} color={palette.orange} />
           </View>
           <View style={styles.backBtn} />
         </View>

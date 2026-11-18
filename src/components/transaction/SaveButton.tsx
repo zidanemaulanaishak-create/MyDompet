@@ -23,9 +23,9 @@ export default function SaveButton({
   variant = 'primary',
   fullWidth = true,
 }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [scale] = React.useState(() => new Animated.Value(1));
 
   const handlePressIn = () => {

@@ -33,9 +33,9 @@ interface Props {
 }
 
 export default function TypeSelector({ value, onChange, className }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [optionWidth, setOptionWidth] = React.useState(0);
 
   const handleLayout = (e: LayoutChangeEvent) => {
@@ -43,7 +43,7 @@ export default function TypeSelector({ value, onChange, className }: Props) {
     setOptionWidth(Math.floor(w));
   };
 
-  const accent = (type: TxType) => (type === 'expense' ? palette.red : palette.green);
+  const toneColor = (type: TxType) => (type === 'expense' ? palette.red : palette.green);
 
   return (
     <View
@@ -60,7 +60,7 @@ export default function TypeSelector({ value, onChange, className }: Props) {
               style={[
                 styles.option,
                 optionWidth > 0 && { width: optionWidth },
-                active && { backgroundColor: accent(option.type) },
+                active && { backgroundColor: toneColor(option.type) },
               ]}
               activeOpacity={0.85}
               onPress={() => onChange(option.type)}
@@ -68,7 +68,7 @@ export default function TypeSelector({ value, onChange, className }: Props) {
               <Iconify
                 icon={option.icon}
                 size={18}
-                color={active ? '#fff' : accent(option.type)}
+                color={active ? '#fff' : toneColor(option.type)}
               />
               <Text
                 style={[

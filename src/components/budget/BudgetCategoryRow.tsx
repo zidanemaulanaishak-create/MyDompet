@@ -20,8 +20,8 @@ interface Props {
 export default function BudgetCategoryRow({ category, onEdit }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const meta = getCategoryById(category.categoryId, 'expense');
   const icon = meta?.icon ?? 'twemoji:label';
   const label = meta?.label ?? t('budget.uncategorized');

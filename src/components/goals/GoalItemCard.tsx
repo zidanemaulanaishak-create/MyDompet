@@ -1,10 +1,17 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { FinancialGoal } from '@/data/goalsData';
-import { formatCompact, formatRupiah, goalPercent, isGoalDone, monthlySuggestion } from '@/utils/goals';
+import {
+  formatCompact,
+  formatDeadlineLabel,
+  formatRupiah,
+  goalPercent,
+  isGoalDone,
+  monthlySuggestion,
+} from '@/utils/goals';
 import { useI18n } from '@/i18n';
 
 interface Props {
@@ -14,9 +21,9 @@ interface Props {
 }
 
 export default function GoalItemCard({ goal, onPress, onDeposit }: Props) {
-  const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { t, locale } = useI18n();
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const done = isGoalDone(goal);
   const pct = goalPercent(goal);
   const barColor = done || pct >= 80 ? palette.green : palette.primary;
@@ -35,7 +42,7 @@ export default function GoalItemCard({ goal, onPress, onDeposit }: Props) {
           <Text style={[styles.name, { color: palette.textDark }]} numberOfLines={1}>{goal.name}</Text>
           <View style={styles.deadlineBadge}>
             <Iconify icon="ph:calendar-bold" size={13} color={palette.textMuted} />
-            <Text style={[styles.deadlineText, { color: palette.textMuted }]}>{t('goals.deadlineLabel', { deadline: goal.deadline })}</Text>
+            <Text style={[styles.deadlineText, { color: palette.textMuted }]}>{t('goals.deadlineLabel', { deadline: formatDeadlineLabel(goal.deadlineTs, locale) })}</Text>
           </View>
         </View>
         <View style={[styles.pctBadge, { backgroundColor: done ? (isDark ? 'rgba(16,185,129,0.18)' : '#E6F7EE') : palette.chipBlue }]}>
@@ -70,12 +77,12 @@ export default function GoalItemCard({ goal, onPress, onDeposit }: Props) {
         </Text>
         {!done ? (
           <TouchableOpacity
-            style={styles.depositBtn}
+            style={[styles.depositBtn, { backgroundColor: palette.chipBlue }]}
             activeOpacity={0.8}
             onPress={() => onDeposit?.(goal)}
           >
             <Iconify icon="ph:plus-bold" size={14} color={palette.primary} />
-            <Text style={styles.depositLabel}>{t('goals.deposit')}</Text>
+            <Text style={[styles.depositLabel, { color: palette.primary }]}>{t('goals.deposit')}</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -118,8 +125,7 @@ const styles = StyleSheet.create({
   suggest: { flex: 1, fontSize: 12, fontWeight: '600' },
   depositBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: COLORS.chipBlue,
     borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7,
   },
-  depositLabel: { fontSize: 13, fontWeight: '700', color: COLORS.primary },
+  depositLabel: { fontSize: 13, fontWeight: '700' },
 });

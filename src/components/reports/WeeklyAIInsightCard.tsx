@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -12,8 +12,8 @@ interface Props {
 }
 
 export default function WeeklyAIInsightCard({ txCount, threshold = 5, onAction }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const unlocked = txCount >= threshold;
   const remaining = Math.max(0, threshold - txCount);
@@ -23,7 +23,7 @@ export default function WeeklyAIInsightCard({ txCount, threshold = 5, onAction }
     <View
       style={[
         styles.card,
-        { backgroundColor: isDark ? '#16233D' : '#F0F7FF', borderColor: isDark ? '#2A4468' : '#C9DEF7' },
+        { backgroundColor: palette.chipBlue, borderColor: palette.border },
       ]}
     >
       <View style={styles.row}>
@@ -34,19 +34,19 @@ export default function WeeklyAIInsightCard({ txCount, threshold = 5, onAction }
           <Text style={[styles.title, { color: palette.textDark }]}>
             {unlocked ? t('weekly.aiUnlocked') : t('weekly.aiLocked')}
           </Text>
-          <Text style={[styles.sub, { color: isDark ? '#A9B8D0' : '#3E5879' }]}>
+          <Text style={[styles.sub, { color: palette.textMuted }]}>
             {unlocked
               ? t('weekly.aiUnlockedSub')
               : t('weekly.aiLockedSub', { count: remaining })}
           </Text>
         </View>
       </View>
-      <View style={[styles.track, { backgroundColor: isDark ? '#24344F' : '#D8E8FA' }]}>
+      <View style={[styles.track, { backgroundColor: palette.track }]}>
         <View
-          style={[styles.fill, { width: `${Math.round(progress * 100)}%`, backgroundColor: unlocked ? COLORS.orange : palette.primary }]}
+          style={[styles.fill, { width: `${Math.round(progress * 100)}%`, backgroundColor: unlocked ? palette.orange : palette.primary }]}
         />
       </View>
-      <Text style={[styles.count, { color: isDark ? '#A9B8D0' : '#3E5879' }]}>
+      <Text style={[styles.count, { color: palette.textMuted }]}>
         {t('weekly.aiCount', { count: txCount, threshold })}
       </Text>
       {unlocked ? (

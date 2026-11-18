@@ -21,8 +21,10 @@ const HIDE_NAV_ROUTES: string[] = ['/add-transaction', '/upload', '/scan', '/rep
 const BLUE_HEADER_ROUTES: string[] = ['/welcome', '/login', '/register', '/ai-assistant', '/upload', '/scan', '/weekly', '/goals'];
 
 function BootSplash() {
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
-    <View className="flex-1 bg-primary items-center justify-center">
+    <View style={{ flex: 1, backgroundColor: palette.primary, alignItems: 'center', justifyContent: 'center' }}>
       <Image
         source={require('@/assets/images/logo.png')}
         style={{ width: 132, height: 132 }}
@@ -36,8 +38,8 @@ function RootNavigator() {
   const pathname = usePathname();
   const rootNavigationState = useRootNavigationState();
   const { user, isReady, onboarding, onboardingReady } = useAuth();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   if (!isReady || !onboardingReady) {
     return <BootSplash />;
@@ -76,7 +78,7 @@ function RootNavigator() {
   }
 
   const chromeBg = plainChrome ? (isDark ? palette.bg : '#FFFFFF') : palette.primary;
-  const statusBg = plainChrome ? chromeBg : '#1A42BA';
+  const statusBg = plainChrome ? chromeBg : palette.primary;
   const barStyle = hasBlueHeader || !plainChrome ? 'light-content' : isDark ? 'light-content' : 'dark-content';
 
   return (

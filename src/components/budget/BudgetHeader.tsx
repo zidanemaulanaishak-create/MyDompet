@@ -4,6 +4,8 @@ import { Iconify } from 'react-native-iconify';
 import { formatMoneyPlain } from '@/utils/money';
 import { percentUsed, remainingBudget } from '@/utils/budget';
 import { useI18n } from '@/i18n';
+import { getThemeColors, withAlpha } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 
 interface Props {
   monthLabel: string;
@@ -23,12 +25,17 @@ export default function BudgetHeader({
   onPressEdit,
 }: Props) {
   const { t } = useI18n();
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const remaining = remainingBudget(limit, spent);
   const used = percentUsed(spent, limit);
 
   return (
-    <View className="bg-primary px-5 pt-4 pb-12 overflow-hidden">
-      <View className="absolute -top-16 -right-14 w-48 h-48 rounded-full bg-sky/20" />
+    <View className="px-5 pt-4 pb-12 overflow-hidden" style={{ backgroundColor: palette.primary }}>
+      <View
+        className="absolute -top-16 -right-14 w-48 h-48 rounded-full"
+        style={{ backgroundColor: withAlpha(palette.sky, 0.2) }}
+      />
       <View className="absolute top-24 -left-20 w-40 h-40 rounded-full bg-white/10" />
 
       <View className="flex-row items-center justify-between">
@@ -38,7 +45,7 @@ export default function BudgetHeader({
           onPress={onPressMonth}
         >
           <Text className="text-white text-lg font-bold">{monthLabel}</Text>
-          <Iconify icon="ph:caret-down-bold" size={14} color="#E6EBFF" />
+          <Iconify icon="ph:caret-down-bold" size={14} color={palette.onPrimaryMuted} />
         </TouchableOpacity>
         <TouchableOpacity
           className="w-9 h-9 rounded-full bg-white/15 items-center justify-center"
@@ -50,7 +57,7 @@ export default function BudgetHeader({
       </View>
 
       <View className="flex-row items-center justify-between mt-6">
-        <Text className="text-[#B9C2FF] text-lg tracking-wider font-semibold">{t('budget.remaining')}</Text>
+        <Text className="text-lg tracking-wider font-semibold" style={{ color: palette.onPrimaryMuted }}>{t('budget.remaining')}</Text>
         <TouchableOpacity
           className="rounded-full border border-white/40 px-3.5 py-1"
           activeOpacity={0.8}
@@ -75,7 +82,7 @@ export default function BudgetHeader({
           <Text className="text-white text-lg font-medium">
             {t('budget.usedAmount', { amount: formatMoneyPlain(spent) })}
           </Text>
-          <Text className="text-[#B9C2FF] text-lg">
+          <Text className="text-lg" style={{ color: palette.onPrimaryMuted }}>
             {t('budget.fromLimit', { amount: formatMoneyPlain(limit), percent: used })}
           </Text>
         </View>

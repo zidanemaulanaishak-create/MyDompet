@@ -10,11 +10,14 @@ import {
   View,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { Image } from 'expo-image';
+import { getThemeColors } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
 interface Props {
   name: string;
+  avatarUrl?: string | null;
   balanceLabel: string;
   monthLabel: string;
   monthDate: string;
@@ -28,6 +31,7 @@ interface Props {
 
 export default function HeaderSummary({
   name,
+  avatarUrl,
   balanceLabel,
   monthLabel,
   monthDate,
@@ -39,6 +43,8 @@ export default function HeaderSummary({
   totalExpense,
 }: Props) {
   const { width } = useWindowDimensions();
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const scrollRef = useRef<ScrollView>(null);
   const [active, setActive] = useState(0);
@@ -92,43 +98,57 @@ export default function HeaderSummary({
     .toUpperCase();
 
   return (
-    <View className="bg-primary px-5 pt-4 pb-16 overflow-hidden">
+    <View className="px-5 pt-4 pb-16 overflow-hidden" style={{ backgroundColor: palette.primary }}>
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
-          <Text className="text-white text-base text-[#B9C2FF] font-semibold">
+          <Text
+            className="text-white text-base font-semibold"
+            style={{ color: palette.onPrimaryMuted }}
+          >
             {greeting},
           </Text>
           <Text className="text-white text-2xl font-bold">{t('home.hello', { name })}</Text>
         </View>
 
         <View className="flex-row items-center gap-3">
-          <View className="w-9 h-9 rounded-full bg-white/15 items-center justify-center">
-            <Text className="text-white text-base font-bold">{initials}</Text>
+          <View className="w-9 h-9 rounded-full bg-white/15 items-center justify-center overflow-hidden">
+            {avatarUrl ? (
+              <Image
+                source={{ uri: avatarUrl }}
+                style={{ width: '100%', height: '100%' }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+            ) : (
+              <Text className="text-white text-base font-bold">{initials}</Text>
+            )}
           </View>
           <View className="w-9 h-9 rounded-full bg-white/15 items-center justify-center">
             <Iconify icon="ph:bell-bold" size={18} color="#FFFFFF" />
-            <View className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red border-[1.5px] border-primary" />
+            <View className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red border-[1.5px]" style={{ borderColor: palette.primary }} />
           </View>
         </View>
       </View>
 
       <View className="flex-row items-center gap-2 mt-5">
         {TABS.map((tab, i) => (
-          <TouchableOpacity
-            key={tab}
-            activeOpacity={0.8}
-            onPress={() => goTo(i)}
-            className={i === active ? 'bg-sky px-3 py-1.5 rounded-2xl' : 'px-3 py-1.5'}
-          >
-<Text
-              className={
-                i === active
-                  ? 'text-primary text-base font-bold'
-                  : 'text-[#CBD3FF] text-base font-semibold'
-              }
-            >
-              {tab}
-            </Text>
+              <TouchableOpacity
+                key={tab}
+                activeOpacity={0.8}
+                onPress={() => goTo(i)}
+                className={i === active ? 'px-3 py-1.5 rounded-2xl' : 'px-3 py-1.5'}
+                style={i === active ? { backgroundColor: palette.sky } : undefined}
+              >
+                <Text
+                  className={
+                    i === active
+                      ? 'text-base font-bold'
+                      : 'text-base font-semibold'
+                  }
+                  style={{ color: i === active ? palette.primary : palette.onPrimaryMuted }}
+                >
+                  {tab}
+                </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -146,7 +166,7 @@ export default function HeaderSummary({
       >
         {SLIDES.map((s) => (
           <View key={s.key} style={[styles.slide, { width: width - 40 }]}>
-            <Text className="text-[#B9C2FF] text-sm font-semibold tracking-wider">{balanceLabel}</Text>
+            <Text className="text-sm font-semibold tracking-wider" style={{ color: palette.onPrimaryMuted }}>{balanceLabel}</Text>
             <View className="flex-row items-center mt-3">
               <Text className="text-white text-4xl font-bold">
                 {showBalance ? s.amount : '••••••••'}
@@ -160,22 +180,28 @@ export default function HeaderSummary({
                 <Iconify
                   icon={showBalance ? 'ph:eye' : 'ph:eye-slash'}
                   size={18}
-                  color="#B9C2FF"
+                  color={palette.onPrimaryMuted}
                 />
               </TouchableOpacity>
             </View>
-            <Text className="text-[#B9C2FF] text-m mt-3">{s.date}</Text>
+            <Text className="text-m mt-3" style={{ color: palette.onPrimaryMuted }}>{s.date}</Text>
 
             <View className="flex-row mt-8 gap-2">
-              <View className="flex-1 flex-row items-center gap-2 py-4 px-2.5 rounded-[10px] bg-[rgba(1,54,129,0.75)]">
+              <View
+                className="flex-1 flex-row items-center gap-2 py-4 px-2.5 rounded-[10px]"
+                style={{ backgroundColor: palette.onPrimarySoft }}
+              >
                 <View className="w-10 h-10 rounded-full items-center justify-center bg-[rgba(16,185,129,0.35)]">
-                  <Iconify icon="ph:arrow-down-left-bold" size={16} color={COLORS.green} />
+                  <Iconify icon="ph:arrow-down-left-bold" size={16} color={palette.green} />
                 </View>
                 <Text className="text-white font-bold text-xl">{s.income}</Text>
               </View>
-              <View className="flex-1 flex-row items-center gap-2 py-4 px-2.5 rounded-[10px] bg-[rgba(1,54,129,0.75)]">
+              <View
+                className="flex-1 flex-row items-center gap-2 py-4 px-2.5 rounded-[10px]"
+                style={{ backgroundColor: palette.onPrimarySoft }}
+              >
                 <View className="w-10 h-10 rounded-full items-center justify-center bg-[rgba(239,68,68,0.35)]">
-                  <Iconify icon="ph:arrow-up-right-bold" size={16} color={COLORS.red} />
+                  <Iconify icon="ph:arrow-up-right-bold" size={16} color={palette.red} />
                 </View>
                 <Text className="text-white font-bold text-xl">{s.expense}</Text>
               </View>
@@ -189,10 +215,11 @@ export default function HeaderSummary({
           <View
             key={i}
             className={
-                  i === active
-                  ? 'w-5 h-1.5 rounded-full bg-sky'
-                  : 'w-1.5 h-1.5 rounded-full bg-white/30'
+              i === active
+                ? 'w-5 h-1.5 rounded-full'
+                : 'w-1.5 h-1.5 rounded-full bg-white/30'
             }
+            style={i === active ? { backgroundColor: palette.sky } : undefined}
           />
         ))}
       </View>

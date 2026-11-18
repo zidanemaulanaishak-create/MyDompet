@@ -12,8 +12,8 @@ interface Props {
 const CHART_HEIGHT = 120;
 
 export default function CashFlowChart({ data }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const max = Math.max(...data.flatMap((d) => [d.income, d.expense]), 1);
   const topTick = Math.ceil(max / 3);

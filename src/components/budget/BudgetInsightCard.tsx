@@ -12,8 +12,8 @@ interface Props {
 
 export default function BudgetInsightCard({ dailyAmount }: Props) {
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View

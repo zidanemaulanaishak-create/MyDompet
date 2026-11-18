@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Stop, Line } from 'react-native-svg';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 
 interface Props {
@@ -29,8 +29,8 @@ function smoothPath(points: { x: number; y: number }[]): string {
 }
 
 export default function WeeklyTrendSpline({ data, width = 320, height = 120 }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const pad = 8;
 
   const { line, area } = useMemo(() => {
@@ -57,8 +57,8 @@ export default function WeeklyTrendSpline({ data, width = 320, height = 120 }: P
       <Svg width={width} height={height}>
         <Defs>
           <LinearGradient id="weeklyArea" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={COLORS.sky} stopOpacity="0.45" />
-            <Stop offset="1" stopColor={COLORS.sky} stopOpacity="0.05" />
+            <Stop offset="0" stopColor={palette.sky} stopOpacity="0.45" />
+            <Stop offset="1" stopColor={palette.sky} stopOpacity="0.05" />
           </LinearGradient>
         </Defs>
         {[0.25, 0.5, 0.75].map((f) => (

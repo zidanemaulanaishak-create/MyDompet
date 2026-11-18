@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Iconify } from 'react-native-iconify';
-import { getThemeColors } from '@/constants/colors';
+import { getThemeColors, mixHex } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -17,12 +17,12 @@ export default function AIInsightCard({
   suggestions,
   onSuggestionPress,
 }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <LinearGradient
-      colors={isDark ? ['#172B4D', '#16233D'] : [palette.chipBlue, '#F6FAFF']}
+      colors={[palette.chipBlue, mixHex(palette.chipBlue, palette.bg, isDark ? 0.45 : 0.55)]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.card}
@@ -53,7 +53,7 @@ export default function AIInsightCard({
           <TouchableOpacity
             key={i}
             className="rounded-[10px] p-2.5 mr-2 max-w-[140px]"
-            style={{ backgroundColor: isDark ? '#1C2942' : '#D4E4FF' }}
+            style={{ backgroundColor: palette.chipBlue }}
             onPress={() => onSuggestionPress?.(s)}
           >
             <Text className="text-xs leading-[17px] font-medium" style={{ color: palette.primary }} numberOfLines={2}>

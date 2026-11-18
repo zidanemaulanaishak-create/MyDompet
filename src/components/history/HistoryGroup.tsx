@@ -17,8 +17,8 @@ interface GroupProps {
 }
 
 export function HistoryGroup({ title, items, subtitle, onPressItem, onLongPressItem }: GroupProps) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const net = items.reduce((acc, tx) => {
     if (tx.amountValue == null) return acc;

@@ -13,8 +13,8 @@ interface AuthScreenHeaderProps {
 export default function AuthScreenHeader({ title }: AuthScreenHeaderProps) {
   const { width } = useWindowDimensions();
   const router = useRouter();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   const goBack = () => {
     if (router.canGoBack()) {

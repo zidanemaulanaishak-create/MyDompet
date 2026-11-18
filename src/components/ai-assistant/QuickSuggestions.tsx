@@ -11,8 +11,8 @@ interface Props {
 }
 
 export default function QuickSuggestions({ suggestions, onPress }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   if (!suggestions.length) return null;
 

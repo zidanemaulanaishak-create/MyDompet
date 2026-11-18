@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { getThemeColors } from '@/constants/colors';
+import { getThemeColors, withAlpha } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -21,9 +21,9 @@ export default function AuthButton({
   disabled,
   className = '',
 }: AuthButtonProps) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   if (variant === 'outline') {
     return (
@@ -33,13 +33,10 @@ export default function AuthButton({
         activeOpacity={0.8}
         className={`rounded-full border-2 py-4 items-center justify-center ${className}`}
         style={{
-          borderColor: isDark ? 'rgba(79,125,255,0.7)' : 'rgba(59,130,246,0.7)',
+          borderColor: withAlpha(palette.primary, 0.7),
         }}
       >
-        <Text
-          className="font-bold text-lg"
-          style={{ color: isDark ? '#9CC0FF' : '#7FB0FF' }}
-        >
+        <Text className="font-bold text-lg" style={{ color: palette.primary }}>
           {label}
         </Text>
       </TouchableOpacity>
@@ -53,7 +50,7 @@ export default function AuthButton({
       activeOpacity={0.85}
       className={`rounded-full py-4 items-center justify-center ${className}`}
       style={{
-        backgroundColor: disabled || loading ? '#60A5FA' : palette.primary,
+        backgroundColor: disabled || loading ? palette.textMuted : palette.primary,
         shadowColor: palette.primary,
         shadowOpacity: 0.45,
         shadowRadius: 14,

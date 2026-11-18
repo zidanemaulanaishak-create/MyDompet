@@ -17,7 +17,8 @@ import { useTransactions } from '@/context/transaction-context';
 import { useBudget } from '@/context/budget-context';
 import { useTheme } from '@/context/theme-context';
 import { getThemeColors } from '@/constants/colors';
-import { filterByPeriod, summarize, formatRupiah, txAmount } from '@/utils/reports';
+import { formatRupiah, txAmount } from '@/utils/reports';
+import { computeBalances } from '@/utils/balance';
 import { buildBudget, totalLimit, totalSpent } from '@/utils/budget';
 import { monthKey, monthLabel, parseItemDate } from '@/utils/dates';
 import { itemType } from '@/constants/categoryVisuals';
@@ -32,9 +33,9 @@ export default function HomeScreen() {
   const { getBudgetsForMonth } = useBudget();
   const { goals: liveGoals, refresh: refreshGoals } = useGoals();
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t, locale } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [refreshing, setRefreshing] = useState(false);
   const [aiInsight, setAiInsight] = useState<{ version: string; result: InsightResult } | null>(
     null
@@ -52,17 +53,20 @@ export default function HomeScreen() {
   }));
   const monthBudget = buildBudget(currentMonthKey, budgetLimits, liveTransactions);
 
-  const monthSum = summarize(filterByPeriod(liveTransactions, 'month'));
-  const allSum = summarize(liveTransactions);
+  const balances = computeBalances({
+    transactions: liveTransactions,
+    mainIncome,
+    incomeHistory: user?.incomeHistory ?? [],
+  });
 
-  const monthIncome = monthSum.income;
-  const monthExpense = monthSum.expense;
+  const monthIncome = balances.monthIncome;
+  const monthExpense = balances.monthExpense;
 
-  const totalIncome = allSum.income;
-  const totalExpense = allSum.expense;
+  const totalIncome = balances.totalIncome;
+  const totalExpense = balances.totalExpense;
 
-  const monthBalance = mainIncome + monthSum.income - monthExpense;
-  const totalBalance = mainIncome + allSum.income - allSum.expense;
+  const monthBalance = balances.monthBalance;
+  const totalBalance = balances.totalBalance;
 
   const dayNames = shortDayNames[locale];
 
@@ -196,6 +200,7 @@ export default function HomeScreen() {
     >
       <HeaderSummary
         name={name}
+        avatarUrl={user?.avatarUrl ?? null}
         balanceLabel={t('home.sisaKeuangan')}
         monthLabel={monthLabel(currentMonthKey)}
         monthDate={monthDate}

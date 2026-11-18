@@ -65,8 +65,8 @@ function BudgetSheetBody({
 }) {
   const isEdit = !!categoryId;
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const meta = isEdit && categoryId ? getCategoryById(categoryId, 'expense') : undefined;
 
   const available = EXPENSE_CATEGORIES.filter((c) => !budgetedCategoryIds.includes(c.id));

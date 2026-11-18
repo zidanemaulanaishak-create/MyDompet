@@ -25,9 +25,9 @@ interface MoneyFieldProps {
 
 function MoneyField({ label, value, onChange, optional }: MoneyFieldProps) {
   const [focused, setFocused] = useState(false);
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View className="mb-5">
@@ -66,9 +66,9 @@ function MoneyField({ label, value, onChange, optional }: MoneyFieldProps) {
 export default function OnboardingStep2Screen() {
   const router = useRouter();
   const { onboarding, setOnboarding, completeOnboarding } = useAuth();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const mainIncome = onboarding?.mainIncome ?? 0;
   const occupationName =
     onboarding?.occupation
@@ -102,7 +102,7 @@ export default function OnboardingStep2Screen() {
           <View className="flex-row items-center gap-2 mb-5">
             <View
               className="w-8 h-8 rounded-full items-center justify-center"
-              style={{ backgroundColor: isDark ? '#1C2942' : '#F0F4FE' }}
+              style={{ backgroundColor: palette.chipBlue }}
             >
               <Iconify icon="ph:wallet-bold" size={18} color={palette.primary} />
             </View>

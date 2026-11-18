@@ -9,8 +9,8 @@ interface Props {
 }
 
 export default function AIAvatar({ size = 32 }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View style={[styles.avatar, { width: size, height: size, backgroundColor: palette.primary + '1A' }]}>

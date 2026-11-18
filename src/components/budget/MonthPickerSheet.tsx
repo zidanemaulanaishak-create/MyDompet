@@ -18,8 +18,8 @@ export default function MonthPickerSheet({ visible, selectedMonthKey, onClose, o
   // eslint-disable-next-line react-hooks/refs
   const translateY = useRef(new Animated.Value(500)).current;
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   useEffect(() => {
     if (visible) {

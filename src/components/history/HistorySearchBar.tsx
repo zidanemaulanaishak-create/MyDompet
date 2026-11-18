@@ -29,8 +29,8 @@ function FilterPill({
   badge: number;
   onPress: () => void;
 }) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <TouchableOpacity
       className="h-11 px-3.5 rounded-xl flex-row items-center gap-1.5 border"
@@ -79,8 +79,8 @@ export function HistorySearchBar({
   onPressCategory,
 }: SearchBarProps) {
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <View className="px-5 pb-8 mt-4">
       <View className="flex-row items-center gap-2">

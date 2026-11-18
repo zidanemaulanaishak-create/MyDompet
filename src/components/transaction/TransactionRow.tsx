@@ -19,8 +19,8 @@ interface RowProps {
 }
 
 export function TransactionRow({ item, onPress, onLongPress, subtitle }: RowProps) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const type = itemType(item);
   const category = resolveCategory(item);
   const bgColor = getCategoryColor(item);

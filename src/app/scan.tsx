@@ -6,7 +6,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { Iconify } from 'react-native-iconify';
-import { getThemeColors } from '@/constants/colors';
+import { getThemeColors, withAlpha } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 import ScanFrame from '@/components/scan/ScanFrame';
@@ -15,8 +15,8 @@ import ScanHelpSheet from '@/components/scan/ScanHelpSheet';
 export default function ScanScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
@@ -74,8 +74,8 @@ export default function ScanScreen() {
           <View style={styles.circleBtn} />
         </View>
         <View style={styles.webBody}>
-          <View style={styles.webIcon}>
-            <Iconify icon="ph:image-bold" size={30} color="#38BDF8" />
+          <View style={[styles.webIcon, { backgroundColor: withAlpha(palette.sky, 0.15) }]}>
+            <Iconify icon="ph:image-bold" size={30} color={palette.sky} />
           </View>
           <Text style={styles.webTitle}>{t('scan.browserUnavailable')}</Text>
           <Text style={[styles.webSub, { color: palette.textMuted }]}>{t('scan.browserUnavailableSub')}</Text>
@@ -143,18 +143,25 @@ export default function ScanScreen() {
             <Text style={styles.sideLabel}>{t('scan.gallery')}</Text>
           </View>
 
-          <TouchableOpacity style={styles.shutterOuter} onPress={takePhoto} activeOpacity={0.8} disabled={taking} accessibilityLabel={t('scan.shutterA11y')}>
+          <TouchableOpacity style={[styles.shutterOuter, { borderColor: palette.sky }]} onPress={takePhoto} activeOpacity={0.8} disabled={taking} accessibilityLabel={t('scan.shutterA11y')}>
             <View style={styles.shutterInner} />
           </TouchableOpacity>
 
           <View style={styles.sideAction}>
             <TouchableOpacity
-              style={[styles.roundBtn, flash && styles.roundBtnActive]}
+              style={[
+                styles.roundBtn,
+                flash && {
+                  backgroundColor: withAlpha(palette.sky, 0.2),
+                  borderWidth: 1,
+                  borderColor: palette.sky,
+                },
+              ]}
               onPress={() => setFlash((v) => !v)}
               activeOpacity={0.7}
               accessibilityLabel="Toggle flash"
             >
-              <Iconify icon="ph:lightning-bold" size={22} color={flash ? '#38BDF8' : '#FFFFFF'} />
+              <Iconify icon="ph:lightning-bold" size={22} color={flash ? palette.sky : '#FFFFFF'} />
             </TouchableOpacity>
             <Text style={styles.sideLabel}>{t('scan.flash')}</Text>
           </View>
@@ -179,14 +186,13 @@ const styles = StyleSheet.create({
   bottomBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', backgroundColor: '#0B0F19', paddingTop: 18, marginTop: 'auto' },
   sideAction: { alignItems: 'center', gap: 6, width: 80 },
   roundBtn: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.12)' },
-  roundBtnActive: { backgroundColor: 'rgba(56,189,248,0.2)', borderWidth: 1, borderColor: '#38BDF8' },
   sideLabel: { color: '#CBD5E1', fontSize: 18, fontWeight: '600' },
-  shutterOuter: { width: 78, height: 78, borderRadius: 39, borderWidth: 3, borderColor: '#38BDF8', alignItems: 'center', justifyContent: 'center' },
+  shutterOuter: { width: 78, height: 78, borderRadius: 39, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
   shutterInner: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#FFFFFF' },
   darkCenter: { flex: 1, backgroundColor: '#0B0F19', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
   webRoot: { flex: 1, backgroundColor: '#0B0F19' },
   webBody: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
-  webIcon: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(56,189,248,0.15)', marginBottom: 18 },
+  webIcon: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
   webTitle: { color: '#FFFFFF', fontSize: 17, fontWeight: '800', textAlign: 'center' },
   webSub: { fontSize: 17, textAlign: 'center', marginTop: 8, marginBottom: 20 },
   webButton: { borderRadius: 14, paddingHorizontal: 20, paddingVertical: 14 },

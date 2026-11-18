@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { ReportPeriod } from '@/utils/reports';
 import { useI18n } from '@/i18n';
@@ -19,8 +19,8 @@ const PERIOD_KEYS: Record<ReportPeriod, string> = {
 };
 
 export default function PeriodSelector({ value, onChange }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   return (
@@ -32,13 +32,13 @@ export default function PeriodSelector({ value, onChange }: Props) {
             key={opt}
             style={[
               styles.chip,
-              { borderColor: active ? COLORS.primary : isDark ? '#263550' : '#E2E8F0' },
-              active && { backgroundColor: COLORS.chipBlue },
+              { borderColor: active ? palette.primary : isDark ? '#263550' : '#E2E8F0' },
+              active && { backgroundColor: palette.chipBlue },
             ]}
             activeOpacity={0.75}
             onPress={() => onChange(opt)}
           >
-            <Text style={[styles.label, { color: active ? COLORS.primary : palette.textMuted }]}>
+            <Text style={[styles.label, { color: active ? palette.primary : palette.textMuted }]}>
               {t(PERIOD_KEYS[opt])}
             </Text>
           </TouchableOpacity>

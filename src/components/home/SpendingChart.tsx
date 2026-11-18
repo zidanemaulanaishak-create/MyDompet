@@ -13,9 +13,9 @@ interface Props {
 const CHART_HEIGHT = 96;
 
 export default function SpendingChart({ data }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const max = Math.max(...data.map((d) => d.amount), 1);
   const todayIndex = data.length - 1;
 

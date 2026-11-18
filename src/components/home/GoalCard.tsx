@@ -12,9 +12,9 @@ interface CardProps {
 }
 
 export function GoalCard({ item, onPress }: CardProps) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const isCake = item.icon === 'ph:cake-bold';
   return (
     <TouchableOpacity
@@ -26,7 +26,7 @@ export function GoalCard({ item, onPress }: CardProps) {
       <View className="flex-row items-center mb-2.5">
         <View
           className="w-10 h-10 rounded-[10px] items-center justify-center mr-2.5"
-          style={{ backgroundColor: isCake ? (isDark ? 'rgba(248,113,113,0.18)' : '#FDECEC') : (isDark ? palette.chipBlue : '#EEF2FF') }}
+          style={{ backgroundColor: isCake ? (isDark ? 'rgba(248,113,113,0.18)' : '#FDECEC') : palette.chipBlue }}
         >
           <Iconify
             icon={item.icon}

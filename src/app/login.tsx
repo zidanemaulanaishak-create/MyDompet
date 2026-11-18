@@ -27,9 +27,9 @@ interface LoginErrors {
 
 export default function LoginScreen() {
   const { signIn, signInWithProvider } = useAuth();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? "dark" : "light");
+  const palette = getThemeColors(isDark ? "dark" : "light", accent);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,7 +81,8 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-primary"
+      className="flex-1"
+      style={{ backgroundColor: palette.primary }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <BlueHeader

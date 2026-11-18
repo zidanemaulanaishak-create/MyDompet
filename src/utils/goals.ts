@@ -65,10 +65,30 @@ const SHORT_MONTHS_ID = [
   'Des',
 ];
 
-export function formatDeadlineLabel(ts: number): string {
+const SHORT_MONTHS_EN = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+export function formatDeadlineLabel(ts: number, locale: 'id' | 'en' = 'id'): string {
   if (!Number.isFinite(ts) || ts <= 0) return '';
   const d = new Date(ts);
-  return `${SHORT_MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+  const day = d.getDate();
+  const year = d.getFullYear();
+  if (locale === 'en') {
+    return `${SHORT_MONTHS_EN[d.getMonth()]} ${day}, ${year}`;
+  }
+  return `${day} ${SHORT_MONTHS_ID[d.getMonth()]} ${year}`;
 }
 
 export function daysLeftLabel(deadlineTs: number, locale: string): string {

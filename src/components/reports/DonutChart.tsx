@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 
 interface Props {
@@ -10,8 +10,8 @@ interface Props {
 }
 
 export default function DonutChart({ percent, label }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const size = 148;
   const stroke = 16;
   const radius = (size - stroke) / 2;
@@ -24,12 +24,12 @@ export default function DonutChart({ percent, label }: Props) {
     <View style={styles.wrap}>
       <View style={{ width: size, height: size }}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <Circle cx={center} cy={center} r={radius} stroke={isDark ? '#1E293B' : '#E2E8F0'} strokeWidth={stroke} fill="transparent" />
+          <Circle cx={center} cy={center} r={radius} stroke={palette.track} strokeWidth={stroke} fill="transparent" />
           <Circle
             cx={center}
             cy={center}
             r={radius}
-            stroke={COLORS.primary}
+            stroke={palette.primary}
             strokeWidth={stroke}
             strokeLinecap="round"
             fill="transparent"

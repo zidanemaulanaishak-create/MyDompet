@@ -30,8 +30,8 @@ interface SheetMode {
 export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { transactions } = useTransactions();
   const { getBudgetsForMonth, setLimit, removeBudget } = useBudget();
 

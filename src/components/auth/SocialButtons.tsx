@@ -22,8 +22,8 @@ export default function SocialButtons({
   loadingProvider = null,
   disabled = false,
 }: SocialButtonsProps) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View className="flex-row gap-3">

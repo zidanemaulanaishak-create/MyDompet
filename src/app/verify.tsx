@@ -22,9 +22,9 @@ const CODE_LENGTH = 4;
 export default function VerifyCodeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
 
   const pending = getPendingAuth();

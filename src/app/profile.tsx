@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Switch,
@@ -8,20 +9,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { Iconify } from "react-native-iconify";
 import { useAuth } from "@/context/auth-context";
 import { useTheme } from "@/context/theme-context";
 import { useTransactions } from "@/context/transaction-context";
-import { getThemeColors } from "@/constants/colors";
+import { getThemeColors, withAlpha } from "@/constants/colors";
 import { useI18n, numberForLocale } from "@/i18n";
 import { useSettings } from "@/context/settings-context";
+import { uploadAvatar, deleteAvatar } from "@/services/avatar";
 import FinanceProfileSheet from "@/components/profile/FinanceProfileSheet";
 import LanguageSheet from "@/components/profile/LanguageSheet";
 import EditProfileSheet from "@/components/profile/EditProfileSheet";
 import NotificationsSheet from "@/components/profile/NotificationsSheet";
 import AccountSettingsSheet from "@/components/profile/AccountSettingsSheet";
 import HelpSheet from "@/components/profile/HelpSheet";
+import AccentColorSheet from "@/components/profile/AccentColorSheet";
 
 const SECTION_ACCENT = "#64748B";
 const HEADER_SUBTEXT = "#E2E8F0";
@@ -30,7 +35,6 @@ const DIVIDER_DARK = "#1E2A42";
 const BORDER = "#E2E8F0";
 const BORDER_DARK = "#23314D";
 const CHEVRON_BG = "#EDF1F7";
-const CHEVRON_BG_DARK = "#172B4D";
 
 function initialsOf(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -122,9 +126,7 @@ function MenuRow({
     ? isDark
       ? "rgba(248,113,113,0.16)"
       : "#FEE2E2"
-    : isDark
-      ? CHEVRON_BG_DARK
-      : "#E8F0FE";
+    : palette.chipBlue;
   const iconColor = danger ? palette.red : palette.primary;
 
   return (
@@ -156,7 +158,7 @@ function MenuRow({
           <View
             style={[
               styles.chevronBadge,
-              { backgroundColor: isDark ? CHEVRON_BG_DARK : CHEVRON_BG },
+              { backgroundColor: isDark ? palette.chipBlue : CHEVRON_BG },
             ]}
           >
             <Iconify
@@ -189,21 +191,24 @@ const OCCUPATION_LABEL: Record<string, string> = {
 };
 
 export default function ProfileScreen() {
-  const { user, onboarding, setOnboarding, signOut, updateName } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { user, onboarding, setOnboarding, signOut, updateName, updateAvatar } =
+    useAuth();
+  const { isDark, accent, toggleTheme } = useTheme();
   const { transactions } = useTransactions();
   const { t, locale } = useI18n();
   const { language, setLanguage } = useSettings();
   const [loading, setLoading] = React.useState(false);
+  const [photoBusy, setPhotoBusy] = React.useState(false);
   const [showFinanceSheet, setShowFinanceSheet] = React.useState(false);
   const [showLanguageSheet, setShowLanguageSheet] = React.useState(false);
+  const [showAccentSheet, setShowAccentSheet] = React.useState(false);
   const [showEditSheet, setShowEditSheet] = React.useState(false);
   const [showAccountSheet, setShowAccountSheet] = React.useState(false);
   const [showNotificationsSheet, setShowNotificationsSheet] =
     React.useState(false);
   const [showHelpSheet, setShowHelpSheet] = React.useState(false);
 
-  const palette = getThemeColors(isDark ? "dark" : "light");
+  const palette = getThemeColors(isDark ? "dark" : "light", accent);
 
   const name = user?.name ?? "Danncow";
   const email = user?.email ?? "";
@@ -242,6 +247,69 @@ export default function ProfileScreen() {
     setLoading(false);
   };
 
+  const pickAvatar = async () => {
+    if (!user || photoBusy) return;
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          t("profile.photoPermissionTitle"),
+          t("profile.photoPermissionMessage"),
+        );
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      setPhotoBusy(true);
+      const url = await uploadAvatar(user.id, result.assets[0].uri);
+      await updateAvatar(url);
+      Alert.alert(t("common.success"), t("profile.photoSaved"));
+    } catch {
+      Alert.alert(t("common.error"), t("profile.photoUploadFailed"));
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    if (!user || photoBusy) return;
+    setPhotoBusy(true);
+    try {
+      await deleteAvatar(user.id);
+      await updateAvatar(null);
+      Alert.alert(t("common.success"), t("profile.photoRemoved"));
+    } catch {
+      Alert.alert(t("common.error"), t("profile.photoUploadFailed"));
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+
+  const openAvatarOptions = () => {
+    if (!user || photoBusy) return;
+    Alert.alert(t("profile.photoOptionsTitle"), undefined, [
+      {
+        text: t("profile.photoFromGallery"),
+        onPress: () => void pickAvatar(),
+      },
+      ...(user.avatarUrl
+        ? [
+            {
+              text: t("profile.photoRemove"),
+              style: "destructive" as const,
+              onPress: () => void removeAvatar(),
+            },
+          ]
+        : []),
+      { text: t("common.cancel"), style: "cancel" as const },
+    ]);
+  };
+
   return (
     <ScrollView
       className="flex-1"
@@ -253,12 +321,15 @@ export default function ProfileScreen() {
     >
       {/* Header gradient */}
       <LinearGradient
-        colors={["#122E85", "#1A42BA", "#1A42BA"]}
+        colors={[palette.primaryDark, palette.primary, palette.primary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <View className="absolute -top-14 -right-16 w-48 h-48 rounded-full bg-sky/20" />
+        <View
+          className="absolute -top-14 -right-16 w-48 h-48 rounded-full"
+          style={{ backgroundColor: withAlpha(palette.sky, 0.2) }}
+        />
         <View className="absolute top-32 -left-20 w-40 h-40 rounded-full bg-white/10" />
         <View className="absolute -bottom-10 right-10 w-28 h-28 rounded-full bg-white/5" />
 
@@ -267,7 +338,10 @@ export default function ProfileScreen() {
             <Text className="text-white text-lg font-extrabold tracking-tight">
               {t("profile.title")}
             </Text>
-            <Text className="text-[#C7CFFF] text-lg mt-1 font-medium">
+            <Text
+              className="text-lg mt-1 font-medium"
+              style={{ color: palette.onPrimaryMuted }}
+            >
               {t("profile.subtitle")}
             </Text>
           </View>
@@ -281,19 +355,39 @@ export default function ProfileScreen() {
         </View>
 
         <View className="items-center mt-7">
-          <View
-            className="w-[124px] h-[124px] rounded-full items-center justify-center border-2 border-white/25"
-            style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={openAvatarOptions}
+            disabled={photoBusy}
           >
-            <View style={[styles.avatar, { backgroundColor: palette.card }]}>
-              <Text style={[styles.avatarInitials, { color: palette.primary }]}>
-                {initialsOf(name)}
-              </Text>
-            </View>
             <View
-              style={[styles.statusDot, { backgroundColor: palette.green }]}
-            />
-          </View>
+              className="w-[124px] h-[124px] rounded-full items-center justify-center border-2 border-white/25"
+              style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+            >
+              <View style={[styles.avatar, { backgroundColor: palette.card }]}>
+                {user?.avatarUrl ? (
+                  <Image
+                    source={{ uri: user.avatarUrl }}
+                    style={styles.avatarImage}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                  />
+                ) : (
+                  <Text style={[styles.avatarInitials, { color: palette.primary }]}>
+                    {initialsOf(name)}
+                  </Text>
+                )}
+                {photoBusy ? (
+                  <View style={styles.avatarLoading}>
+                    <ActivityIndicator color={palette.primary} />
+                  </View>
+                ) : null}
+              </View>
+              <View style={[styles.statusDot, { backgroundColor: palette.primary }]}>
+                <Iconify icon="ph:camera-bold" size={12} color="#FFFFFF" />
+              </View>
+            </View>
+          </TouchableOpacity>
           <Text className="text-white text-2xl font-extrabold mt-4">
             {name}
           </Text>
@@ -304,7 +398,7 @@ export default function ProfileScreen() {
             {email ? `${email} | ${name}` : name}
           </Text>
           <View className="mt-3.5 flex-row items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5">
-            <Iconify icon="ph:shield-check-bold" size={14} color="#38BDF8" />
+            <Iconify icon="ph:shield-check-bold" size={14} color={palette.sky} />
             <Text className="text-white/90 text-lg font-semibold">
               {t("profile.verified")}
             </Text>
@@ -437,7 +531,7 @@ export default function ProfileScreen() {
                 onValueChange={toggleTheme}
                 trackColor={{
                   false: isDark ? BORDER_DARK : BORDER,
-                  true: "#1A42BA",
+                  true: palette.primary,
                 }}
                 thumbColor="#FFFFFF"
                 ios_backgroundColor={isDark ? BORDER_DARK : BORDER}
@@ -453,6 +547,14 @@ export default function ProfileScreen() {
                 : t("profile.langEnglish")
             }
             onPress={() => setShowLanguageSheet(true)}
+            palette={palette}
+            isDark={isDark}
+          />
+          <MenuRow
+            icon="ph:palette-bold"
+            title={t("profile.accentColor")}
+            subtitle={t("profile.accentColorSubtitle")}
+            onPress={() => setShowAccentSheet(true)}
             palette={palette}
             isDark={isDark}
             last
@@ -514,6 +616,10 @@ export default function ProfileScreen() {
           setShowLanguageSheet(false);
         }}
       />
+      <AccentColorSheet
+        visible={showAccentSheet}
+        onClose={() => setShowAccentSheet(false)}
+      />
 
       <EditProfileSheet
         visible={showEditSheet}
@@ -571,11 +677,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#FFFFFF",
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 12,
+  },
+  avatarImage: {
+    width: 100,
+    height: 100,
+  },
+  avatarLoading: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.7)",
   },
   avatarInitials: {
     fontSize: 34,

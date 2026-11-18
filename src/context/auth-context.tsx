@@ -16,11 +16,19 @@ import {
 } from '@/services/socialAuth';
 import { getAppPrefs } from '@/utils/appPrefs';
 import { translate } from '@/i18n';
+import { monthKey } from '@/utils/dates';
+import {
+  addIncomePeriod,
+  parseIncomeHistory,
+  type IncomePeriod,
+} from '@/utils/income';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  avatarUrl: string | null;
+  incomeHistory: IncomePeriod[];
 }
 
 interface AuthContextValue {
@@ -34,6 +42,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (name: string, email: string, password: string) => Promise<string | null>;
   updateName: (name: string) => Promise<string | null>;
+  updateAvatar: (url: string | null) => Promise<void>;
   signInWithProvider: (provider: SocialProvider) => Promise<string | null>;
   signOut: () => Promise<void>;
 }
@@ -70,6 +79,8 @@ interface ProfileRow {
   occupation: string | null;
   main_income: number | null;
   onboarding_completed: boolean | null;
+  avatar_url: string | null;
+  income_history: unknown;
 }
 
 function toOccupation(value: string | null): Occupation | null {
@@ -77,32 +88,53 @@ function toOccupation(value: string | null): Occupation | null {
 }
 
 async function fetchProfileRow(userId: string): Promise<ProfileRow | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('name, email, occupation, main_income, onboarding_completed, avatar_url, income_history')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (!error) return (data as ProfileRow | null) ?? null;
+
+  // Fallback sebelum migrasi 0006 dijalankan.
+  const fallback = await supabase
     .from('profiles')
     .select('name, email, occupation, main_income, onboarding_completed')
     .eq('id', userId)
     .maybeSingle();
 
-  return data ?? null;
+  if (!fallback.data) return null;
+  return {
+    ...(fallback.data as Omit<ProfileRow, 'avatar_url' | 'income_history'>),
+    avatar_url: null,
+    income_history: [],
+  };
 }
 
 async function syncOnboardingToDb(
   userId: string,
   name: string,
   email: string,
-  data: OnboardingData
+  data: OnboardingData,
+  incomeHistory: IncomePeriod[]
 ) {
-  await supabase.from('profiles').upsert(
-    {
-      id: userId,
-      name,
-      email,
-      occupation: data.occupation,
-      main_income: data.mainIncome,
-      onboarding_completed: data.completed,
-    },
-    { onConflict: 'id' }
-  );
+  const base = {
+    id: userId,
+    name,
+    email,
+    occupation: data.occupation,
+    main_income: data.mainIncome,
+    onboarding_completed: data.completed,
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .upsert({ ...base, income_history: incomeHistory }, { onConflict: 'id' });
+
+  // Fallback sebelum migrasi 0006 dijalankan.
+  if (error) {
+    await supabase.from('profiles').upsert(base, { onConflict: 'id' });
+  }
 }
 
 async function readOnboarding(email: string): Promise<OnboardingData> {
@@ -167,7 +199,7 @@ async function applySession(user?: User) {
       } else if (localOnboard.completed) {
         // migrasi sekali: user lama yang datanya masih di AsyncStorage
         onboard = localOnboard;
-        void syncOnboardingToDb(user.id, 'Pengguna', fallbackEmail, localOnboard);
+        void syncOnboardingToDb(user.id, 'Pengguna', fallbackEmail, localOnboard, []);
       } else {
         onboard = localOnboard;
       }
@@ -176,6 +208,8 @@ async function applySession(user?: User) {
         id: user.id,
         name: profile?.name ?? metadataDisplayName(user) ?? 'Pengguna',
         email: profile?.email ?? fallbackEmail,
+        avatarUrl: profile?.avatar_url ?? null,
+        incomeHistory: parseIncomeHistory(profile?.income_history),
       });
       setOnboardingState(onboard);
       setOnboardingReady(true);
@@ -243,8 +277,21 @@ async function applySession(user?: User) {
       });
 
       if (error) {
-        if (error.message.includes('already registered')) {
-          return 'Email sudah terdaftar. Silakan masuk.';
+        const msg = (error.message ?? '').toLowerCase();
+        const code = (error as { code?: string }).code;
+        if (
+          msg.includes('already registered') ||
+          msg.includes('already exists') ||
+          msg.includes('already in use') ||
+          msg.includes('already been registered') ||
+          msg.includes('user already') ||
+          msg.includes('duplicate key') ||
+          msg.includes('profiles_email') ||
+          code === '23505' ||
+          code === 'user_already_exists' ||
+          code === 'email_exists'
+        ) {
+          return translate(getAppPrefs().locale, 'auth.errEmailTaken');
         }
         return error.message;
       }
@@ -281,35 +328,61 @@ async function applySession(user?: User) {
     [user]
   );
 
-  const setOnboarding = useCallback(
-    async (patch: Partial<OnboardingData>) => {
+  const updateAvatar = useCallback(
+    async (url: string | null) => {
       if (!user) return;
-      setOnboardingState((prev) => {
-        const next = { ...prev, ...patch };
-        void writeOnboarding(user.email, next);
-        void syncOnboardingToDb(user.id, user.name, user.email, next);
-        return next;
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .upsert(
+          { id: user.id, name: user.name, email: user.email, avatar_url: url },
+          { onConflict: 'id' }
+        );
+      if (error) throw error;
+      setUser((prev) => (prev ? { ...prev, avatarUrl: url } : prev));
     },
     [user]
   );
 
+  const setOnboarding = useCallback(
+    async (patch: Partial<OnboardingData>) => {
+      if (!user) return;
+      const next = { ...onboarding, ...patch };
+      let nextHistory = user.incomeHistory;
+      if (
+        typeof patch.mainIncome === 'number' &&
+        patch.mainIncome !== onboarding.mainIncome
+      ) {
+        nextHistory = addIncomePeriod(
+          user.incomeHistory,
+          monthKey(new Date()),
+          patch.mainIncome,
+          onboarding.mainIncome
+        );
+      }
+      setOnboardingState(next);
+      setUser((prev) => (prev ? { ...prev, incomeHistory: nextHistory } : prev));
+      await writeOnboarding(user.email, next);
+      await syncOnboardingToDb(user.id, user.name, user.email, next, nextHistory);
+    },
+    [user, onboarding]
+  );
+
   const completeOnboarding = useCallback(async () => {
     if (!user) return;
-    setOnboardingState((prev) => {
-      const next = { ...prev, completed: true };
-      void writeOnboarding(user.email, next);
-      void syncOnboardingToDb(user.id, user.name, user.email, next);
-      return next;
-    });
-  }, [user]);
+    const next = { ...onboarding, completed: true };
+    setOnboardingState(next);
+    await writeOnboarding(user.email, next);
+    await syncOnboardingToDb(user.id, user.name, user.email, next, user.incomeHistory);
+  }, [user, onboarding]);
 
   const resetOnboarding = useCallback(async () => {
     if (!user) return;
-    setOnboardingState(EMPTY_ONBOARDING);
-    await writeOnboarding(user.email, EMPTY_ONBOARDING);
-    await syncOnboardingToDb(user.id, user.name, user.email, EMPTY_ONBOARDING);
-  }, [user]);
+    // Hanya reset profesi. Pendapatan, transaksi, dan saldo tetap aman.
+    const next: OnboardingData = { ...onboarding, occupation: null, completed: true };
+    setOnboardingState(next);
+    await writeOnboarding(user.email, next);
+    await syncOnboardingToDb(user.id, user.name, user.email, next, user.incomeHistory);
+  }, [user, onboarding]);
 
   const signInWithProvider = useCallback(
     async (provider: SocialProvider): Promise<string | null> => {
@@ -336,6 +409,7 @@ async function applySession(user?: User) {
       signIn,
       signUp,
       updateName,
+      updateAvatar,
       signInWithProvider,
       signOut,
     }),
@@ -350,6 +424,7 @@ async function applySession(user?: User) {
       signIn,
       signUp,
       updateName,
+      updateAvatar,
       signInWithProvider,
       signOut,
     ]

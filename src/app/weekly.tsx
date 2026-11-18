@@ -7,8 +7,8 @@ import WeeklyRecapScreen from '@/components/reports/WeeklyRecapScreen';
 
 export default function WeeklyRoute() {
   const router = useRouter();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) router.back();

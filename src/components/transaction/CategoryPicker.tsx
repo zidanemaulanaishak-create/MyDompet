@@ -34,9 +34,9 @@ export default function CategoryPicker({
   type,
   title,
 }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [searchQuery, setSearchQuery] = useState('');
   // eslint-disable-next-line react-hooks/refs
   const translateY = useRef(new Animated.Value(500)).current;

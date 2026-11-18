@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { TransactionItem } from '@/data/dummyData';
 import { getCategoriesForType } from '@/constants/categories';
@@ -19,8 +19,8 @@ interface Props {
 }
 
 export default function CashFlowTab({ transactions, period, onPeriodChange, onSeeDetail }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   const [incomeCatLabel, setIncomeCatLabel] = useState('Semua');
@@ -99,7 +99,7 @@ export default function CashFlowTab({ transactions, period, onPeriodChange, onSe
       />
 
       <TouchableOpacity
-        style={styles.action}
+        style={[styles.action, { backgroundColor: palette.primary }]}
         activeOpacity={0.85}
         onPress={() => onSeeDetail('expense')}
       >
@@ -123,6 +123,6 @@ const styles = StyleSheet.create({
   period: { marginTop: 14 },
   cardTitle: { fontSize: 17, fontWeight: '700', marginBottom: 12 },
   chart: {},
-  action: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: COLORS.primary, borderRadius: 16, paddingVertical: 16 },
+  action: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 16, paddingVertical: 16 },
   actionLabel: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
 });

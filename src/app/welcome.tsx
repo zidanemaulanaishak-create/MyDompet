@@ -1,6 +1,5 @@
 import React from 'react';
 import { Text, useWindowDimensions, View } from 'react-native';
-import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Iconify } from 'react-native-iconify';
@@ -20,27 +19,27 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   const illWidth = Math.min(width * 0.86, 420);
   const illHeight = illWidth * (250 / 360);
 
   return (
-    <View className="flex-1 bg-primary">
-      <View className="items-center px-6" style={{ paddingTop: insets.top + 16 }}>
+    <View className="flex-1" style={{ backgroundColor: palette.primary }}>
+      <View className="flex-1 items-center justify-center px-8">
         <Text className="mt-4 text-center text-white text-[25px] font-extrabold tracking-tight">
           {t('auth.welcome')}
         </Text>
-        <Text className="mt-2 text-center text-[#C7D2FE] text-lg leading-5 px-6">
+        <Text className="mt-2 text-center text-lg leading-5 px-6" style={{ color: 'rgba(255,255,255,0.8)' }}>
           {t('auth.welcomeSub')}
         </Text>
       </View>
 
       <View className="flex-1 items-center justify-center px-4" style={{ paddingBottom: 10 }}>
         <View style={{ width: illWidth, height: illHeight }}>
-          <WelcomeIllustration />
+          <WelcomeIllustration color={palette.primary} secondaryColor={palette.sky} />
         </View>
       </View>
 

@@ -15,9 +15,9 @@ interface Props {
 }
 
 export default function TransactionList({ items, onSeeAll, onPressItem }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <View className="rounded-2xl p-4 mb-6 shadow-sm" style={{ backgroundColor: palette.card }}>
       <TouchableOpacity

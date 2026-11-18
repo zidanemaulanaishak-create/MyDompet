@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Iconify } from 'react-native-iconify';
 import OnboardingShell from '@/components/onboarding/OnboardingShell';
 import { useAuth } from '@/context/auth-context';
-import { getThemeColors } from '@/constants/colors';
+import { getThemeColors, mixHex, withAlpha } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 import type { Occupation } from '@/context/onboarding';
@@ -40,9 +40,10 @@ const OPTIONS: ProfileOption[] = [
 export default function OnboardingStep1Screen() {
   const router = useRouter();
   const { onboarding, setOnboarding } = useAuth();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
+  const inactiveIconColor = mixHex(palette.primary, palette.textMuted, isDark ? 0.35 : 0.5);
   const selected = onboarding?.occupation ?? null;
 
   const pick = (key: Occupation) => {
@@ -78,11 +79,7 @@ export default function OnboardingStep1Screen() {
               accessibilityState={{ selected: active }}
               className="flex-row items-start gap-4 p-4 rounded-2xl"
               style={{
-                backgroundColor: active
-                  ? isDark
-                    ? '#1C2942'
-                    : '#F0F4FE'
-                  : palette.card,
+                backgroundColor: active ? palette.chipBlue : palette.card,
                 borderWidth: 2,
                 borderColor: active ? palette.primary : palette.track,
               }}
@@ -91,19 +88,11 @@ export default function OnboardingStep1Screen() {
                 className="w-14 h-14 rounded-full items-center justify-center"
                 style={{
                   backgroundColor: active
-                    ? isDark
-                      ? '#24344F'
-                      : '#DCE6FB'
-                    : isDark
-                      ? '#1C2942'
-                      : '#F0F4FE',
+                    ? withAlpha(palette.primary, isDark ? 0.24 : 0.12)
+                    : palette.chipBlue,
                 }}
               >
-                <Iconify
-                  icon={opt.icon}
-                  size={26}
-                  color={active ? palette.primary : isDark ? '#7E9CD9' : '#5B78C9'}
-                />
+                <Iconify icon={opt.icon} size={26} color={active ? palette.primary : inactiveIconColor} />
               </View>
               <View className="flex-1">
                 <View className="flex-row items-center justify-between">
@@ -114,7 +103,7 @@ export default function OnboardingStep1Screen() {
                     className="w-6 h-6 rounded-full items-center justify-center"
                     style={{
                       borderWidth: 2,
-                      borderColor: active ? palette.primary : isDark ? '#39476B' : '#CBD5E1',
+                      borderColor: active ? palette.primary : palette.border,
                       backgroundColor: active ? palette.primary : 'transparent',
                     }}
                   >

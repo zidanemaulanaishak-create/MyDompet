@@ -13,8 +13,8 @@ interface Props {
 }
 
 export default function SuggestionRail({ suggestions, onPress, compact = false }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   if (!suggestions.length) return null;
@@ -31,18 +31,18 @@ export default function SuggestionRail({ suggestions, onPress, compact = false }
           key={item.id}
           style={[
             compact ? styles.compactChip : styles.card,
-            { backgroundColor: isDark ? '#1C2942' : '#F1F5FB', borderColor: isDark ? '#2E3D5C' : '#E2E8F0' },
+            { backgroundColor: palette.chipBlue, borderColor: palette.border },
           ]}
           activeOpacity={0.7}
           onPress={() => onPress(item)}
         >
           {!compact ? (
-            <View style={[styles.tile, { backgroundColor: isDark ? '#2A3B5C' : '#FFFFFF' }]}>
+            <View style={[styles.tile, { backgroundColor: palette.card }]}>
               <Iconify icon={item.icon ?? 'ph:sparkle-bold'} size={15} color={palette.primary} />
             </View>
           ) : null}
           <Text
-            style={[compact ? styles.compactLabel : styles.label, { color: isDark ? '#E6ECF5' : palette.textDark }]}
+            style={[compact ? styles.compactLabel : styles.label, { color: palette.textDark }]}
             numberOfLines={compact ? 1 : 2}
           >
             {t(item.label)}

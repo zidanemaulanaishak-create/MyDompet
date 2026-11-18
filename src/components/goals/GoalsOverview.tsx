@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { formatRupiah } from '@/utils/goals';
 import { useI18n } from '@/i18n';
@@ -16,8 +16,8 @@ interface Props {
 
 export default function GoalsOverview({ totalSaved, totalTarget, percent, active, done }: Props) {
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   return (
     <View style={styles.wrap}>
       <LinearGradient
@@ -31,7 +31,7 @@ export default function GoalsOverview({ totalSaved, totalTarget, percent, active
           {formatRupiah(totalSaved)} <Text style={[styles.nominalDim, { color: palette.textMuted }]}>/ {formatRupiah(totalTarget)}</Text>
         </Text>
         <View style={[styles.track, { backgroundColor: palette.track }]}>
-          <View style={[styles.fill, { width: `${Math.min(100, percent)}%` }]} />
+          <View style={[styles.fill, { width: `${Math.min(100, percent)}%`, backgroundColor: palette.primary }]} />
         </View>
         <Text style={[styles.percent, { color: palette.primary }]}>{t('goals.reached', { percent })}</Text>
         <View style={[styles.divider, { backgroundColor: palette.border }]} />
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   nominal: { fontSize: 22, fontWeight: '800', marginTop: 4 },
   nominalDim: { fontSize: 15, fontWeight: '600' },
   track: { height: 10, borderRadius: 5, overflow: 'hidden', marginTop: 14 },
-  fill: { height: 10, borderRadius: 5, backgroundColor: COLORS.primary },
+  fill: { height: 10, borderRadius: 5 },
   percent: { fontSize: 14, fontWeight: '700', marginTop: 8 },
   divider: { height: 1, marginVertical: 14 },
   stats: { flexDirection: 'row' },

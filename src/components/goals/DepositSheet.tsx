@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { FinancialGoal } from '@/data/goalsData';
 import { formatRupiah } from '@/utils/goals';
@@ -31,8 +31,8 @@ function formatNominalInput(n: number): string {
 
 export default function DepositSheet({ goal, mode = 'deposit', saving, onClose, onSubmit }: Props) {
   const { t } = useI18n();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [tab, setTab] = useState<CashflowMode>(mode);
   const [amount, setAmount] = useState('');
 
@@ -92,7 +92,7 @@ export default function DepositSheet({ goal, mode = 'deposit', saving, onClose, 
 
           <View style={[styles.tabs, { backgroundColor: palette.inputBg }]}>
             <TouchableOpacity
-              style={[styles.tab, !isWithdraw && styles.tabActive]}
+              style={[styles.tab, !isWithdraw && { backgroundColor: palette.primary }]}
               activeOpacity={0.8}
               onPress={() => setTab('deposit')}
             >
@@ -159,7 +159,7 @@ export default function DepositSheet({ goal, mode = 'deposit', saving, onClose, 
           </View>
 
           <TouchableOpacity
-            style={[styles.save, isWithdraw && styles.saveWithdraw]}
+            style={[styles.save, isWithdraw && styles.saveWithdraw, !isWithdraw && { backgroundColor: palette.primary }]}
             activeOpacity={0.85}
             onPress={handleSave}
             disabled={!!saving}
@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, borderRadius: 10, paddingVertical: 10,
   },
-  tabActive: { backgroundColor: COLORS.primary },
   tabActiveWithdraw: { backgroundColor: '#DC2626' },
   tabLabel: { fontSize: 14, fontWeight: '700' },
   input: {
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
   },
   chipLabel: { fontSize: 14, fontWeight: '700' },
   save: {
-    backgroundColor: COLORS.primary, borderRadius: 16,
+    borderRadius: 16,
     paddingVertical: 15, alignItems: 'center', marginTop: 18,
   },
   saveWithdraw: { backgroundColor: '#DC2626' },

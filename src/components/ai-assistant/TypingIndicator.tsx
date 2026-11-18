@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
 export default function TypingIndicator() {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const animation = useRef(new Animated.Value(0));
 
@@ -27,7 +27,7 @@ export default function TypingIndicator() {
       inputRange: [0, 0.3, 0.6, 1],
       outputRange: [0.4, 1, 0.4, 0.4],
     });
-    return { transform: [{ scale }] };
+    return { backgroundColor: palette.primary, transform: [{ scale }] };
   };
 
   return (
@@ -51,6 +51,6 @@ const styles = StyleSheet.create({
   container: { alignItems: 'flex-start', marginBottom: 14 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 18, borderBottomLeftRadius: 6, paddingHorizontal: 14, paddingVertical: 11 },
   dots: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLORS.primary },
+  dot: { width: 7, height: 7, borderRadius: 4 },
   label: { fontSize: 18, fontWeight: '600' },
 });

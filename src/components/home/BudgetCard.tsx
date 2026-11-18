@@ -16,9 +16,9 @@ function formatRupiah(n: number): string {
 }
 
 export default function BudgetCard({ allowance, spent, monthLabel }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const hasBudget = allowance > 0;
   const big = hasBudget && spent > allowance;
   const percent = hasBudget ? Math.round((spent / allowance) * 100) : 0;

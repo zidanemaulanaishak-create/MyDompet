@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { TopCategoryComparison, formatRupiah } from '@/utils/reports';
 import { useI18n } from '@/i18n';
@@ -11,8 +11,8 @@ interface Props {
 }
 
 export default function TopCategoriesComparison({ items }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   return (
@@ -28,14 +28,14 @@ export default function TopCategoriesComparison({ items }: Props) {
           <Text style={[styles.legendLabel, { color: palette.textMuted }]}>{t('weekly.thisWeek')}</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: COLORS.sky }]} />
+          <View style={[styles.dot, { backgroundColor: palette.sky }]} />
           <Text style={[styles.legendLabel, { color: palette.textMuted }]}>{t('weekly.lastWeek')}</Text>
         </View>
       </View>
 
       {items.length === 0 ? (
         <View style={styles.emptyWrap}>
-          <View style={[styles.emptyIcon, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9' }]}>
+          <View style={[styles.emptyIcon, { backgroundColor: palette.divider }]}>
             <Iconify icon="ph:chart-bar-bold" size={30} color={palette.textMuted} />
           </View>
           <Text style={[styles.emptyText, { color: palette.textDark }]}>
@@ -51,16 +51,16 @@ export default function TopCategoriesComparison({ items }: Props) {
             const max = Math.max(it.thisWeek, it.lastWeek, 1);
             return (
               <View key={it.id} style={styles.row}>
-                <View style={[styles.icon, { backgroundColor: isDark ? '#1E293B' : COLORS.chipBlue }]}>
+                <View style={[styles.icon, { backgroundColor: palette.chipBlue }]}>
                   <Iconify icon={it.icon} size={20} color={palette.primary} />
                 </View>
                 <View style={styles.mid}>
                   <Text style={[styles.name, { color: palette.textDark }]}>{it.label}</Text>
-                  <View style={[styles.track, { backgroundColor: isDark ? '#1E293B' : '#EDF2F7' }]}>
+                  <View style={[styles.track, { backgroundColor: palette.track }]}>
                     <View style={[styles.fillNow, { width: `${Math.max(4, (it.thisWeek / max) * 100)}%`, backgroundColor: palette.primary }]} />
                   </View>
-                  <View style={[styles.track, { backgroundColor: isDark ? '#1E293B' : '#EDF2F7' }]}>
-                    <View style={[styles.fillPrev, { width: `${Math.max(4, (it.lastWeek / max) * 100)}%`, backgroundColor: COLORS.sky }]} />
+                  <View style={[styles.track, { backgroundColor: palette.track }]}>
+                    <View style={[styles.fillPrev, { width: `${Math.max(4, (it.lastWeek / max) * 100)}%`, backgroundColor: palette.sky }]} />
                   </View>
                 </View>
                 <View style={styles.amounts}>

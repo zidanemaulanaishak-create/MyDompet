@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors, ColorPalette } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 
@@ -12,8 +12,9 @@ interface Props {
 }
 
 export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
+  const styles = createStyles(palette);
   const { t } = useI18n();
 
   return (
@@ -32,7 +33,7 @@ export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
           <View style={styles.titles}>
             <Text style={[styles.title, { color: palette.textDark }]}>MyGpt</Text>
             <View style={styles.statusRow}>
-              <View style={[styles.dot, { backgroundColor: COLORS.green }]} />
+              <View style={[styles.dot, { backgroundColor: palette.green }]} />
               <Text style={[styles.status, { color: palette.textMuted }]}>{t('ai.status')}</Text>
             </View>
           </View>
@@ -51,16 +52,18 @@ export default function ChatHeader({ onMenuPress, onOptionsPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  header: { borderBottomWidth: 1, shadowColor: '#1A2E5A', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2 },
-  content: { width: '100%', maxWidth: 760, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
-  backButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  brand: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 10 },
-  avatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', shadowColor: COLORS.primary, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 4 }, shadowRadius: 8, elevation: 4 },
-  titles: { flex: 1 },
-  title: { fontSize: 18, fontWeight: '800', letterSpacing: -0.2 },
-  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
-  dot: { width: 7, height: 7, borderRadius: 4 },
-  status: { fontSize: 18, fontWeight: '600' },
-  optionsButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-});
+function createStyles(palette: ColorPalette) {
+  return StyleSheet.create({
+    header: { borderBottomWidth: 1, shadowColor: '#1A2E5A', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2 },
+    content: { width: '100%', maxWidth: 760, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
+    backButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+    brand: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 10 },
+    avatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', shadowColor: palette.primary, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 4 }, shadowRadius: 8, elevation: 4 },
+    titles: { flex: 1 },
+    title: { fontSize: 18, fontWeight: '800', letterSpacing: -0.2 },
+    statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
+    dot: { width: 7, height: 7, borderRadius: 4 },
+    status: { fontSize: 18, fontWeight: '600' },
+    optionsButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  });
+}

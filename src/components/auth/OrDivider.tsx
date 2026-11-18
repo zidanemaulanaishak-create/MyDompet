@@ -4,8 +4,8 @@ import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 
 export default function OrDivider({ text }: { text: string }) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <View className="flex-row items-center my-6">

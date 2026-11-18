@@ -24,8 +24,8 @@ interface HistoryGroupData {
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const router = useRouter();
   const params = useLocalSearchParams<{ type?: string; period?: ReportPeriod }>();

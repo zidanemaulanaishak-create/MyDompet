@@ -18,16 +18,17 @@ export default function PrimaryButton({
   disabled,
   className = '',
 }: PrimaryButtonProps) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.85}
-      className={`rounded-full bg-primary py-4 items-center justify-center ${className}`}
+      className={`rounded-full py-4 items-center justify-center ${className}`}
       style={{
+        backgroundColor: palette.primary,
         shadowColor: palette.primary,
         shadowOpacity: 0.4,
         shadowRadius: 14,

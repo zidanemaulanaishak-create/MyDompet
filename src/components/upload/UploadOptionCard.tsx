@@ -12,8 +12,8 @@ interface Props {
 }
 
 export default function UploadOptionCard({ icon, title, subtitle, onPress }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
     <TouchableOpacity
@@ -21,7 +21,7 @@ export default function UploadOptionCard({ icon, title, subtitle, onPress }: Pro
       activeOpacity={0.7}
       onPress={onPress}
     >
-      <View style={[styles.iconWrap, { backgroundColor: isDark ? '#1C2942' : '#EEF2F7' }]}>
+      <View style={[styles.iconWrap, { backgroundColor: palette.chipBlue }]}>
         <Iconify icon={icon} size={22} color={palette.primary} />
       </View>
       <View style={styles.textWrap}>

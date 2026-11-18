@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS } from '@/constants/colors';
+import { getThemeColors, ColorPalette } from '@/constants/colors';
+import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
 import { Occupation, parseRupiah, formatRupiahInput } from '@/context/onboarding';
 
@@ -30,6 +31,9 @@ export default function FinanceProfileSheet({
   const [incomeText, setIncomeText] = useState(
     mainIncome ? formatRupiahInput(mainIncome) : ''
   );
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
+  const styles = createStyles(palette);
   const { t } = useI18n();
 
   const handleSave = () => {
@@ -54,7 +58,7 @@ export default function FinanceProfileSheet({
             <View style={styles.header}>
               <Text style={styles.title}>{t('profile.financeProfile')}</Text>
               <TouchableOpacity onPress={onClose} hitSlop={8}>
-                <Iconify icon="ph:x-bold" size={22} color={COLORS.textMuted} />
+                <Iconify icon="ph:x-bold" size={22} color={palette.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -72,7 +76,7 @@ export default function FinanceProfileSheet({
                     <Iconify
                       icon={o.icon}
                       size={18}
-                      color={active ? '#FFFFFF' : COLORS.primary}
+                      color={active ? '#FFFFFF' : palette.primary}
                     />
                     <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
                       {t(o.labelKey)}
@@ -86,7 +90,7 @@ export default function FinanceProfileSheet({
             <TextInput
               style={styles.input}
               placeholder={t('profile.incomePlaceholder')}
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={palette.textMuted}
               keyboardType="numeric"
               value={incomeText}
               onChangeText={(t) => setIncomeText(formatRupiahInput(parseRupiah(t)))}
@@ -102,63 +106,65 @@ export default function FinanceProfileSheet({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.45)', justifyContent: 'flex-end' },
-  sheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 44,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: '#D9D9D9',
-    marginTop: 10,
-    marginBottom: 14,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  title: { fontSize: 18, fontWeight: '700', color: COLORS.textDark },
-  label: { fontSize: 14, fontWeight: '700', color: COLORS.textDark, marginTop: 12, marginBottom: 8 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14,
-    borderWidth: 1.5,
-  },
-  chipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  chipIdle: { backgroundColor: '#F8F9FA', borderColor: '#E2E8F0' },
-  chipLabel: { fontSize: 14, fontWeight: '700', color: COLORS.primary },
-  chipLabelActive: { color: '#FFFFFF' },
-  input: {
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.textDark,
-    backgroundColor: '#F8F9FA',
-  },
-  save: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveLabel: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
-});
+function createStyles(palette: ColorPalette) {
+  return StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.45)', justifyContent: 'flex-end' },
+    sheet: {
+      backgroundColor: palette.card,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingHorizontal: 20,
+      paddingBottom: 32,
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 44,
+      height: 5,
+      borderRadius: 3,
+      backgroundColor: palette.divider,
+      marginTop: 10,
+      marginBottom: 14,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    title: { fontSize: 18, fontWeight: '700', color: palette.textDark },
+    label: { fontSize: 14, fontWeight: '700', color: palette.textDark, marginTop: 12, marginBottom: 8 },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 14,
+      borderWidth: 1.5,
+    },
+    chipActive: { backgroundColor: palette.primary, borderColor: palette.primary },
+    chipIdle: { backgroundColor: palette.bg, borderColor: palette.border },
+    chipLabel: { fontSize: 14, fontWeight: '700', color: palette.primary },
+    chipLabelActive: { color: '#FFFFFF' },
+    input: {
+      borderWidth: 1.5,
+      borderColor: palette.border,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 17,
+      fontWeight: '700',
+      color: palette.textDark,
+      backgroundColor: palette.bg,
+    },
+    save: {
+      backgroundColor: palette.primary,
+      borderRadius: 16,
+      paddingVertical: 15,
+      alignItems: 'center',
+      marginTop: 20,
+    },
+    saveLabel: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  });
+}

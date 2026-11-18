@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { TransactionItem } from '@/data/dummyData';
 import PeriodSelector from './PeriodSelector';
@@ -17,9 +17,9 @@ interface Props {
 }
 
 export default function BalanceTab({ transactions, period, onPeriodChange, onSeeDetail }: Props) {
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   const summary = useMemo(() => summarize(transactions), [transactions]);
   const incomeTotal = summary.income;
@@ -45,7 +45,7 @@ export default function BalanceTab({ transactions, period, onPeriodChange, onSee
         </View>
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
-            <View style={[styles.dot, { backgroundColor: COLORS.primary }]} />
+            <View style={[styles.dot, { backgroundColor: palette.primary }]} />
             <Text style={[styles.legendText, { color: palette.textDark }]}>{t('reports.income')}</Text>
             <Text style={[styles.legendPct, { color: palette.textDark }]}>{incomePct}%</Text>
           </View>
@@ -57,7 +57,7 @@ export default function BalanceTab({ transactions, period, onPeriodChange, onSee
         </View>
       </View>
 
-      <TouchableOpacity style={styles.action} activeOpacity={0.85} onPress={onSeeDetail}>
+      <TouchableOpacity style={[styles.action, { backgroundColor: palette.primary }]} activeOpacity={0.85} onPress={onSeeDetail}>
         <Iconify icon="ph:list-bold" size={17} color="#FFFFFF" />
         <Text style={styles.actionLabel}>{t('reports.viewAllTransactions')}</Text>
       </TouchableOpacity>
@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
   dot: { width: 10, height: 10, borderRadius: 5 },
   legendText: { fontSize: 18, fontWeight: '700' },
   legendPct: { fontSize: 18, fontWeight: '700' },
-  action: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: COLORS.primary, borderRadius: 16, paddingVertical: 16 },
+  action: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 16, paddingVertical: 16 },
   actionLabel: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
 });

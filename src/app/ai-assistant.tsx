@@ -22,8 +22,8 @@ import { QuickSuggestion } from '@/types/chat';
 import { useI18n } from '@/i18n';
 
 export default function AIAssistantScreen() {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const { user, onboarding } = useAuth();
   const { transactions } = useTransactions();

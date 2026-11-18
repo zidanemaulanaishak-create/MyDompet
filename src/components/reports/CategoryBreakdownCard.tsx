@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Iconify } from 'react-native-iconify';
-import { COLORS, getThemeColors } from '@/constants/colors';
+import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { CategoryTotal, formatRupiah } from '@/utils/reports';
 import { useI18n } from '@/i18n';
@@ -16,8 +16,8 @@ interface Props {
 }
 
 export default function CategoryBreakdownCard({ title, total, items, filterLabel, onFilterPress, compact = false }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
 
   return (
@@ -26,7 +26,7 @@ export default function CategoryBreakdownCard({ title, total, items, filterLabel
         <Text style={[styles.title, { color: palette.textDark }]}>{title}</Text>
         {filterLabel ? (
           <TouchableOpacity
-            style={[styles.filter, { borderColor: isDark ? '#334155' : '#E2E8F0', backgroundColor: isDark ? '#1E293B' : '#F8F9FA' }]}
+            style={[styles.filter, { borderColor: isDark ? '#334155' : '#E2E8F0', backgroundColor: isDark ? palette.chipBlue : '#F8F9FA' }]}
             activeOpacity={0.7}
             onPress={onFilterPress}
           >
@@ -45,13 +45,13 @@ export default function CategoryBreakdownCard({ title, total, items, filterLabel
         <View style={styles.list}>
           {items.map((it) => (
             <View key={it.id} style={[styles.row, compact && styles.rowCompact, { borderColor: isDark ? '#263550' : '#F1F5F9' }]}>
-              <View style={[styles.icon, { backgroundColor: COLORS.chipBlue }]}>
-                <Iconify icon={it.icon} size={17} color={COLORS.primary} />
+              <View style={[styles.icon, { backgroundColor: palette.chipBlue }]}>
+                <Iconify icon={it.icon} size={17} color={palette.primary} />
               </View>
               <View style={styles.mid}>
                 <Text style={[styles.name, { color: palette.textDark }]}>{it.label}</Text>
-                <View style={[styles.barTrack, { backgroundColor: isDark ? '#1E293B' : '#EDF2F7' }]}>
-                  <View style={[styles.barFill, { width: `${Math.min(100, it.percent)}%` }]} />
+                <View style={[styles.barTrack, { backgroundColor: palette.track }]}>
+                  <View style={[styles.barFill, { width: `${Math.min(100, it.percent)}%`, backgroundColor: palette.primary }]} />
                 </View>
                 <Text style={[styles.pct, { color: palette.textMuted }]}>{it.percent}%</Text>
               </View>
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   mid: { flex: 1 },
   name: { fontSize: 18, fontWeight: '700' },
   barTrack: { height: 6, borderRadius: 3, overflow: 'hidden', marginTop: 6 },
-  barFill: { height: 6, borderRadius: 3, backgroundColor: COLORS.primary },
+  barFill: { height: 6, borderRadius: 3 },
   pct: { fontSize: 18, marginTop: 4 },
   amount: { fontSize: 18, fontWeight: '700', textAlign: 'right' },
 });

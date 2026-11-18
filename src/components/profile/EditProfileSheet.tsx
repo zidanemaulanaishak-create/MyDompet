@@ -23,8 +23,8 @@ interface Props {
 }
 
 export default function EditProfileSheet({ visible, name, email, onClose, onSubmit }: Props) {
-  const { isDark } = useTheme();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const { isDark, accent } = useTheme();
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
   const [draft, setDraft] = useState(name);
   const [saving, setSaving] = useState(false);

@@ -39,9 +39,9 @@ export default function AddTransactionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
-  const { isDark } = useTheme();
+  const { isDark, accent } = useTheme();
   const { t } = useI18n();
-  const palette = getThemeColors(isDark ? 'dark' : 'light');
+  const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { transactions, addTransaction, updateTransaction } = useTransactions();
 
   const existing = useMemo<TransactionItem | undefined>(

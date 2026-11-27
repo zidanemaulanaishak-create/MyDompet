@@ -1,9 +1,4 @@
-import {
-  Category,
-  ALL_CATEGORIES,
-  EXPENSE_CATEGORIES,
-  INCOME_CATEGORIES,
-} from '@/constants/categories';
+import { Category, ALL_CATEGORIES, getCategoriesForType } from '@/constants/categories';
 import { TransactionItem } from '@/data/dummyData';
 
 export const CATEGORY_PASTEL_BG: Record<string, string> = {
@@ -54,9 +49,10 @@ export type TransactionType = 'expense' | 'income';
 export function itemType(item: TransactionItem): TransactionType {
   if (item.type) return item.type;
   const category = resolveCategory(item);
+  if (category?.type) return category.type;
   if (category) {
-    if (EXPENSE_CATEGORIES.some((c) => c.id === category.id)) return 'expense';
-    if (INCOME_CATEGORIES.some((c) => c.id === category.id)) return 'income';
+    if (getCategoriesForType('expense').some((c) => c.id === category.id)) return 'expense';
+    if (getCategoriesForType('income').some((c) => c.id === category.id)) return 'income';
   }
   return item.amount.startsWith('-') ? 'expense' : 'income';
 }

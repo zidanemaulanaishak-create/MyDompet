@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
+import AnimatedPressable from '@/components/ui/AnimatedPressable';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 
@@ -22,7 +23,7 @@ export default function PrimaryButton({
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
 
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.85}
@@ -44,6 +45,6 @@ export default function PrimaryButton({
       ) : (
         <Text className="text-white font-bold text-lg">{label}</Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }

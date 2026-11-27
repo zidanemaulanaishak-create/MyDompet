@@ -7,6 +7,7 @@ import {
   Modal,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -36,11 +37,7 @@ export default function LanguageSheet({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableOpacity
-        style={styles.overlay}
-        onPress={onClose}
-        activeOpacity={1}
-      >
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
         <View
           style={[styles.sheet, { backgroundColor: palette.card }]}
         >
@@ -88,7 +85,7 @@ export default function LanguageSheet({
             );
           })}
         </View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

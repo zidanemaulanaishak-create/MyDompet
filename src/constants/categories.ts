@@ -3,6 +3,8 @@ export interface Category {
   label: string;
   icon: string;
   color?: string;
+  type?: 'expense' | 'income';
+  custom?: boolean;
 }
 
 export const EXPENSE_CATEGORIES: Category[] = [
@@ -29,12 +31,27 @@ export const INCOME_CATEGORIES: Category[] = [
 
 export const ALL_CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
 
-export function getCategoriesForType(type: 'expense' | 'income'): Category[] {
-  return type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+let customCategories: Category[] = [];
+
+export function registerCustomCategories(next: Category[]) {
+  customCategories = next;
+  ALL_CATEGORIES.splice(
+    0,
+    ALL_CATEGORIES.length,
+    ...EXPENSE_CATEGORIES,
+    ...INCOME_CATEGORIES,
+    ...next,
+  );
 }
 
-export function getCategoryById(id: string, type: 'expense' | 'income'): Category | undefined {
-  return getCategoriesForType(type).find((c) => c.id === id);
+export function getCategoriesForType(type: 'expense' | 'income'): Category[] {
+  const base = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  return [...base, ...customCategories.filter((c) => (c.type ?? type) === type)];
+}
+
+export function getCategoryById(id: string, type?: 'expense' | 'income'): Category | undefined {
+  const pool = type ? getCategoriesForType(type) : ALL_CATEGORIES;
+  return pool.find((c) => c.id === id);
 }
 
 export function getDefaultCategory(type: 'expense' | 'income'): Category {

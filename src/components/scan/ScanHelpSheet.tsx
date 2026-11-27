@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -24,7 +25,7 @@ export default function ScanHelpSheet({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
         <TouchableOpacity style={styles.dismiss} activeOpacity={1} onPress={onClose} accessibilityLabel={t('common.close')} />
         <View style={[styles.sheet, { backgroundColor: palette.card }]}>
           <View style={[styles.handle, { backgroundColor: palette.border }]} />
@@ -41,7 +42,7 @@ export default function ScanHelpSheet({ visible, onClose }: Props) {
             <Text style={styles.buttonLabel}>{t('scan.helpCta')}</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

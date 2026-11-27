@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
 import { Image } from 'expo-image';
+import AnimatedPressable from '@/components/ui/AnimatedPressable';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -18,6 +19,8 @@ import { useI18n } from '@/i18n';
 interface Props {
   name: string;
   avatarUrl?: string | null;
+  onNotificationPress: () => void;
+  unreadCount: number;
   balanceLabel: string;
   monthLabel: string;
   monthDate: string;
@@ -32,6 +35,8 @@ interface Props {
 export default function HeaderSummary({
   name,
   avatarUrl,
+  onNotificationPress,
+  unreadCount,
   balanceLabel,
   monthLabel,
   monthDate,
@@ -111,7 +116,7 @@ export default function HeaderSummary({
         </View>
 
         <View className="flex-row items-center gap-3">
-          <View className="w-9 h-9 rounded-full bg-white/15 items-center justify-center overflow-hidden">
+          <View className="w-10 h-10 rounded-full bg-white/15 items-center justify-center overflow-hidden">
             {avatarUrl ? (
               <Image
                 source={{ uri: avatarUrl }}
@@ -120,13 +125,24 @@ export default function HeaderSummary({
                 cachePolicy="memory-disk"
               />
             ) : (
-              <Text className="text-white text-base font-bold">{initials}</Text>
+              <Text className="text-white text-lg font-bold">{initials}</Text>
             )}
           </View>
-          <View className="w-9 h-9 rounded-full bg-white/15 items-center justify-center">
-            <Iconify icon="ph:bell-bold" size={18} color="#FFFFFF" />
-            <View className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red border-[1.5px]" style={{ borderColor: palette.primary }} />
-          </View>
+          <AnimatedPressable
+            className="w-10 h-10 rounded-full bg-white/15 items-center justify-center"
+            activeOpacity={0.85}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityLabel={t('home.notifTitle')}
+            onPress={onNotificationPress}
+          >
+            <Iconify icon="ph:bell-bold" size={20} color="#FFFFFF" />
+            {unreadCount > 0 ? (
+              <View
+                className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red border-[1.5px]"
+                style={{ borderColor: palette.primary }}
+              />
+            ) : null}
+          </AnimatedPressable>
         </View>
       </View>
 

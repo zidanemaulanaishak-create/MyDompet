@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, Imag
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -119,7 +120,7 @@ export default function AddGoalSheet({ visible, initial, saving, onClose, onSubm
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={close}>
-      <TouchableOpacity style={styles.overlay} onPress={close} activeOpacity={1}>
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={close}>
         <View style={[styles.sheet, { backgroundColor: palette.card }]}>
           <View style={[styles.handle, { backgroundColor: palette.track }]} />
           <View style={styles.header}>
@@ -206,7 +207,7 @@ export default function AddGoalSheet({ visible, initial, saving, onClose, onSubm
             )}
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

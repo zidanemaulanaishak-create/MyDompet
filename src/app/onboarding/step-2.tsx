@@ -14,7 +14,11 @@ import { useAuth } from '@/context/auth-context';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
-import { formatRupiahInput, parseRupiah } from '@/context/onboarding';
+import {
+  formatRupiahInput,
+  parseRupiah,
+  OCCUPATION_LABEL_KEYS,
+} from '@/context/onboarding';
 
 interface MoneyFieldProps {
   label: string;
@@ -70,10 +74,10 @@ export default function OnboardingStep2Screen() {
   const { t } = useI18n();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const mainIncome = onboarding?.mainIncome ?? 0;
-  const occupationName =
-    onboarding?.occupation
-      ? onboarding.occupation.charAt(0).toUpperCase() + onboarding.occupation.slice(1)
-      : '';
+  const isIrt = onboarding?.occupation === 'irt';
+  const occupationName = onboarding?.occupation
+    ? t(OCCUPATION_LABEL_KEYS[onboarding.occupation])
+    : '';
 
   const handleFinish = async () => {
     await setOnboarding({ mainIncome });
@@ -88,7 +92,7 @@ export default function OnboardingStep2Screen() {
       onBack={() => (router.canGoBack() ? router.back() : router.replace('/onboarding/step-1'))}
       actionLabel={t('onboarding.finishDashboard')}
       onAction={handleFinish}
-      actionDisabled={mainIncome <= 0}
+      actionDisabled={!isIrt && mainIncome <= 0}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -117,6 +121,7 @@ export default function OnboardingStep2Screen() {
             label={t('onboarding.mainIncome')}
             value={mainIncome}
             onChange={(v) => setOnboarding({ mainIncome: v })}
+            optional={isIrt}
           />
         </ScrollView>
       </KeyboardAvoidingView>

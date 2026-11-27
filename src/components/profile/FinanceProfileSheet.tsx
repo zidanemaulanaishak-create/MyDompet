@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors, ColorPalette } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -18,6 +19,7 @@ const OCCUPATIONS: { key: Occupation; labelKey: string; icon: string }[] = [
   { key: 'pekerja', labelKey: 'profile.occupationWorker', icon: 'ph:briefcase-bold' },
   { key: 'pelajar', labelKey: 'profile.occupationStudent', icon: 'ph:graduation-cap-bold' },
   { key: 'mahasiswa', labelKey: 'profile.occupationCollege', icon: 'ph:student-bold' },
+  { key: 'irt', labelKey: 'profile.occupationIrt', icon: 'ph:house-bold' },
 ];
 
 export default function FinanceProfileSheet({
@@ -42,7 +44,7 @@ export default function FinanceProfileSheet({
       Alert.alert(t('profile.selectOccupation'), t('profile.selectOccupationMsg'));
       return;
     }
-    if (nominal <= 0) {
+    if (nominal <= 0 && selected !== 'irt') {
       Alert.alert(t('profile.invalidAmount'), t('profile.invalidAmountMsg'));
       return;
     }
@@ -52,7 +54,7 @@ export default function FinanceProfileSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       {visible ? (
-        <TouchableOpacity key="open" style={styles.overlay} onPress={onClose} activeOpacity={1}>
+        <AnimatedSheetBackdrop key="open" style={styles.overlay} onPress={onClose}>
           <View style={styles.sheet}>
             <View style={styles.handle} />
             <View style={styles.header}>
@@ -100,7 +102,7 @@ export default function FinanceProfileSheet({
               <Text style={styles.saveLabel}>{t('common.save')}</Text>
             </TouchableOpacity>
           </View>
-        </TouchableOpacity>
+        </AnimatedSheetBackdrop>
       ) : null}
     </Modal>
   );

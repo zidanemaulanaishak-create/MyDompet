@@ -66,8 +66,8 @@ function line(label: string, value: string): string {
 function renderDataBlock(ctx: ChatContextSnapshot, locale: Locale): string {
   const en = locale === 'en';
   const occupationLabels: Record<string, string> = en
-    ? { pekerja: 'Employee', pelajar: 'Student', mahasiswa: 'College student' }
-    : { pekerja: 'Pekerja', pelajar: 'Pelajar', mahasiswa: 'Mahasiswa' };
+    ? { pekerja: 'Employee', pelajar: 'Student', mahasiswa: 'College student', irt: 'Homemaker' }
+    : { pekerja: 'Pekerja', pelajar: 'Pelajar', mahasiswa: 'Mahasiswa', irt: 'Ibu Rumah Tangga' };
 
   const top = ctx.topExpenseCategory;
   const hits = ctx.budgetHits

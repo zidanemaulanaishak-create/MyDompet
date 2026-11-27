@@ -13,6 +13,7 @@ import { uploadDict } from './dicts/upload';
 import { reportsDict } from './dicts/reports';
 import { aiDict } from './dicts/ai';
 import { addTransactionDict } from './dicts/addTransaction';
+import { categoriesDict } from './dicts/categories';
 import { useSettings } from '@/context/settings-context';
 
 const domains: Dict[] = [
@@ -29,6 +30,7 @@ const domains: Dict[] = [
   reportsDict,
   aiDict,
   addTransactionDict,
+  categoriesDict,
 ];
 
 const idDict: Record<string, string> = {};

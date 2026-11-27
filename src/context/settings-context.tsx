@@ -13,12 +13,14 @@ import { setAppPrefs } from '@/utils/appPrefs';
 export interface NotificationPrefs {
   budgetReminder: boolean;
   goalReminder: boolean;
+  spendingReminder: boolean;
   promo: boolean;
 }
 
 export const EMPTY_NOTIFICATION_PREFS: NotificationPrefs = {
   budgetReminder: false,
   goalReminder: false,
+  spendingReminder: true,
   promo: false,
 };
 
@@ -45,6 +47,7 @@ function parseNotificationPrefs(raw: string | null): NotificationPrefs {
     return {
       budgetReminder: parsed.budgetReminder === true,
       goalReminder: parsed.goalReminder === true,
+      spendingReminder: parsed.spendingReminder !== false,
       promo: parsed.promo === true,
     };
   } catch {

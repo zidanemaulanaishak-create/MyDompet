@@ -10,11 +10,16 @@ import {
   Keyboard,
   Animated,
   Easing,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
-import { Category, getCategoriesForType } from '@/constants/categories';
+import { useCategories } from '@/context/categories-context';
+import { Category } from '@/constants/categories';
+import { CATEGORY_ERRORS } from '@/services/categories';
 import { useI18n } from '@/i18n';
 
 interface Props {
@@ -36,8 +41,12 @@ export default function CategoryPicker({
 }: Props) {
   const { isDark, accent } = useTheme();
   const { t } = useI18n();
+  const { getCategoriesForType, createCategory } = useCategories();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [searchQuery, setSearchQuery] = useState('');
+  const [customName, setCustomName] = useState('');
+  const [pendingType, setPendingType] = useState<'expense' | 'income' | null>(null);
+  const [savingCustom, setSavingCustom] = useState(false);
   // eslint-disable-next-line react-hooks/refs
   const translateY = useRef(new Animated.Value(500)).current;
   const titleText = title ?? t('addTx.selectCategory');
@@ -57,7 +66,7 @@ export default function CategoryPicker({
       Animated.timing(translateY, {
         toValue: 0,
         duration: 300,
-        easing: Easing.out(Easing.cubic),
+        easing: Easing.out(Easing.back(1.2)),
         useNativeDriver: true,
       }).start();
     } else {
@@ -72,10 +81,7 @@ export default function CategoryPicker({
     }
   }, [visible, translateY, onClose]);
 
-  const handleSelect = (category: Category) => {
-    onSelect(category);
-    Keyboard.dismiss();
-    setSearchQuery('');
+  const closeSheet = () => {
     Animated.timing(translateY, {
       toValue: 500,
       duration: 200,
@@ -86,17 +92,48 @@ export default function CategoryPicker({
     });
   };
 
+  const handleSelect = (category: Category) => {
+    if (category.id === 'other' || category.id === 'other_income') {
+      setPendingType(category.id === 'other' ? 'expense' : 'income');
+      setCustomName('');
+      return;
+    }
+    onSelect(category);
+    Keyboard.dismiss();
+    setSearchQuery('');
+    setPendingType(null);
+    closeSheet();
+  };
+
+  const handleSaveCustom = async () => {
+    const label = customName.trim();
+    if (!pendingType || !label) {
+      Alert.alert(t('addTx.customCategoryTitle'), t('addTx.customCategoryRequired'));
+      return;
+    }
+    setSavingCustom(true);
+    try {
+      const created = await createCategory(label, pendingType);
+      handleSelect(created);
+    } catch (error) {
+      const code = error instanceof Error ? error.message : '';
+      Alert.alert(
+        t('addTx.customCategoryTitle'),
+        code === CATEGORY_ERRORS.EXISTS
+          ? t('addTx.customCategoryExists')
+          : t('addTx.customCategoryFailed'),
+      );
+    } finally {
+      setSavingCustom(false);
+    }
+  };
+
   const handleBackdropPress = () => {
     Keyboard.dismiss();
     setSearchQuery('');
-    Animated.timing(translateY, {
-      toValue: 500,
-      duration: 200,
-      easing: Easing.in(Easing.cubic),
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) onClose();
-    });
+    setCustomName('');
+    setPendingType(null);
+    closeSheet();
   };
 
   if (!visible) {
@@ -110,11 +147,7 @@ export default function CategoryPicker({
       animationType="none"
       onRequestClose={handleBackdropPress}
     >
-      <TouchableOpacity
-        style={styles.overlay}
-        onPress={handleBackdropPress}
-        activeOpacity={1}
-      >
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={handleBackdropPress}>
         <Animated.View
           style={[
             styles.bottomSheet,
@@ -157,6 +190,55 @@ export default function CategoryPicker({
               autoFocus={true}
             />
           </View>
+
+          {pendingType ? (
+            <View style={[styles.customForm, { borderBottomColor: palette.border }]}>
+              <Text style={[styles.customFormTitle, { color: palette.textDark }]}>
+                {t('addTx.customCategoryCreate')}
+              </Text>
+              <TextInput
+                style={[
+                  styles.customInput,
+                  { backgroundColor: palette.inputBg, color: palette.textDark, borderColor: palette.border },
+                ]}
+                placeholder={t('addTx.customCategoryPlaceholder')}
+                placeholderTextColor={palette.textMuted}
+                value={customName}
+                onChangeText={setCustomName}
+                autoFocus
+                maxLength={40}
+                onSubmitEditing={() => void handleSaveCustom()}
+              />
+              <View style={styles.customActions}>
+                <TouchableOpacity
+                  style={[styles.customButton, { borderColor: palette.border }]}
+                  onPress={() => {
+                    setPendingType(null);
+                    setCustomName('');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.customButtonText, { color: palette.textMuted }]}>
+                    {t('addTx.customCategoryCancel')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.customButton, styles.customButtonPrimary, { backgroundColor: palette.primary }]}
+                  onPress={() => void handleSaveCustom()}
+                  disabled={savingCustom}
+                  activeOpacity={0.8}
+                >
+                  {savingCustom ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={[styles.customButtonText, styles.customButtonTextPrimary]}>
+                      {t('addTx.customCategorySave')}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : null}
 
           <ScrollView
             contentContainerStyle={styles.listContent}
@@ -213,7 +295,7 @@ export default function CategoryPicker({
             )}
           </ScrollView>
         </Animated.View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }
@@ -272,6 +354,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
+  },
+  customForm: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+  },
+  customFormTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  customInput: {
+    fontSize: 17,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+  },
+  customActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+  },
+  customButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    minHeight: 44,
+  },
+  customButtonPrimary: {
+    borderWidth: 0,
+  },
+  customButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  customButtonTextPrimary: {
+    color: '#fff',
   },
   listContent: {
     paddingHorizontal: 16,

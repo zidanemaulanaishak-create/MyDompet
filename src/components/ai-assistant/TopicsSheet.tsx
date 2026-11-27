@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, Platform } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { POPULAR_TOPICS, PopularTopic } from './AiHero';
 import { useI18n } from '@/i18n';
 
@@ -14,7 +15,7 @@ export default function TopicsSheet({ visible, onClose, onTopicPress }: Props) {
   const { t } = useI18n();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
         <TouchableOpacity style={styles.dismiss} activeOpacity={1} onPress={onClose} accessibilityLabel={t('common.close')} />
         <View style={styles.sheet}>
           <View style={styles.handle} />
@@ -44,7 +45,7 @@ export default function TopicsSheet({ visible, onClose, onTopicPress }: Props) {
             ))}
           </ScrollView>
         </View>
-      </View>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

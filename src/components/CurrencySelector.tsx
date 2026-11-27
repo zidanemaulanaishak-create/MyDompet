@@ -11,6 +11,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { Currency, CURRENCIES } from '@/constants/currencies';
 import { useTheme } from '@/context/theme-context';
@@ -82,11 +83,7 @@ export default function CurrencySelector({ selectedCurrency, onSelect, style, cl
         animationType="none"
         onRequestClose={closeDropdown}
       >
-        <TouchableOpacity
-          style={styles.overlay}
-          onPress={closeDropdown}
-          activeOpacity={1}
-        >
+        <AnimatedSheetBackdrop style={styles.overlay} onPress={closeDropdown}>
           <View style={[styles.bottomSheet, { backgroundColor: palette.card }]}>
             <View style={styles.handleContainer}>
               <View style={[styles.handle, { backgroundColor: isDark ? palette.divider : '#CBD5E1' }]} />
@@ -154,7 +151,7 @@ export default function CurrencySelector({ selectedCurrency, onSelect, style, cl
               )}
             </ScrollView>
           </View>
-        </TouchableOpacity>
+        </AnimatedSheetBackdrop>
       </Modal>
     </View>
   );

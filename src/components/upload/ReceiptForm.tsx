@@ -15,7 +15,8 @@ import { Iconify } from 'react-native-iconify';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { monthName, useI18n } from '@/i18n';
-import { Category, EXPENSE_CATEGORIES, getCategoryById, getDefaultCategory } from '@/constants/categories';
+import { Category } from '@/constants/categories';
+import { useCategories } from '@/context/categories-context';
 import SaveButton from '@/components/transaction/SaveButton';
 
 export interface ReceiptDraft {
@@ -73,11 +74,13 @@ export default function ReceiptForm({
   const { isDark, accent } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t, locale } = useI18n();
+  const { getCategoriesForType, getCategoryById } = useCategories();
+  const expenseCategories = getCategoriesForType('expense');
 
   const [amountText, setAmountText] = useState(initialAmount);
   const [merchant, setMerchant] = useState(initialMerchant);
   const [category, setCategory] = useState<Category>(
-    getCategoryById(initialCategoryId ?? '', 'expense') ?? getDefaultCategory('expense')
+    getCategoryById(initialCategoryId ?? '', 'expense') ?? expenseCategories[0]
   );
   const [note, setNote] = useState('');
   const [dateTs, setDateTs] = useState(() => isoToTimestamp(initialDateIso));
@@ -188,7 +191,7 @@ export default function ReceiptForm({
 
         <Text style={[styles.label, { color: palette.textDark }]}>{t('common.category')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          {EXPENSE_CATEGORIES.map((c) => {
+          {expenseCategories.map((c) => {
             const active = c.id === category.id;
             return (
               <TouchableOpacity

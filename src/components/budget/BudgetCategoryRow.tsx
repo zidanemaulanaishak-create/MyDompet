@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Iconify } from 'react-native-iconify';
+import ProgressFill from '@/components/ui/ProgressFill';
 import { BudgetCategory } from '@/data/budgetData';
 import { getCategoryById } from '@/constants/categories';
 import { getPastelBg } from '@/constants/categoryVisuals';
@@ -65,9 +66,10 @@ export default function BudgetCategoryRow({ category, onEdit }: Props) {
           </View>
 
           <View className="h-[6px] rounded-full overflow-hidden mt-2.5" style={{ backgroundColor: palette.track }}>
-            <View
+            <ProgressFill
               className="h-[6px] rounded-full"
-              style={{ width: `${Math.min(100, used)}%`, backgroundColor: barColor }}
+              progress={used / 100}
+              color={barColor}
             />
           </View>
 

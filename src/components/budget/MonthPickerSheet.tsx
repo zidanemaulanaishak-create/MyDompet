@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Animated, Easing } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { getRecentMonthKeys } from '@/data/budgetData';
@@ -26,7 +27,7 @@ export default function MonthPickerSheet({ visible, selectedMonthKey, onClose, o
       Animated.timing(translateY, {
         toValue: 0,
         duration: 300,
-        easing: Easing.out(Easing.cubic),
+        easing: Easing.out(Easing.back(1.2)),
         useNativeDriver: true,
       }).start();
     } else {
@@ -61,11 +62,7 @@ export default function MonthPickerSheet({ visible, selectedMonthKey, onClose, o
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      <TouchableOpacity
-        style={styles.overlay}
-        onPress={onClose}
-        activeOpacity={1}
-      >
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
         <Animated.View style={[styles.sheet, { backgroundColor: palette.card, transform: [{ translateY }] }]}>
           <View style={[styles.handle, { backgroundColor: palette.track }]} />
           <View style={styles.header}>
@@ -96,7 +93,7 @@ export default function MonthPickerSheet({ visible, selectedMonthKey, onClose, o
             );
           })}
         </Animated.View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

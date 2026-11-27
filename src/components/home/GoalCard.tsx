@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedPressable from '@/components/ui/AnimatedPressable';
+import ProgressFill from '@/components/ui/ProgressFill';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -17,7 +19,7 @@ export function GoalCard({ item, onPress }: CardProps) {
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const isCake = item.icon === 'ph:cake-bold';
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       className="border-[1.5px] rounded-xl p-3 mb-3"
       style={{ borderColor: palette.border }}
       activeOpacity={0.7}
@@ -42,9 +44,10 @@ export function GoalCard({ item, onPress }: CardProps) {
       </View>
 
       <View className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: palette.track }}>
-        <View
+        <ProgressFill
           className="h-1.5 rounded-full"
-          style={{ width: `${item.progress * 100}%`, backgroundColor: palette.orange }}
+          progress={item.progress}
+          color={palette.orange}
         />
       </View>
 
@@ -52,6 +55,6 @@ export function GoalCard({ item, onPress }: CardProps) {
         <Text className="text-lg font-bold" style={{ color: palette.textDark }}>{item.saved}</Text>
         <Text className="text-lg" style={{ color: palette.textMuted }}>{item.target}</Text>
       </View>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }

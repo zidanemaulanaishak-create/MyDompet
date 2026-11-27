@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { useTheme } from '@/context/theme-context';
 import { getThemeColors } from '@/constants/colors';
 import { useI18n } from '@/i18n';
@@ -51,7 +52,7 @@ export default function EditProfileSheet({ visible, name, email, onClose, onSubm
       onShow={() => setDraft(name)}
     >
       {visible ? (
-        <TouchableOpacity key="open" style={styles.overlay} onPress={onClose} activeOpacity={1}>
+        <AnimatedSheetBackdrop key="open" style={styles.overlay} onPress={onClose}>
           <View style={[styles.sheet, { backgroundColor: palette.card }]}>
             <View style={[styles.handle, { backgroundColor: palette.track }]} />
             <View style={styles.header}>
@@ -104,7 +105,7 @@ export default function EditProfileSheet({ visible, name, email, onClose, onSubm
               )}
             </TouchableOpacity>
           </View>
-        </TouchableOpacity>
+        </AnimatedSheetBackdrop>
       ) : null}
     </Modal>
   );

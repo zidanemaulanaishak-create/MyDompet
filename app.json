@@ -42,6 +42,12 @@
           "photosPermission": "Izinkan MyDompet mengakses galeri untuk memilih foto profil."
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "mydompet-default"
+        }
+      ],
       "expo-status-bar",
       "expo-web-browser"
     ],

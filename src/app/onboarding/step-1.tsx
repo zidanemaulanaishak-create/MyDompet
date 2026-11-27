@@ -35,6 +35,12 @@ const OPTIONS: ProfileOption[] = [
     title: 'onboarding.occCollege',
     description: 'onboarding.occCollegeDesc',
   },
+  {
+    key: 'irt',
+    icon: 'ph:house-bold',
+    title: 'onboarding.occIrt',
+    description: 'onboarding.occIrtDesc',
+  },
 ];
 
 export default function OnboardingStep1Screen() {

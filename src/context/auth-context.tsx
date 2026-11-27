@@ -84,7 +84,9 @@ interface ProfileRow {
 }
 
 function toOccupation(value: string | null): Occupation | null {
-  return value === 'pekerja' || value === 'pelajar' || value === 'mahasiswa' ? value : null;
+  return value === 'pekerja' || value === 'pelajar' || value === 'mahasiswa' || value === 'irt'
+    ? value
+    : null;
 }
 
 async function fetchProfileRow(userId: string): Promise<ProfileRow | null> {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { FinancialGoal } from '@/data/goalsData';
@@ -37,7 +38,7 @@ export default function GoalDetailSheet({ goal, onClose, onDeposit, onWithdraw, 
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
         <View style={[styles.sheet, { backgroundColor: palette.card }]}>
           <View style={[styles.handle, { backgroundColor: palette.track }]} />
           <View style={styles.header}>
@@ -112,7 +113,7 @@ export default function GoalDetailSheet({ goal, onClose, onDeposit, onWithdraw, 
             </TouchableOpacity>
           </View>
         </View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

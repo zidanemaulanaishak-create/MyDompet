@@ -1,4 +1,11 @@
-export type Occupation = 'pekerja' | 'pelajar' | 'mahasiswa';
+export type Occupation = 'pekerja' | 'pelajar' | 'mahasiswa' | 'irt';
+
+export const OCCUPATION_LABEL_KEYS: Record<Occupation, string> = {
+  pekerja: 'profile.occupationWorker',
+  pelajar: 'profile.occupationStudent',
+  mahasiswa: 'profile.occupationCollege',
+  irt: 'profile.occupationIrt',
+};
 
 export interface OnboardingData {
   occupation: Occupation | null;
@@ -22,7 +29,8 @@ export function parseOnboarding(raw: string | null): OnboardingData {
       occupation:
         parsed.occupation === 'pekerja' ||
         parsed.occupation === 'pelajar' ||
-        parsed.occupation === 'mahasiswa'
+        parsed.occupation === 'mahasiswa' ||
+        parsed.occupation === 'irt'
           ? parsed.occupation
           : null,
       mainIncome: typeof parsed.mainIncome === 'number' ? parsed.mainIncome : 0,

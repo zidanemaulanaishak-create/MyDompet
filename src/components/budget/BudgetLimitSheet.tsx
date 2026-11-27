@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
-import { EXPENSE_CATEGORIES, getCategoryById } from '@/constants/categories';
+import { useCategories } from '@/context/categories-context';
 import { parseRupiah, formatRupiahInput } from '@/context/onboarding';
 import { monthLabel } from '@/utils/dates';
 import { useI18n } from '@/i18n';
@@ -66,10 +67,13 @@ function BudgetSheetBody({
   const isEdit = !!categoryId;
   const { t } = useI18n();
   const { isDark, accent } = useTheme();
+  const { getCategoriesForType, getCategoryById } = useCategories();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const meta = isEdit && categoryId ? getCategoryById(categoryId, 'expense') : undefined;
 
-  const available = EXPENSE_CATEGORIES.filter((c) => !budgetedCategoryIds.includes(c.id));
+  const available = getCategoriesForType('expense').filter(
+    (c) => !budgetedCategoryIds.includes(c.id)
+  );
   const [selectedId, setSelectedId] = useState(
     categoryId ?? available[0]?.id ?? ''
   );
@@ -108,7 +112,7 @@ function BudgetSheetBody({
   };
 
   return (
-    <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
+    <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
       <View style={[styles.sheet, { backgroundColor: palette.card }]}>
         <View style={[styles.handle, { backgroundColor: palette.track }]} />
         <View style={styles.header}>
@@ -199,7 +203,7 @@ function BudgetSheetBody({
           </TouchableOpacity>
         ) : null}
       </View>
-    </TouchableOpacity>
+    </AnimatedSheetBackdrop>
   );
 }
 

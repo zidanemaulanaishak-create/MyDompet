@@ -2,15 +2,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import HeaderSummary from '@/components/home/HeaderSummary';
+import NotificationsCenterSheet from '@/components/notifications/NotificationsCenterSheet';
 import QuickActions from '@/components/home/QuickActions';
 import SpendingChart from '@/components/home/SpendingChart';
 import AIInsightCard from '@/components/home/AIInsightCard';
 import BudgetCard from '@/components/home/BudgetCard';
 import TransactionList from '@/components/home/TransactionList';
 import GoalList from '@/components/home/GoalList';
+import StaggeredContent from '@/components/ui/StaggeredContent';
 import { quickActions } from '@/data/dummyData';
 import type { GoalItem } from '@/data/dummyData';
 import { useGoals } from '@/context/goal-context';
+import { useNotifications } from '@/context/notifications-context';
 import { daysLeftLabel, formatRupiah as formatGoalRupiah, goalProgress } from '@/utils/goals';
 import { getFirstName, useAuth } from '@/context/auth-context';
 import { useTransactions } from '@/context/transaction-context';
@@ -32,11 +35,13 @@ export default function HomeScreen() {
   const { transactions: liveTransactions, refresh: refreshTransactions } = useTransactions();
   const { getBudgetsForMonth } = useBudget();
   const { goals: liveGoals, refresh: refreshGoals } = useGoals();
+  const { unreadCount } = useNotifications();
   const router = useRouter();
   const { isDark, accent } = useTheme();
   const { t, locale } = useI18n();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const [refreshing, setRefreshing] = useState(false);
+  const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [aiInsight, setAiInsight] = useState<{ version: string; result: InsightResult } | null>(
     null
   );
@@ -189,6 +194,7 @@ export default function HomeScreen() {
   };
 
   return (
+    <>
     <ScrollView
       className="flex-1"
       style={{ backgroundColor: palette.bg }}
@@ -198,59 +204,80 @@ export default function HomeScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <HeaderSummary
-        name={name}
-        avatarUrl={user?.avatarUrl ?? null}
-        balanceLabel={t('home.sisaKeuangan')}
-        monthLabel={monthLabel(currentMonthKey)}
-        monthDate={monthDate}
-        monthBalance={formatRupiah(monthBalance)}
-        monthIncome={formatRupiah(monthIncome)}
-        monthExpense={formatRupiah(monthExpense)}
-        totalBalance={formatRupiah(totalBalance)}
-        totalIncome={formatRupiah(totalIncome)}
-        totalExpense={formatRupiah(totalExpense)}
-      />
+      <StaggeredContent index={0}>
+        <HeaderSummary
+          name={name}
+          avatarUrl={user?.avatarUrl ?? null}
+          onNotificationPress={() => setShowNotificationCenter(true)}
+          unreadCount={unreadCount}
+          balanceLabel={t('home.sisaKeuangan')}
+          monthLabel={monthLabel(currentMonthKey)}
+          monthDate={monthDate}
+          monthBalance={formatRupiah(monthBalance)}
+          monthIncome={formatRupiah(monthIncome)}
+          monthExpense={formatRupiah(monthExpense)}
+          totalBalance={formatRupiah(totalBalance)}
+          totalIncome={formatRupiah(totalIncome)}
+          totalExpense={formatRupiah(totalExpense)}
+        />
+      </StaggeredContent>
 
-      <QuickActions
-        items={quickActions}
-        onPress={(item) => onQuickAction(item.label)}
-      />
+      <StaggeredContent index={1}>
+        <QuickActions
+          items={quickActions}
+          onPress={(item) => onQuickAction(item.label)}
+        />
+      </StaggeredContent>
 
       <View className="px-4 pt-4">
-        <SpendingChart data={weeklyData} />
+        <StaggeredContent index={2}>
+          <SpendingChart data={weeklyData} />
+        </StaggeredContent>
 
-        <BudgetCard allowance={totalLimit(monthBudget)} spent={totalSpent(monthBudget)} monthLabel={monthLabel(currentMonthKey)} />
+        <StaggeredContent index={3}>
+          <BudgetCard allowance={totalLimit(monthBudget)} spent={totalSpent(monthBudget)} monthLabel={monthLabel(currentMonthKey)} />
+        </StaggeredContent>
 
-        <AIInsightCard
-          insightText={insight.insight}
-          suggestions={insight.suggestions}
-          onSuggestionPress={onAsk}
-        />
+        <StaggeredContent index={4}>
+          <AIInsightCard
+            insightText={insight.insight}
+            suggestions={insight.suggestions}
+            onSuggestionPress={onAsk}
+          />
+        </StaggeredContent>
 
-        <TransactionList
-          items={liveTransactions}
-          onSeeAll={() => router.push('/transactions')}
-          onPressItem={(tx) => onAsk(t('home.detailTransaction', { name: tx.name }))}
-        />
+        <StaggeredContent index={5}>
+          <TransactionList
+            items={liveTransactions}
+            onSeeAll={() => router.push('/transactions')}
+            onPressItem={(tx) => onAsk(t('home.detailTransaction', { name: tx.name }))}
+          />
+        </StaggeredContent>
 
-        <GoalList
-          title={t('home.goals')}
-          items={liveGoals.slice(0, 3).map(
-            (g): GoalItem => ({
-              id: g.id,
-              name: g.name,
-              days: daysLeftLabel(g.deadlineTs, locale),
-              saved: formatGoalRupiah(g.saved),
-              target: `${Math.round(goalProgress(g) * 100)}% ${t('home.goalOf')} ${formatGoalRupiah(g.target)}`,
-              icon: g.icon || 'ph:target-bold',
-              progress: goalProgress(g),
-            })
-          )}
-          onSeeAll={() => router.push('/goals' as never)}
-          onPressItem={() => router.push('/goals' as never)}
-        />
+        <StaggeredContent index={6}>
+          <GoalList
+            title={t('home.goals')}
+            items={liveGoals.slice(0, 3).map(
+              (g): GoalItem => ({
+                id: g.id,
+                name: g.name,
+                days: daysLeftLabel(g.deadlineTs, locale),
+                saved: formatGoalRupiah(g.saved),
+                target: `${Math.round(goalProgress(g) * 100)}% ${t('home.goalOf')} ${formatGoalRupiah(g.target)}`,
+                icon: g.icon || 'ph:target-bold',
+                progress: goalProgress(g),
+              })
+            )}
+            onSeeAll={() => router.push('/goals' as never)}
+            onPressItem={() => router.push('/goals' as never)}
+          />
+        </StaggeredContent>
       </View>
     </ScrollView>
+    <NotificationsCenterSheet
+      visible={showNotificationCenter}
+      onClose={() => setShowNotificationCenter(false)}
+    />
+    </>
   );
 }

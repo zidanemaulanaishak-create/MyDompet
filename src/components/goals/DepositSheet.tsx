@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { FinancialGoal } from '@/data/goalsData';
@@ -75,7 +76,7 @@ export default function DepositSheet({ goal, mode = 'deposit', saving, onClose, 
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={close}>
-      <TouchableOpacity style={styles.overlay} onPress={close} activeOpacity={1}>
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={close}>
         <View style={[styles.sheet, { backgroundColor: palette.card }]}>
           <View style={[styles.handle, { backgroundColor: palette.track }]} />
           <View style={styles.header}>
@@ -173,7 +174,7 @@ export default function DepositSheet({ goal, mode = 'deposit', saving, onClose, 
             )}
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

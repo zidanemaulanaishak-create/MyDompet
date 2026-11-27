@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from './storage';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/auth-context';
 import type { FinancialGoal } from '@/data/goalsData';
@@ -59,7 +59,7 @@ function cacheKey(userId: string): string {
 
 async function readCache(userId: string): Promise<FinancialGoal[]> {
   try {
-    const raw = await AsyncStorage.getItem(cacheKey(userId));
+    const raw = await storage.getItem(cacheKey(userId));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? (parsed as FinancialGoal[]) : [];
@@ -70,7 +70,7 @@ async function readCache(userId: string): Promise<FinancialGoal[]> {
 
 async function writeCache(userId: string, goals: FinancialGoal[]): Promise<void> {
   try {
-    await AsyncStorage.setItem(cacheKey(userId), JSON.stringify(goals));
+    await storage.setItem(cacheKey(userId), JSON.stringify(goals));
   } catch {
     // cache best-effort, abaikan
   }

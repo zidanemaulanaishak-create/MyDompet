@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +20,7 @@ import { useTransactions } from "@/context/transaction-context";
 import { getThemeColors, withAlpha } from "@/constants/colors";
 import { useI18n, numberForLocale } from "@/i18n";
 import { useSettings } from "@/context/settings-context";
+import { OCCUPATION_LABEL_KEYS } from "@/context/onboarding";
 import { uploadAvatar, deleteAvatar } from "@/services/avatar";
 import FinanceProfileSheet from "@/components/profile/FinanceProfileSheet";
 import LanguageSheet from "@/components/profile/LanguageSheet";
@@ -184,13 +186,8 @@ function SectionTitle({ title, isDark }: { title: string; isDark: boolean }) {
   );
 }
 
-const OCCUPATION_LABEL: Record<string, string> = {
-  pekerja: "profile.occupationWorker",
-  pelajar: "profile.occupationStudent",
-  mahasiswa: "profile.occupationCollege",
-};
-
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, onboarding, setOnboarding, signOut, updateName, updateAvatar } =
     useAuth();
   const { isDark, accent, toggleTheme } = useTheme();
@@ -215,7 +212,7 @@ export default function ProfileScreen() {
 
   const incomeSubtitle =
     (onboarding?.occupation
-      ? t(OCCUPATION_LABEL[onboarding.occupation] ?? "—")
+      ? t(OCCUPATION_LABEL_KEYS[onboarding.occupation] ?? "—")
       : t("profile.notSet")) +
     (onboarding?.mainIncome
       ? ` · Rp ${formatMoney(onboarding.mainIncome, locale)}${t("profile.perMonth")}`
@@ -500,6 +497,14 @@ export default function ProfileScreen() {
             title={t("profile.notifications")}
             subtitle={t("profile.notificationsSubtitle")}
             onPress={() => setShowNotificationsSheet(true)}
+            palette={palette}
+            isDark={isDark}
+          />
+          <MenuRow
+            icon="ph:folder-bold"
+            title={t("profile.categories")}
+            subtitle={t("profile.categoriesSubtitle")}
+            onPress={() => router.push("/categories")}
             palette={palette}
             isDark={isDark}
             last

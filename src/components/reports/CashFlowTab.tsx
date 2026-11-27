@@ -4,7 +4,7 @@ import { Iconify } from 'react-native-iconify';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { TransactionItem } from '@/data/dummyData';
-import { getCategoriesForType } from '@/constants/categories';
+import { useCategories } from '@/context/categories-context';
 import PeriodSelector from './PeriodSelector';
 import CashFlowChart from './CashFlowChart';
 import CategoryBreakdownCard from './CategoryBreakdownCard';
@@ -22,6 +22,7 @@ export default function CashFlowTab({ transactions, period, onPeriodChange, onSe
   const { isDark, accent } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
+  const { getCategoriesForType } = useCategories();
 
   const [incomeCatLabel, setIncomeCatLabel] = useState('Semua');
   const [expenseCatLabel, setExpenseCatLabel] = useState('Semua');

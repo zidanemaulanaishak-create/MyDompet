@@ -1,22 +1,37 @@
 // @@iconify-code-gen
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'expo-image';
-import { View, StatusBar } from 'react-native';
-import { Redirect, Slot, usePathname, useRootNavigationState } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { Platform, View, StatusBar } from 'react-native';
+import {
+  Redirect,
+  Stack,
+  usePathname,
+  useRootNavigationState,
+  useRouter,
+} from 'expo-router';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import BottomNav from '@/components/ui/BottomNav';
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import { CategoriesProvider } from '@/context/categories-context';
 import { ThemeProvider, useTheme } from '@/context/theme-context';
 import { SettingsProvider } from '@/context/settings-context';
 import { TransactionProvider } from '@/context/transaction-context';
 import { BudgetProvider } from '@/context/budget-context';
 import { GoalProvider } from '@/context/goal-context';
+import {
+  NotificationsProvider,
+  useNotifications,
+} from '@/context/notifications-context';
+import { toAppNotification } from '@/notifications/setup';
+import { useNotificationTriggers } from '@/hooks/useNotificationTriggers';
+import { useDailySpendingReminder } from '@/hooks/useDailySpendingReminder';
 import { getThemeColors } from '@/constants/colors';
 import '../global.css';
 
 const PUBLIC_ROUTES: string[] = ['/welcome', '/login', '/register', '/verify', '/auth-callback'];
 
-const HIDE_NAV_ROUTES: string[] = ['/add-transaction', '/upload', '/scan', '/reports', '/welcome', '/login', '/register', '/verify', '/ai-assistant', '/weekly', '/goals', '/onboarding/step-1', '/onboarding/step-2', '/auth-callback'];
+const HIDE_NAV_ROUTES: string[] = ['/add-transaction', '/upload', '/scan', '/reports', '/welcome', '/login', '/register', '/verify', '/ai-assistant', '/weekly', '/goals', '/categories', '/onboarding/step-1', '/onboarding/step-2', '/auth-callback'];
 
 const BLUE_HEADER_ROUTES: string[] = ['/welcome', '/login', '/register', '/ai-assistant', '/upload', '/scan', '/weekly', '/goals'];
 
@@ -32,6 +47,44 @@ function BootSplash() {
       />
     </View>
   );
+}
+
+function NotificationObserver() {
+  const router = useRouter();
+  const { addLocal, markRead } = useNotifications();
+  useNotificationTriggers();
+  useDailySpendingReminder();
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    const handleResponse = (response: Notifications.NotificationResponse) => {
+      const item = toAppNotification(response.notification);
+      addLocal(item);
+      void markRead(item.id);
+      void Notifications.clearLastNotificationResponseAsync();
+      const url = item.data.url;
+      if (typeof url === 'string' && url.startsWith('/')) {
+        router.push(url as any);
+      }
+    };
+
+    const received = Notifications.addNotificationReceivedListener((notification) => {
+      addLocal(toAppNotification(notification));
+    });
+    const responded = Notifications.addNotificationResponseReceivedListener(handleResponse);
+
+    void Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) handleResponse(response);
+    });
+
+    return () => {
+      received.remove();
+      responded.remove();
+    };
+  }, [addLocal, markRead, router]);
+
+  return null;
 }
 
 function RootNavigator() {
@@ -92,7 +145,36 @@ function RootNavigator() {
         translucent={hasBlueHeader}
       />
       <View className="flex-1">
-        <Slot />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'none',
+          }}
+        >
+          <Stack.Screen
+            name="add-transaction"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="upload"
+            options={{
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="scan"
+            options={{
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen name="ai-assistant" options={{ animation: 'slide_from_left' }} />
+          <Stack.Screen name="weekly" options={{ animation: 'slide_from_left' }} />
+          <Stack.Screen name="reports" options={{ animation: 'slide_from_left' }} />
+          <Stack.Screen name="goals" options={{ animation: 'slide_from_left' }} />
+        </Stack>
         {!hideNav && <BottomNav />}
       </View>
     </SafeAreaView>
@@ -105,13 +187,18 @@ export default function RootLayout() {
       <SettingsProvider>
         <ThemeProvider>
           <AuthProvider>
-            <TransactionProvider>
-              <BudgetProvider>
-                <GoalProvider>
-                  <RootNavigator />
-                </GoalProvider>
-              </BudgetProvider>
-            </TransactionProvider>
+            <CategoriesProvider>
+              <TransactionProvider>
+                <BudgetProvider>
+                  <GoalProvider>
+                    <NotificationsProvider>
+                      <NotificationObserver />
+                      <RootNavigator />
+                    </NotificationsProvider>
+                  </GoalProvider>
+                </BudgetProvider>
+              </TransactionProvider>
+            </CategoriesProvider>
           </AuthProvider>
         </ThemeProvider>
       </SettingsProvider>

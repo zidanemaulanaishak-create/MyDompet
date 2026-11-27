@@ -8,6 +8,7 @@ import {
   Switch,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { useTheme } from '@/context/theme-context';
 import { getThemeColors } from '@/constants/colors';
 import { useI18n } from '@/i18n';
@@ -38,7 +39,12 @@ const OPTIONS: Option[] = [
     title: 'profile.notifGoal',
     description: 'profile.notifGoalDesc',
   },
- 
+  {
+    key: 'spendingReminder',
+    icon: 'ph:clock-bold',
+    title: 'profile.notifSpending',
+    description: 'profile.notifSpendingDesc',
+  },
 ];
 
 export default function NotificationsSheet({ visible, onClose }: Props) {
@@ -49,7 +55,7 @@ export default function NotificationsSheet({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={onClose}>
         <View style={[styles.sheet, { backgroundColor: palette.card }]}>
           <View style={[styles.handle, { backgroundColor: isDark ? palette.divider : '#E2E8F0' }]} />
           <View style={styles.header}>
@@ -92,7 +98,7 @@ export default function NotificationsSheet({ visible, onClose }: Props) {
             );
           })}
         </View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 }

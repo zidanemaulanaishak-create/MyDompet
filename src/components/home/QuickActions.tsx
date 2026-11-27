@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import AnimatedPressable from '@/components/ui/AnimatedPressable';
 import { Iconify } from 'react-native-iconify';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
@@ -48,7 +49,7 @@ export default function QuickActions({ items, onPress }: Props) {
     >
       <View className="flex-row justify-between items-start gap-2">
         {items.map((item) => (
-          <TouchableOpacity
+          <AnimatedPressable
             key={item.id}
             className="flex-1 items-center"
             activeOpacity={0.7}
@@ -58,7 +59,7 @@ export default function QuickActions({ items, onPress }: Props) {
             <Text className="text-xs text-center leading-[16px] font-medium" style={{ color: palette.textDark }} numberOfLines={2}>
               {item.label}
             </Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))}
       </View>
     </View>

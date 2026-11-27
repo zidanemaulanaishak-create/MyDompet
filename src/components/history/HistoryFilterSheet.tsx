@@ -11,11 +11,13 @@ import {
   Easing,
 } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedSheetBackdrop from '@/components/ui/AnimatedSheetBackdrop';
 import { getThemeColors, ColorPalette } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { translate, useI18n } from '@/i18n';
 import { getAppPrefs } from '@/utils/appPrefs';
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, Category } from '@/constants/categories';
+import { Category } from '@/constants/categories';
+import { useCategories } from '@/context/categories-context';
 import { getPastelBg } from '@/constants/categoryVisuals';
 
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -102,6 +104,9 @@ export default function HistoryFilterSheet({
   const { isDark, accent } = useTheme();
   const palette = getThemeColors(isDark ? 'dark' : 'light', accent);
   const { t } = useI18n();
+  const { getCategoriesForType } = useCategories();
+  const expenseCategories = getCategoriesForType('expense');
+  const incomeCategories = getCategoriesForType('income');
   const styles = createStyles(palette);
   // eslint-disable-next-line react-hooks/refs
   const translateY = useRef(new Animated.Value(500)).current;
@@ -116,7 +121,7 @@ export default function HistoryFilterSheet({
       Animated.timing(translateY, {
         toValue: 0,
         duration: 300,
-        easing: Easing.out(Easing.cubic),
+        easing: Easing.out(Easing.back(1.2)),
         useNativeDriver: true,
       }).start();
     } else {
@@ -194,11 +199,7 @@ export default function HistoryFilterSheet({
       animationType="none"
       onRequestClose={handleBackdropPress}
     >
-      <TouchableOpacity
-        style={styles.overlay}
-        onPress={handleBackdropPress}
-        activeOpacity={1}
-      >
+      <AnimatedSheetBackdrop style={styles.overlay} onPress={handleBackdropPress}>
         <Animated.View style={[styles.bottomSheet, { transform: [{ translateY }] }]}>
           <View style={styles.handleContainer}>
             <View style={styles.handle} />
@@ -307,11 +308,11 @@ export default function HistoryFilterSheet({
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionText}>{t('transactions.expense')}</Text>
                 </View>
-                {EXPENSE_CATEGORIES.map((category) => renderCategoryItem(category))}
+                {expenseCategories.map((category) => renderCategoryItem(category))}
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionText}>{t('transactions.income')}</Text>
                 </View>
-                {INCOME_CATEGORIES.map((category) => renderCategoryItem(category))}
+                {incomeCategories.map((category) => renderCategoryItem(category))}
               </>
             )}
           </ScrollView>
@@ -326,7 +327,7 @@ export default function HistoryFilterSheet({
             </TouchableOpacity>
           </View>
         </Animated.View>
-      </TouchableOpacity>
+      </AnimatedSheetBackdrop>
     </Modal>
   );
 

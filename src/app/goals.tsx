@@ -164,7 +164,15 @@ export default function GoalsScreen() {
       </ScrollView>
 
       <TouchableOpacity
-        style={[styles.fab, { bottom: insets.bottom + 50, right: 45 }]}
+        style={[
+          styles.fab,
+          {
+            bottom: insets.bottom + 50,
+            right: 45,
+            backgroundColor: palette.primary,
+            shadowColor: palette.primary,
+          },
+        ]}
         onPress={() => { setEditing(null); setShowAdd(true); }}
         activeOpacity={0.85}
         accessibilityLabel={t('goals.addAccessibility')}

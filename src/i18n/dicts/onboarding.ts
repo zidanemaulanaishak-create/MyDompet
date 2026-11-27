@@ -20,6 +20,9 @@ export const onboardingDict: Dict = {
     'onboarding.occCollege': 'Mahasiswa',
     'onboarding.occCollegeDesc':
       'Manajemen biaya kuliah, uang kos, dan alokasi dana darurat harian.',
+    'onboarding.occIrt': 'Ibu Rumah Tangga',
+    'onboarding.occIrtDesc':
+      'Atur keuangan rumah tangga, alokasi belanja harian, dan tabungan keluarga dengan lebih terarah.',
     'onboarding.financeTitle': 'Informasi Keuangan',
     'onboarding.financeSub':
       'Masukkan estimasi saldo atau pemasukan bulanan untuk pengelolaan otomatis.',
@@ -51,6 +54,9 @@ export const onboardingDict: Dict = {
     'onboarding.occCollege': 'College Student',
     'onboarding.occCollegeDesc':
       'Manage tuition costs, rent, and daily emergency fund allocation.',
+    'onboarding.occIrt': 'Homemaker',
+    'onboarding.occIrtDesc':
+      'Manage household finances, daily spending allocation, and family savings more effectively.',
     'onboarding.financeTitle': 'Financial Information',
     'onboarding.financeSub':
       'Enter your estimated balance or monthly income for automatic management.',

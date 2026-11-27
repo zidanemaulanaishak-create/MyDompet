@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import AnimatedPressable from '@/components/ui/AnimatedPressable';
 import { TransactionItem } from '@/data/dummyData';
 import {
   getCategoryColor,
@@ -32,7 +33,7 @@ export function TransactionRow({ item, onPress, onLongPress, subtitle }: RowProp
       : item.amount;
 
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       className="flex-row items-center px-4 py-3"
       activeOpacity={0.7}
       onPress={() => onPress?.(item)}
@@ -59,6 +60,6 @@ export function TransactionRow({ item, onPress, onLongPress, subtitle }: RowProp
       >
         {amount}
       </Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Iconify } from 'react-native-iconify';
+import ProgressFill from '@/components/ui/ProgressFill';
 import { getThemeColors } from '@/constants/colors';
 import { useTheme } from '@/context/theme-context';
 import { useI18n } from '@/i18n';
@@ -49,9 +50,10 @@ export default function BudgetCard({ allowance, spent, monthLabel }: Props) {
       </View>
 
       <View className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: palette.track }}>
-        <View
+        <ProgressFill
           className="h-2.5 rounded-full"
-          style={{ width: `${Math.min(100, percent)}%`, backgroundColor: barColor }}
+          progress={percent / 100}
+          color={barColor}
         />
       </View>
 

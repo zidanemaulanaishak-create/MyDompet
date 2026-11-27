@@ -59,6 +59,7 @@ module.exports = function (api) {
             'ph:arrow-down-bold',
             'twemoji:briefcase',
             'twemoji:laptop',
+            'ph:bell-slash-bold',
             'twemoji:chart-increasing',
             'twemoji:counterclockwise-arrows-button',
             'twemoji:money-with-wings',
